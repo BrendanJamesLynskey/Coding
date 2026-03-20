@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reed-Solomon Codes — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+.math-block { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+    <div class="series-tag">Coding Theory Series — 08</div>
+    <h1 class="title-gradient">Reed-Solomon Codes</h1>
+    <p style="font-size:0.7em; color: var(--dim); margin-top:0.5em;">The most widely deployed error correction code in history — from deep space to your pocket</p>
+    <div style="margin-top:1.5em;">
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <span class="badge badge-history">History</span>
+        <span class="badge badge-app">Applications</span>
+        <span class="badge badge-standards">Standards</span>
+    </div>
+    <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+    <h2>Roadmap</h2>
+    <div class="grid-3">
+        <div class="panel fragment">
+            <h3>Origins</h3>
+            <p class="small">Reed &amp; Solomon at MIT Lincoln Lab, 1960</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Theory</h3>
+            <p class="small">GF(2<sup>m</sup>) arithmetic, MDS property, code parameters</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Encoding</h3>
+            <p class="small">Generator polynomial, systematic encoding, worked examples</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Decoding</h3>
+            <p class="small">Full pipeline: syndromes, BM, Forney, Chien</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Applications</h3>
+            <p class="small">CDs, QR codes, deep space, RAID 6</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Implementation</h3>
+            <p class="small">Python RS encoder/decoder over GF(2<sup>8</sup>)</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 3: History -->
+<section>
+    <h2>Historical Origins</h2>
+    <span class="badge badge-history">History</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel fragment">
+            <h3>Irving S. Reed (1923-2012)</h3>
+            <p class="small">Born in Seattle. Caltech PhD, worked at MIT Lincoln Lab. Also co-invented the Reed-Muller codes (1954).</p>
+            <p class="small dim">Later, Reed contributed to JPEG image compression and automatic target recognition.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Gustave Solomon (1930-1996)</h3>
+            <p class="small">At MIT Lincoln Lab and JPL. The 1960 paper "Polynomial Codes over Certain Finite Fields" was just 3 pages — one of the most impactful short papers in engineering history.</p>
+            <p class="small dim">The original encoding was based on polynomial evaluation, not the generator polynomial approach used today.</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>The irony:</strong> Reed and Solomon's original decoding method was impractical. It took years for Berlekamp (1968), Massey (1969), and Forney (1965) to develop efficient decoders that made RS codes usable.
+    </div>
+</section>
+
+<!-- Slide 4: RS as Non-Binary BCH -->
+<section>
+    <h2>RS Codes as Non-Binary BCH</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Key Distinction</h3>
+        <p class="small fragment">Reed-Solomon codes are BCH codes where the <span class="accent">alphabet and the root field are the same</span>.</p>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>Binary BCH</h3>
+                <p class="small">Codeword symbols: GF(2)</p>
+                <p class="small">Roots of g(x): GF(2<sup>m</sup>)</p>
+                <p class="small accent2">Different fields!</p>
+                <p class="small dim">Minimal polynomial degree can be up to m, so g(x) degree grows fast.</p>
+            </div>
+            <div class="card">
+                <h3>Reed-Solomon</h3>
+                <p class="small">Codeword symbols: GF(2<sup>m</sup>)</p>
+                <p class="small">Roots of g(x): GF(2<sup>m</sup>)</p>
+                <p class="small accent">Same field!</p>
+                <p class="small dim">Every root has minimal polynomial of degree 1: (x - &alpha;<sup>i</sup>). So g(x) = product of linear factors.</p>
+            </div>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Consequence:</strong> RS codes achieve d = n - k + 1, the Singleton bound. They are <span class="accent">Maximum Distance Separable (MDS)</span> — no code can do better for given n and k!
+    </div>
+</section>
+
+<!-- Slide 5: GF(2^8) Arithmetic -->
+<section>
+    <h2>Finite Field Arithmetic: GF(2<sup>8</sup>)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Standard Field for RS Codes</h3>
+        <p class="small fragment">GF(2<sup>8</sup>) = GF(256): each element is a <span class="accent">byte</span> (8 bits).</p>
+        <div class="formula fragment">
+            Irreducible polynomial: p(x) = x<sup>8</sup> + x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + 1 &nbsp; (0x11D)
+        </div>
+        <p class="small fragment dim">This is the polynomial used in AES, QR codes, and many RS implementations.</p>
+    </div>
+    <div class="grid-2 fragment">
+        <div class="card">
+            <h3>Addition</h3>
+            <p class="small">XOR of bytes — trivial and fast:</p>
+            <div class="math-block">
+                0x53 + 0xCA = 0x99<br>
+                01010011 ⊕ 11001010 = 10011001
+            </div>
+            <p class="small dim">No carries, no overflow. a + a = 0 for all a.</p>
+        </div>
+        <div class="card">
+            <h3>Multiplication</h3>
+            <p class="small">Polynomial multiplication mod p(x):</p>
+            <div class="math-block">
+                a · b = antilog(log(a) + log(b))
+            </div>
+            <p class="small dim">Using log/antilog tables makes multiplication a table lookup + addition mod 255.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 6: GF(2^8) Worked Examples -->
+<section>
+    <h2>GF(2<sup>8</sup>) Worked Examples</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Generating the Log/Antilog Tables</h3>
+        <p class="small fragment">Start with &alpha; = 0x02 (the primitive element x), repeatedly multiply:</p>
+        <table class="fragment">
+            <tr><th>Power</th><th>Value (hex)</th><th>Value (binary)</th></tr>
+            <tr><td>&alpha;<sup>0</sup> = 1</td><td>0x01</td><td>00000001</td></tr>
+            <tr><td>&alpha;<sup>1</sup></td><td>0x02</td><td>00000010</td></tr>
+            <tr><td>&alpha;<sup>2</sup></td><td>0x04</td><td>00000100</td></tr>
+            <tr><td>&alpha;<sup>7</sup></td><td>0x80</td><td>10000000</td></tr>
+            <tr class="fragment"><td>&alpha;<sup>8</sup></td><td>0x1D</td><td>00011101</td></tr>
+        </table>
+        <p class="small fragment dim">&alpha;<sup>8</sup> = &alpha;<sup>4</sup> + &alpha;<sup>3</sup> + &alpha;<sup>2</sup> + 1 = 0x1D (from the reduction: x<sup>8</sup> mod p(x)).</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>All 255 nonzero elements</strong> of GF(256) are generated as powers of &alpha;. The log table maps value → exponent, antilog maps exponent → value. Both are 256-byte lookup tables.
+    </div>
+</section>
+
+<!-- Slide 7: RS Code Parameters -->
+<section>
+    <h2>RS Code Parameters</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>RS(n, k) over GF(q)</h3>
+        <div class="grid-3 fragment">
+            <div class="card" style="text-align:center;">
+                <div class="stat">n</div>
+                <div class="stat-label">Code length<br><span class="tiny">n = q - 1 symbols</span></div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="stat" style="color:var(--accent3);">k</div>
+                <div class="stat-label">Message length<br><span class="tiny">k symbols</span></div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="stat" style="color:var(--accent2);">n-k+1</div>
+                <div class="stat-label">Min distance (MDS!)<br><span class="tiny">d = n - k + 1</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="formula fragment">
+        Error correction: t = ⌊(d-1)/2⌋ = ⌊(n-k)/2⌋ symbol errors
+    </div>
+    <div class="panel fragment">
+        <h3>Common RS Codes</h3>
+        <table>
+            <tr><th>Code</th><th>Field</th><th>Parity</th><th>Correction</th><th>Use</th></tr>
+            <tr><td>RS(255, 223)</td><td>GF(2<sup>8</sup>)</td><td>32</td><td>16 symbols</td><td>Deep space</td></tr>
+            <tr class="fragment"><td>RS(255, 239)</td><td>GF(2<sup>8</sup>)</td><td>16</td><td>8 symbols</td><td>DVB</td></tr>
+            <tr class="fragment"><td>RS(255, 249)</td><td>GF(2<sup>8</sup>)</td><td>6</td><td>3 symbols</td><td>DiskStorage</td></tr>
+            <tr class="fragment"><td>RS(204, 188)</td><td>GF(2<sup>8</sup>)</td><td>16</td><td>8 symbols</td><td>DVB-T</td></tr>
+            <tr class="fragment"><td>RS(28, 24)</td><td>GF(2<sup>8</sup>)</td><td>4</td><td>2 symbols</td><td>CD (C1)</td></tr>
+        </table>
+    </div>
+</section>
+
+<!-- Slide 8: MDS Property -->
+<section>
+    <h2>The MDS Property</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Maximum Distance Separable</h3>
+        <div class="formula fragment">
+            d<sub>min</sub> = n - k + 1 &nbsp;&nbsp; (Singleton bound met with EQUALITY)
+        </div>
+        <p class="small fragment">No code with the same n and k can have a larger minimum distance. RS codes are <span class="accent">optimal</span> in this sense.</p>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>What MDS Means Practically</h3>
+            <ul class="small">
+                <li class="fragment">Every n-k+1 symbol positions carry independent information</li>
+                <li class="fragment">Any k of n received symbols suffice to recover the message</li>
+                <li class="fragment">Maximum possible erasure correction: n-k erasures</li>
+                <li class="fragment">Maximum error correction: ⌊(n-k)/2⌋ errors</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Trade-off Formula</h3>
+            <p class="small">With s erasures and e errors:</p>
+            <div class="formula" style="font-size:0.9em;">2e + s ≤ n - k = d - 1</div>
+            <p class="small fragment dim">Each error "costs" 2 (unknown position + unknown value). Each erasure "costs" 1 (known position, unknown value).</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 9: Generator Polynomial -->
+<section>
+    <h2>Generator Polynomial</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Construction</h3>
+        <p class="small fragment">The generator polynomial for RS(n, k) has 2t = n-k consecutive roots:</p>
+        <div class="formula fragment">
+            g(x) = &Pi;<sub>i=1</sub><sup>2t</sup> (x - &alpha;<sup>i</sup>) = (x - &alpha;)(x - &alpha;<sup>2</sup>)...(x - &alpha;<sup>2t</sup>)
+        </div>
+        <p class="small fragment">Each factor is <span class="accent">linear</span> (degree 1) since roots are in the same field as coefficients!</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Example: RS(255, 223) — 2t = 32</h3>
+        <div class="math-block">
+            g(x) = (x - &alpha;)(x - &alpha;<sup>2</sup>)(x - &alpha;<sup>3</sup>)...(x - &alpha;<sup>32</sup>)
+        </div>
+        <p class="small">A degree-32 polynomial over GF(256). Coefficients are bytes.</p>
+        <p class="small dim fragment">First few coefficients: g(x) = x<sup>32</sup> + 0x10·x<sup>31</sup> + 0x77·x<sup>30</sup> + ...</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>Why consecutive roots?</strong> The BCH bound guarantees d ≥ 2t + 1. Since each root contributes exactly degree 1, we get deg(g) = 2t = n - k, which gives d = n - k + 1 (MDS).
+    </div>
+</section>
+
+<!-- Slide 10: Systematic Encoding -->
+<section>
+    <h2>Encoding: Systematic Method</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Polynomial Long Division Approach</h3>
+        <p class="small fragment"><strong>Step 1:</strong> Represent message as polynomial m(x) of degree k-1</p>
+        <p class="small fragment"><strong>Step 2:</strong> Shift message: x<sup>2t</sup> · m(x)</p>
+        <p class="small fragment"><strong>Step 3:</strong> Compute remainder: r(x) = [x<sup>2t</sup> · m(x)] mod g(x)</p>
+        <p class="small fragment"><strong>Step 4:</strong> Codeword: c(x) = x<sup>2t</sup> · m(x) - r(x)</p>
+    </div>
+    <div class="formula fragment">
+        c(x) = x<sup>2t</sup> · m(x) + r(x) &nbsp;&nbsp;&nbsp; (since -1 = 1 in GF(2<sup>m</sup>))
+    </div>
+    <div class="key-point fragment">
+        <strong>Systematic codeword:</strong> [parity<sub>2t</sub> ... parity<sub>1</sub> | msg<sub>k</sub> ... msg<sub>1</sub>]<br>
+        <span class="small dim">The k message symbols appear unchanged in the codeword — easy to extract after decoding.</span>
+    </div>
+    <div class="warning fragment">
+        <strong>Alternative — evaluation encoding:</strong> Reed and Solomon's original method evaluates m(x) at n points. Equivalent code, but not systematic by default.
+    </div>
+</section>
+
+<!-- Slide 11: Encoding Example -->
+<section>
+    <h2>Step-by-Step Encoding: RS(7, 3) over GF(2<sup>3</sup>)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Small Example (GF(8) for clarity)</h3>
+        <p class="small fragment">GF(8): p(x) = x<sup>3</sup> + x + 1, &alpha;<sup>3</sup> = &alpha; + 1</p>
+        <p class="small fragment">RS(7, 3): t = 2, g(x) = (x-&alpha;)(x-&alpha;<sup>2</sup>)(x-&alpha;<sup>3</sup>)(x-&alpha;<sup>4</sup>)</p>
+    </div>
+    <div class="panel fragment">
+        <p class="small"><span class="accent">Message:</span> m = [&alpha;<sup>2</sup>, &alpha;<sup>0</sup>, &alpha;<sup>4</sup>] → m(x) = &alpha;<sup>2</sup>x<sup>2</sup> + x + &alpha;<sup>4</sup></p>
+        <p class="small fragment"><strong>Step 1:</strong> x<sup>4</sup>·m(x) = &alpha;<sup>2</sup>x<sup>6</sup> + x<sup>5</sup> + &alpha;<sup>4</sup>x<sup>4</sup></p>
+        <p class="small fragment"><strong>Step 2:</strong> Divide by g(x) using GF(8) polynomial long division</p>
+        <p class="small fragment"><strong>Step 3:</strong> Remainder r(x) = r<sub>3</sub>x<sup>3</sup> + r<sub>2</sub>x<sup>2</sup> + r<sub>1</sub>x + r<sub>0</sub></p>
+        <p class="small fragment"><strong>Step 4:</strong> Codeword c(x) = x<sup>4</sup>·m(x) + r(x)</p>
+        <div class="formula fragment">
+            c = [r<sub>0</sub>, r<sub>1</sub>, r<sub>2</sub>, r<sub>3</sub>, &alpha;<sup>4</sup>, 1, &alpha;<sup>2</sup>]<br>
+            <span class="tiny dim">|--- parity ---| |-- message --|</span>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Verification:</strong> c(&alpha;<sup>i</sup>) = 0 for i = 1,2,3,4. Each evaluation involves GF(8) arithmetic.
+    </div>
+</section>
+
+<!-- Slide 12: Decoding Pipeline -->
+<section>
+    <h2>RS Decoding Pipeline</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="flow-row" style="margin-top:1em;">
+        <div class="flow-node" style="background:rgba(108,92,231,0.15);">r(x)<br><span class="accent4">received</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Syndromes<br><span class="accent">S₁...S₂ₜ</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(255,217,61,0.1);">BM Algorithm<br><span class="accent3">&sigma;(x)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(255,107,157,0.1);">Chien Search<br><span class="accent2">locations</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(96,165,250,0.15);">Forney<br><span style="color:#60a5fa;">values</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Correct<br><span class="accent">ĉ(x)</span></div>
+    </div>
+    <div class="grid-2" style="margin-top:1em;">
+        <div class="card fragment">
+            <h3>Key Difference from Binary BCH</h3>
+            <p class="small">Binary BCH only needs error <em>positions</em> (flip the bit). RS needs both <span class="accent">positions and values</span> — what is the correct symbol value?</p>
+            <p class="small dim">This is why RS decoding adds Forney's algorithm.</p>
+        </div>
+        <div class="card fragment">
+            <h3>Computational Cost</h3>
+            <table class="small">
+                <tr><th>Step</th><th>Complexity</th></tr>
+                <tr><td>Syndromes</td><td>O(n · 2t)</td></tr>
+                <tr><td>Berlekamp-Massey</td><td>O(t<sup>2</sup>)</td></tr>
+                <tr><td>Chien search</td><td>O(n · t)</td></tr>
+                <tr><td>Forney</td><td>O(t<sup>2</sup>)</td></tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 13: Syndrome Computation -->
+<section>
+    <h2>Syndrome Computation</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Evaluating r(x) at Roots of g(x)</h3>
+        <div class="formula fragment">
+            S<sub>j</sub> = r(&alpha;<sup>j</sup>) = &Sigma;<sub>i=0</sub><sup>n-1</sup> r<sub>i</sub> · (&alpha;<sup>j</sup>)<sup>i</sup>, &nbsp;&nbsp; j = 1, 2, ..., 2t
+        </div>
+        <p class="small fragment">Since c(&alpha;<sup>j</sup>) = 0 for valid codewords, the syndrome depends only on errors:</p>
+        <div class="formula fragment">
+            S<sub>j</sub> = e(&alpha;<sup>j</sup>) = &Sigma;<sub>l=1</sub><sup>v</sup> Y<sub>l</sub> · X<sub>l</sub><sup>j</sup>
+        </div>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Notation</h3>
+            <ul class="small">
+                <li><span class="accent">v</span> = number of errors</li>
+                <li><span class="accent">X<sub>l</sub></span> = &alpha;<sup>i<sub>l</sub></sup> = error locator (position)</li>
+                <li><span class="accent">Y<sub>l</sub></span> = error value (magnitude) at position i<sub>l</sub></li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>All S<sub>j</sub> = 0?</h3>
+            <p class="small">If all 2t syndromes are zero, the received word is a valid codeword — no errors detected (or an undetectable error pattern, which requires ≥ d errors).</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 14: Berlekamp-Massey in Detail -->
+<section>
+    <h2>Berlekamp-Massey Algorithm</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Finding the Error-Locator Polynomial &sigma;(x)</h3>
+        <p class="small fragment">Iteratively builds &sigma;(x) = 1 + &sigma;<sub>1</sub>x + &sigma;<sub>2</sub>x<sup>2</sup> + ... + &sigma;<sub>v</sub>x<sup>v</sup> whose roots are X<sub>l</sub><sup>-1</sup>.</p>
+    </div>
+    <pre class="fragment"><code class="language-python">def berlekamp_massey(syndromes, t, gf):
+    """Berlekamp-Massey algorithm over GF(2^m)."""
+    n = 2 * t
+    sigma = [1]        # error locator polynomial
+    old_sigma = [1]    # previous sigma
+    L = 0              # current LFSR length
+
+    for r in range(n):
+        # Compute discrepancy
+        delta = syndromes[r]
+        for j in range(1, len(sigma)):
+            delta = gf.add(delta, gf.mul(sigma[j], syndromes[r - j]))
+
+        # Shift old_sigma: multiply by x
+        old_sigma = [0] + old_sigma
+
+        if delta == 0:
+            continue
+
+        # Update sigma
+        new_sigma = list(sigma)
+        for j in range(len(old_sigma)):
+            if j < len(new_sigma):
+                new_sigma[j] = gf.add(new_sigma[j],
+                                       gf.mul(delta, old_sigma[j]))
+            else:
+                new_sigma.append(gf.mul(delta, old_sigma[j]))
+
+        if 2 * L <= r:
+            # Length change
+            old_sigma = [gf.mul(gf.inv(delta), s) for s in sigma]
+            # Pad to account for the shift we already did
+            old_sigma = [0] + old_sigma
+            L = r + 1 - L
+
+        sigma = new_sigma
+
+    return sigma</code></pre>
+</section>
+
+<!-- Slide 15: BM Worked Example -->
+<section>
+    <h2>BM Algorithm: Worked Example</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>RS(7, 3) over GF(8), 2 errors</h3>
+        <p class="small fragment">Suppose syndromes: S₁ = &alpha;<sup>3</sup>, S₂ = &alpha;<sup>0</sup>, S₃ = &alpha;<sup>5</sup>, S₄ = &alpha;<sup>2</sup></p>
+    </div>
+    <div class="panel fragment">
+        <table>
+            <tr><th>Iteration r</th><th>&Delta;</th><th>&sigma;(x)</th><th>L</th><th>Action</th></tr>
+            <tr class="fragment">
+                <td>0</td><td>&alpha;<sup>3</sup></td><td>1 + &alpha;<sup>3</sup>x</td><td>1</td><td>Length update</td>
+            </tr>
+            <tr class="fragment">
+                <td>1</td><td>&alpha;<sup>6</sup></td><td>1 + &alpha;<sup>5</sup>x + &alpha;<sup>6</sup>x<sup>2</sup></td><td>2</td><td>Length update</td>
+            </tr>
+            <tr class="fragment">
+                <td>2</td><td>0</td><td>unchanged</td><td>2</td><td>No change</td>
+            </tr>
+            <tr class="fragment">
+                <td>3</td><td>0</td><td>unchanged</td><td>2</td><td>No change</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>Result:</strong> &sigma;(x) = 1 + &sigma;₁x + &sigma;₂x<sup>2</sup> has degree 2, confirming v = 2 errors. Now find roots via Chien search to locate error positions.
+    </div>
+</section>
+
+<!-- Slide 16: Forney's Algorithm -->
+<section>
+    <h2>Forney's Algorithm</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Computing Error Values</h3>
+        <p class="small fragment">Once we know the error positions X<sub>l</sub>, we need the error <span class="accent">magnitudes</span> Y<sub>l</sub>.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Error Evaluator Polynomial</h3>
+        <div class="formula">
+            &Omega;(x) = S(x) · &sigma;(x) mod x<sup>2t</sup>
+        </div>
+        <p class="small">where S(x) = S₁ + S₂x + ... + S₂ₜx<sup>2t-1</sup> is the syndrome polynomial.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Forney's Formula</h3>
+        <div class="formula">
+            Y<sub>l</sub> = - &Omega;(X<sub>l</sub><sup>-1</sup>) / &sigma;'(X<sub>l</sub><sup>-1</sup>)
+        </div>
+        <p class="small">&sigma;'(x) is the <span class="accent">formal derivative</span> of &sigma;(x).</p>
+        <p class="small fragment dim">In characteristic 2: &sigma;'(x) = &sigma;₁ + &sigma;₃x<sup>2</sup> + &sigma;₅x<sup>4</sup> + ... (only odd-index coefficients survive).</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>Elegance:</strong> Forney's algorithm avoids solving a linear system for the error values. It computes each Y<sub>l</sub> independently using only polynomial evaluation.
+    </div>
+</section>
+
+<!-- Slide 17: Chien Search for RS -->
+<section>
+    <h2>Chien Search</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Finding Error Locations</h3>
+        <p class="small fragment">Evaluate &sigma;(x) at x = &alpha;<sup>0</sup>, &alpha;<sup>-1</sup>, &alpha;<sup>-2</sup>, ..., &alpha;<sup>-(n-1)</sup>:</p>
+        <div class="formula fragment">
+            If &sigma;(&alpha;<sup>-i</sup>) = 0, then position i has an error
+        </div>
+    </div>
+    <pre class="fragment"><code class="language-python">def chien_search(sigma, n, gf):
+    """Find roots of sigma(x) by exhaustive evaluation."""
+    error_positions = []
+    for i in range(n):
+        # Evaluate sigma at alpha^(-i)
+        x_inv = gf.exp_table[(255 - i) % 255]  # alpha^(-i)
+        val = 0
+        x_power = 1
+        for coeff in sigma:
+            val = gf.add(val, gf.mul(coeff, x_power))
+            x_power = gf.mul(x_power, x_inv)
+        if val == 0:
+            error_positions.append(i)
+
+    if len(error_positions) != len(sigma) - 1:
+        return None  # Decoding failure!
+    return error_positions</code></pre>
+    <div class="warning fragment">
+        <strong>Decoding failure:</strong> If the number of roots found doesn't match deg(&sigma;), the received word has more errors than the code can correct. Report failure — don't output incorrect data!
+    </div>
+</section>
+
+<!-- Slide 18: Erasure Decoding -->
+<section>
+    <h2>Erasure &amp; Error+Erasure Decoding</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Erasure vs. Error</h3>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>Error</h3>
+                <p class="small">Unknown position, unknown value.</p>
+                <p class="small accent2">Costs 2 in the budget: 2e ≤ d-1</p>
+                <p class="small dim">Decoder must find both WHERE and WHAT.</p>
+            </div>
+            <div class="card">
+                <h3>Erasure</h3>
+                <p class="small">Known position, unknown value.</p>
+                <p class="small accent">Costs 1 in the budget: s ≤ d-1</p>
+                <p class="small dim">Position is flagged by demodulator. Only need to find WHAT.</p>
+            </div>
+        </div>
+    </div>
+    <div class="formula fragment">
+        Combined: &nbsp; 2e + s ≤ n - k &nbsp;&nbsp; (can correct e errors AND s erasures simultaneously)
+    </div>
+    <div class="panel fragment">
+        <h3>Why Erasures Matter</h3>
+        <ul class="small">
+            <li class="fragment">CD players know which samples are unreliable (scratches, fingerprints)</li>
+            <li class="fragment">Demodulators can flag low-confidence symbols</li>
+            <li class="fragment">Interleaving converts burst errors into erasures</li>
+            <li class="fragment">RS(255, 223) can correct 16 errors OR 32 erasures OR any combination with 2e+s ≤ 32</li>
+        </ul>
+    </div>
+</section>
+
+<!-- Slide 19: Deep Space RS -->
+<section>
+    <h2>RS(255, 223) in Deep Space</h2>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-history">History</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Standard Deep Space Code</h3>
+        <div class="grid-2 fragment">
+            <div class="card" style="text-align:center;">
+                <div class="stat">223</div>
+                <div class="stat-label">Data bytes per block</div>
+            </div>
+            <div class="card" style="text-align:center;">
+                <div class="stat" style="color:var(--accent2);">32</div>
+                <div class="stat-label">Parity bytes (16 symbol correction)</div>
+            </div>
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>Concatenated Coding Scheme</h3>
+        <div class="flow-row">
+            <div class="flow-node">Data</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent);">RS(255,223)<br><span class="tiny accent">outer code</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Interleave<br><span class="tiny dim">depth 5</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent2);">Conv K=7<br><span class="tiny accent2">inner code</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Channel<br><span class="tiny dim">deep space</span></div>
+        </div>
+        <p class="small fragment dim" style="text-align:center;">CCSDS standard adopted by NASA, ESA, JAXA. Used from Voyager to Mars missions.</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>Performance:</strong> Within ~2 dB of Shannon limit. The inner convolutional code corrects most errors; the outer RS code catches the rare bursts that slip through.
+    </div>
+</section>
+
+<!-- Slide 20: CD/DVD Error Correction -->
+<section>
+    <h2>CD/DVD: CIRC</h2>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-standards">Standards</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Cross-Interleaved Reed-Solomon Coding</h3>
+        <p class="small fragment">The Compact Disc (1982) uses a brilliant two-layer RS scheme designed by Philips and Sony:</p>
+    </div>
+    <div class="flow-row fragment">
+        <div class="flow-node">Audio<br>samples</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color:var(--accent);">C2 Encoder<br><span class="tiny accent">RS(28,24)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node">Interleave<br><span class="tiny dim">28 delays</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color:var(--accent2);">C1 Encoder<br><span class="tiny accent2">RS(32,28)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node">Disc</div>
+    </div>
+    <div class="grid-2" style="margin-top:0.8em;">
+        <div class="card fragment">
+            <h3>C1 (Inner Code)</h3>
+            <p class="small">RS(32, 28) over GF(256)</p>
+            <p class="small">Corrects 2 byte errors per frame</p>
+            <p class="small dim">Handles random errors from disc read</p>
+        </div>
+        <div class="card fragment">
+            <h3>C2 (Outer Code)</h3>
+            <p class="small">RS(28, 24) over GF(256)</p>
+            <p class="small">Corrects 2 byte errors or 4 erasures</p>
+            <p class="small dim">Handles burst errors (scratches up to ~2.4mm)</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Result:</strong> A CD can handle burst errors up to ~4000 consecutive bits (~2.4mm scratch) and still play perfectly. Up to ~7.7mm with concealment!
+    </div>
+</section>
+
+<!-- Slide 21: QR Codes -->
+<section>
+    <h2>QR Codes &amp; Reed-Solomon</h2>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-standards">Standards</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Error Correction Levels</h3>
+        <div class="grid-2">
+            <div>
+                <table class="fragment">
+                    <tr><th>Level</th><th>Recovery</th><th>Use Case</th></tr>
+                    <tr><td><span class="accent">L</span> (Low)</td><td>~7%</td><td>Clean environments</td></tr>
+                    <tr><td><span class="accent3">M</span> (Medium)</td><td>~15%</td><td>General purpose</td></tr>
+                    <tr><td><span class="accent4">Q</span> (Quartile)</td><td>~25%</td><td>Industrial</td></tr>
+                    <tr><td><span class="accent2">H</span> (High)</td><td>~30%</td><td>Harsh environments</td></tr>
+                </table>
+            </div>
+            <div class="fragment">
+                <div class="card">
+                    <h3>How It Works</h3>
+                    <p class="small">QR data is encoded as bytes (GF(256)). RS code adds parity bytes. Higher EC level = more parity = less data capacity but more resilience.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Artistic QR codes:</strong> Level H allows 30% of the code to be damaged/covered — which is why you can put logos in the center of QR codes and they still scan!
+    </div>
+    <p class="small fragment dim">QR codes use RS over GF(256) with p(x) = x<sup>8</sup> + x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + 1 — the same field as our examples.</p>
+</section>
+
+<!-- Slide 22: RAID 6 -->
+<section>
+    <h2>Reed-Solomon in RAID 6</h2>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-standards">Standards</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Surviving Two Disk Failures</h3>
+        <p class="small fragment">RAID 6 uses an RS-like code across disk drives:</p>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>RAID 5: Single Parity</h3>
+                <p class="small">P = D₁ ⊕ D₂ ⊕ ... ⊕ D<sub>n</sub></p>
+                <p class="small dim">Survives 1 disk failure. Simple XOR.</p>
+            </div>
+            <div class="card">
+                <h3>RAID 6: Dual Parity</h3>
+                <p class="small">P = D₁ ⊕ D₂ ⊕ ... ⊕ D<sub>n</sub></p>
+                <p class="small">Q = g₁·D₁ ⊕ g₂·D₂ ⊕ ... ⊕ g<sub>n</sub>·D<sub>n</sub></p>
+                <p class="small accent">Where g<sub>i</sub> = &alpha;<sup>i</sup> in GF(256)!</p>
+            </div>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>This is exactly an RS code!</strong> Each "symbol" is a disk stripe. The P and Q are two RS parity symbols. When any two disks fail, we have two erasures — RS decoding recovers both.
+    </div>
+    <div class="panel fragment">
+        <p class="small"><span class="accent3">Scale:</span> Modern storage arrays with 20+ disks rely on RAID 6 (or triple-parity RAID) to avoid data loss. The probability of simultaneous failures during rebuild is non-negligible with large drives.</p>
+    </div>
+</section>
+
+<!-- Slide 23: Python GF(256) Implementation -->
+<section>
+    <h2>Python: GF(2<sup>8</sup>) Arithmetic</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python">class GF256:
+    """Galois Field GF(2^8) with primitive polynomial x^8+x^4+x^3+x^2+1."""
+    def __init__(self):
+        self.exp_table = [0] * 512  # double-sized for convenience
+        self.log_table = [0] * 256
+        # Generate tables using primitive element alpha = 2
+        x = 1
+        for i in range(255):
+            self.exp_table[i] = x
+            self.log_table[x] = i
+            x <<= 1  # multiply by alpha
+            if x & 0x100:  # if x >= 256, reduce mod p(x)
+                x ^= 0x11D  # p(x) = x^8 + x^4 + x^3 + x^2 + 1
+        # Extend exp table for easy mod-free multiplication
+        for i in range(255, 512):
+            self.exp_table[i] = self.exp_table[i - 255]
+
+    def add(self, a, b):
+        return a ^ b  # addition = XOR
+
+    def sub(self, a, b):
+        return a ^ b  # same as addition in char 2
+
+    def mul(self, a, b):
+        if a == 0 or b == 0: return 0
+        return self.exp_table[self.log_table[a] + self.log_table[b]]
+
+    def div(self, a, b):
+        if b == 0: raise ZeroDivisionError
+        if a == 0: return 0
+        return self.exp_table[(self.log_table[a] - self.log_table[b]) % 255]
+
+    def inv(self, a):
+        if a == 0: raise ZeroDivisionError
+        return self.exp_table[255 - self.log_table[a]]
+
+    def pow(self, a, n):
+        if a == 0: return 0
+        return self.exp_table[(self.log_table[a] * n) % 255]</code></pre>
+</section>
+
+<!-- Slide 24: Python RS Encoder -->
+<section>
+    <h2>Python: RS Encoder</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python">class ReedSolomon:
+    """Reed-Solomon encoder/decoder over GF(256)."""
+    def __init__(self, n=255, k=223):
+        self.n = n
+        self.k = k
+        self.t = (n - k) // 2  # error correction capability
+        self.gf = GF256()
+        self.generator = self._build_generator()
+
+    def _build_generator(self):
+        """Build generator polynomial g(x) = prod(x - alpha^i)."""
+        g = [1]
+        for i in range(1, 2 * self.t + 1):
+            # Multiply g by (x - alpha^i)
+            alpha_i = self.gf.exp_table[i]
+            new_g = [0] * (len(g) + 1)
+            for j in range(len(g)):
+                new_g[j] = self.gf.add(new_g[j], g[j])
+                new_g[j + 1] = self.gf.add(new_g[j + 1],
+                                             self.gf.mul(g[j], alpha_i))
+            g = new_g
+        return g
+
+    def encode(self, message):
+        """Systematic RS encoding."""
+        assert len(message) == self.k
+        # Multiply message by x^(n-k)
+        msg_padded = message + [0] * (self.n - self.k)
+        # Compute remainder of msg_padded / generator
+        remainder = list(msg_padded)
+        for i in range(self.k):
+            if remainder[i] != 0:
+                coef = remainder[i]
+                for j in range(len(self.generator)):
+                    remainder[i + j] = self.gf.add(
+                        remainder[i + j],
+                        self.gf.mul(self.generator[j], coef))
+        # Codeword = message + parity
+        parity = remainder[self.k:]
+        return message + parity</code></pre>
+</section>
+
+<!-- Slide 25: Python RS Decoder -->
+<section>
+    <h2>Python: RS Decoder</h2>
+    <span class="badge badge-code">Code</span>
+    <pre style="font-size:0.42em;"><code class="language-python">def decode(self, received):
+    """Decode received RS codeword, correct up to t errors."""
+    # Step 1: Compute syndromes
+    syndromes = []
+    for i in range(1, 2 * self.t + 1):
+        s = 0
+        for j in range(self.n):
+            s = self.gf.add(s, self.gf.mul(received[j],
+                            self.gf.pow(self.gf.exp_table[i], j)))
+        syndromes.append(s)
+
+    if all(s == 0 for s in syndromes):
+        return received[:self.k]  # No errors
+
+    # Step 2: Berlekamp-Massey -> error locator sigma(x)
+    sigma = self._berlekamp_massey(syndromes)
+
+    # Step 3: Chien search -> error positions
+    positions = self._chien_search(sigma)
+    if positions is None:
+        raise ValueError("Decoding failure: too many errors")
+
+    # Step 4: Forney's algorithm -> error values
+    omega = self._error_evaluator(syndromes, sigma)
+    sigma_deriv = self._formal_derivative(sigma)
+
+    # Step 5: Compute error values and correct
+    corrected = list(received)
+    for pos in positions:
+        x_inv = self.gf.inv(self.gf.exp_table[pos])
+        # Evaluate omega and sigma' at x_inv
+        omega_val = self._poly_eval(omega, x_inv)
+        sigma_d_val = self._poly_eval(sigma_deriv, x_inv)
+        # Error value
+        error_val = self.gf.mul(self.gf.exp_table[pos],
+                                self.gf.div(omega_val, sigma_d_val))
+        corrected[pos] = self.gf.add(corrected[pos], error_val)
+
+    return corrected[:self.k]</code></pre>
+</section>
+
+<!-- Slide 26: Python RS Demo -->
+<section>
+    <h2>Python: RS Encode/Decode Demo</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python"># Create RS(255, 223) codec
+rs = ReedSolomon(n=255, k=223)
+
+# Create a test message (223 bytes)
+message = list(range(223))  # [0, 1, 2, ..., 222]
+
+# Encode
+codeword = rs.encode(message)
+print(f"Message length:  {len(message)}")
+print(f"Codeword length: {len(codeword)}")
+print(f"Parity bytes:    {len(codeword) - len(message)}")
+
+# Introduce 16 random symbol errors (maximum correctable)
+import random
+received = list(codeword)
+error_positions = random.sample(range(255), 16)
+for pos in error_positions:
+    received[pos] ^= random.randint(1, 255)  # corrupt byte
+
+errors = sum(a != b for a, b in zip(codeword, received))
+print(f"\nErrors introduced: {errors}")
+
+# Decode
+try:
+    decoded = rs.decode(received)
+    if decoded == message:
+        print("Decoding SUCCESS - all 16 errors corrected!")
+    else:
+        print("Decoding produced wrong result")
+except ValueError as e:
+    print(f"Decoding failed: {e}")
+
+# Test with 17 errors (beyond correction capability)
+received2 = list(codeword)
+for pos in random.sample(range(255), 17):
+    received2[pos] ^= random.randint(1, 255)
+try:
+    rs.decode(received2)
+    print("WARNING: 17 errors decoded (miscorrection!)")
+except ValueError:
+    print("17 errors correctly detected as uncorrectable")</code></pre>
+</section>
+
+<!-- Slide 27: Performance Comparison -->
+<section>
+    <h2>RS Performance &amp; Comparison</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-app">Applications</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Why RS Codes Dominate</h3>
+        <table>
+            <tr><th>Property</th><th>RS Codes</th><th>Binary BCH</th><th>Convolutional</th></tr>
+            <tr class="fragment">
+                <td>Symbol size</td>
+                <td><span class="accent">m-bit symbols</span></td>
+                <td>Individual bits</td>
+                <td>Individual bits</td>
+            </tr>
+            <tr class="fragment">
+                <td>Burst error handling</td>
+                <td><span class="accent">Excellent</span></td>
+                <td>Poor</td>
+                <td>Moderate</td>
+            </tr>
+            <tr class="fragment">
+                <td>MDS?</td>
+                <td><span class="accent">Yes!</span></td>
+                <td>No</td>
+                <td>N/A</td>
+            </tr>
+            <tr class="fragment">
+                <td>Random errors</td>
+                <td>Good</td>
+                <td><span class="accent">Better per bit</span></td>
+                <td><span class="accent">Best (soft)</span></td>
+            </tr>
+            <tr class="fragment">
+                <td>Decoding complexity</td>
+                <td>O(n·t + t<sup>2</sup>)</td>
+                <td>O(n·t + t<sup>2</sup>)</td>
+                <td>O(2<sup>K</sup>·n)</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>RS excels at burst errors:</strong> A burst of 8m consecutive bit errors corrupts at most 9 symbols — RS corrects this easily. Binary codes would need to correct 8m individual bit errors!
+    </div>
+</section>
+
+<!-- Slide 28: Why RS is Everywhere -->
+<section>
+    <h2>Why RS is "The Most Widely Deployed Code"</h2>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-standards">Standards</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <div class="grid-3">
+            <div class="card fragment">
+                <div style="text-align:center;"><span class="stat" style="font-size:1.5em;">1982</span></div>
+                <p class="small" style="text-align:center;">Compact Disc<br><span class="dim">First mass RS deployment</span></p>
+            </div>
+            <div class="card fragment">
+                <div style="text-align:center;"><span class="stat" style="font-size:1.5em;color:var(--accent3);">1997</span></div>
+                <p class="small" style="text-align:center;">DVD<br><span class="dim">Enhanced CIRC</span></p>
+            </div>
+            <div class="card fragment">
+                <div style="text-align:center;"><span class="stat" style="font-size:1.5em;color:var(--accent2);">2000s</span></div>
+                <p class="small" style="text-align:center;">QR Codes<br><span class="dim">Mobile revolution</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="grid-2" style="margin-top:0.5em;">
+        <div class="panel fragment">
+            <h3>Reasons for Ubiquity</h3>
+            <ul class="small">
+                <li><span class="accent">MDS optimality:</span> best possible distance</li>
+                <li><span class="accent">Burst error resilience:</span> handles real-world noise</li>
+                <li><span class="accent">Flexible parameters:</span> adjustable n, k, t</li>
+                <li><span class="accent">Mature decoders:</span> 50+ years of optimization</li>
+                <li><span class="accent">Hardware friendly:</span> GF(2<sup>8</sup>) = byte operations</li>
+            </ul>
+        </div>
+        <div class="panel fragment">
+            <h3>Where You'll Find RS Today</h3>
+            <ul class="small">
+                <li>Every CD, DVD, Blu-ray ever made</li>
+                <li>Every QR code ever scanned</li>
+                <li>Every digital TV broadcast (DVB)</li>
+                <li>Deep space communications (NASA/ESA)</li>
+                <li>RAID storage systems</li>
+                <li>DSL/ADSL broadband</li>
+                <li>Barcodes (DataMatrix, PDF417)</li>
+                <li>Flash memory controllers</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 29: Summary -->
+<section>
+    <h2>Summary</h2>
+    <div class="grid-2" style="margin-top:0.5em;">
+        <div class="panel fragment">
+            <h3>Theory</h3>
+            <ul class="small">
+                <li>Non-binary BCH over GF(2<sup>m</sup>)</li>
+                <li>MDS: d = n - k + 1 (optimal!)</li>
+                <li>Corrects t = (n-k)/2 symbol errors</li>
+                <li>Or any combination: 2e + s ≤ n - k</li>
+            </ul>
+        </div>
+        <div class="panel fragment">
+            <h3>Decoding Pipeline</h3>
+            <ul class="small">
+                <li>Syndromes → Berlekamp-Massey → Chien → Forney</li>
+                <li>Total: O(n·t + t<sup>2</sup>) — efficient!</li>
+                <li>Handles errors AND erasures</li>
+                <li>Detects uncorrectable patterns</li>
+            </ul>
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>The RS Legacy</h3>
+        <div class="flow-row">
+            <div class="flow-node">1960<br><span class="tiny accent3">Invented</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">1968<br><span class="tiny accent">BM decoder</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">1982<br><span class="tiny accent2">CD launch</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Today<br><span class="tiny accent3">Everywhere</span></div>
+        </div>
+    </div>
+    <div class="key-point fragment" style="margin-top:0.5em;">
+        <strong>Reed-Solomon codes demonstrate how elegant mathematics becomes indispensable engineering.</strong> A 3-page paper from 1960 now protects trillions of bytes of data every second, worldwide.
+    </div>
+    <div class="nav-hint fragment">End of Part 08 &bull; Reed-Solomon Codes</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+    width: 1200,
+    height: 900,
+    margin: 0.02,
+    transition: 'slide',
+    slideNumber: 'c/t',
+    plugins: [ RevealHighlight ]
+});
+
+function fixSlides() {
+    document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+        if (!slide.getAttribute('data-background-color')) {
+            slide.setAttribute('data-background-color', '#0a0a0f');
+        }
+    });
+}
+fixSlides();
+</script>
+</body>
+</html>

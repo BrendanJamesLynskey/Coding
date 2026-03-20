@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coding in Practice — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+  <div class="series-tag">Coding Theory Series — 13</div>
+  <h1 class="title-gradient">Coding in Practice</h1>
+  <p style="font-size:0.65em; color: var(--dim); max-width: 750px;">From deep space to your pocket — how error-correcting codes silently protect every bit of digital information in the modern world.</p>
+  <div style="margin-top: 1em;">
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-standards">Standards</span>
+    <span class="badge badge-history">History</span>
+  </div>
+  <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="grid-3">
+    <div class="panel fragment">
+      <h3>Space</h3>
+      <p class="small">Voyager, Mars rovers, JWST — coding at the edge of the solar system.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Storage</h3>
+      <p class="small">CDs, DVDs, Blu-ray, HDDs, SSDs, RAID — protecting your data.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Mobile</h3>
+      <p class="small">QR codes, NFC, Bluetooth — codes in your pocket.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Networks</h3>
+      <p class="small">Ethernet, Wi-Fi, 5G, submarine cables — the digital backbone.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Broadcast</h3>
+      <p class="small">Digital TV, satellite — reaching millions simultaneously.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Future</h3>
+      <p class="small">Quantum error correction, DNA storage — what's next.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Overview -->
+<section>
+  <h2>Coding Theory: Hidden in Plain Sight</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="key-point fragment">
+    <p class="small">Every digital device you use relies on error-correcting codes. They're invisible when they work — and catastrophic when absent.</p>
+  </div>
+  <div class="grid-3 fragment" style="margin-top: 0.8em;">
+    <div class="card" style="text-align: center;">
+      <div class="stat">10<sup>15</sup></div>
+      <div class="stat-label">Bits corrected per second<br>by a single SSD</div>
+    </div>
+    <div class="card" style="text-align: center;">
+      <div class="stat">24B+</div>
+      <div class="stat-label">Devices using LDPC<br>codes worldwide</div>
+    </div>
+    <div class="card" style="text-align: center;">
+      <div class="stat">10<sup>-15</sup></div>
+      <div class="stat-label">Target BER for fiber<br>optic links</div>
+    </div>
+  </div>
+  <div class="panel fragment">
+    <p class="small">Right now, as you view this presentation, error-correcting codes are operating in your display controller, your Wi-Fi chip, your storage drive, your RAM (ECC), and the network infrastructure delivering this content.</p>
+  </div>
+</section>
+
+<!-- Slide 4: Deep Space — Voyager -->
+<section>
+  <h2>Deep Space: Voyager</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Voyager 1 & 2 (1977–present)</h3>
+        <p class="small">The most distant human-made objects. Voyager 1 is over <span class="accent">24 billion km</span> from Earth.</p>
+        <p class="small fragment">Signal power at Earth: ~10<sup>-16</sup> watts. The coding must be exceptional.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Coding Evolution</h3>
+        <table>
+          <tr><th>Year</th><th>Code</th><th>Gain</th></tr>
+          <tr><td>1977</td><td>Golay (24,12)</td><td>Baseline</td></tr>
+          <tr><td>1979</td><td>Convolutional (K=7, R=1/2)</td><td class="accent">+2 dB</td></tr>
+          <tr><td>1981</td><td>RS(255,223) + Conv</td><td class="accent">+2 dB more</td></tr>
+          <tr><td>1989</td><td>Software update: improved decoding</td><td class="accent">+1 dB</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>The Neptune Flyby (1989)</h3>
+        <p class="small">Voyager 2's coding was <span class="accent">upgraded in flight</span> via software upload. The concatenated RS+convolutional code enabled high-resolution images from Neptune — 4.5 billion km away.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">Voyager demonstrated a principle: as spacecraft travel farther, you can compensate by upgrading the coding — software can replace hardware.</p>
+      </div>
+      <div class="fragment">
+        <p class="small dim">Voyager 1 continues transmitting today (2026) using the same RS+convolutional code. Still works perfectly after nearly 50 years.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Mars Rovers & JWST -->
+<section>
+  <h2>Mars Rovers &amp; James Webb Space Telescope</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Mars Rovers</h3>
+      <p class="small"><span class="accent">Spirit/Opportunity:</span> Turbo codes (CCSDS standard). Enabled high-res panoramic images from Mars surface.</p>
+      <p class="small fragment"><span class="accent">Curiosity/Perseverance:</span> Enhanced turbo codes. Data rates up to 2 Mbps from Mars orbit relay.</p>
+      <div class="flow-row" style="margin: 0.5em 0; font-size: 0.7em;">
+        <div class="flow-node">Rover</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color: var(--accent);">Turbo<br>encode</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node">MRO<br>relay</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node">DSN<br>Earth</div>
+      </div>
+    </div>
+    <div class="panel fragment">
+      <h3>James Webb Space Telescope</h3>
+      <p class="small">At L2, 1.5 million km from Earth. Transmitting infrared images of the early universe.</p>
+      <table>
+        <tr><td>Coding</td><td class="accent">RS(255,223) + LDPC</td></tr>
+        <tr><td>Data rate</td><td>28 Mbps (Ka-band)</td></tr>
+        <tr><td>Distance</td><td>1.5 million km</td></tr>
+        <tr><td>Daily data</td><td>~57 GB downlink</td></tr>
+      </table>
+      <p class="small fragment">JWST's coding enables it to transmit as much data daily as Voyager transmitted in its entire mission.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: CD/DVD/Blu-ray -->
+<section>
+  <h2>CD / DVD / Blu-ray</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-history">History</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>CD: CIRC (1982)</h3>
+        <p class="small">Cross-Interleaved Reed-Solomon Code:</p>
+        <p class="small"><span class="accent">C2:</span> RS(28,24) — first level correction</p>
+        <p class="small"><span class="accent3">Interleave:</span> Spread symbols across ~3 mm of track</p>
+        <p class="small"><span class="accent2">C1:</span> RS(32,28) — second level correction</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">A CD can correct a burst error up to <span class="accent">~4,000 consecutive symbols</span> (~2.5 mm scratch). This is why CDs play through minor scratches.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>DVD & Blu-ray</h3>
+        <table>
+          <tr><th>Format</th><th>Inner code</th><th>Outer code</th></tr>
+          <tr><td>CD</td><td>RS(32,28)</td><td>RS(28,24)</td></tr>
+          <tr><td>DVD</td><td>RS(182,172)</td><td>RS(208,192)</td></tr>
+          <tr><td class="accent">Blu-ray</td><td>LDPC + BIS</td><td>RS-like (Picket)</td></tr>
+        </table>
+      </div>
+      <div class="panel fragment">
+        <h3>Why Interleaving Matters</h3>
+        <p class="small">A scratch produces a <span class="accent2">burst</span> error. Without interleaving, one codeword gets destroyed. With interleaving, the burst is spread across many codewords — each sees only 1-2 errors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7: QR Codes -->
+<section>
+  <h2>QR Codes</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Reed-Solomon Inside</h3>
+        <p class="small">Every QR code uses RS error correction over GF(2<sup>8</sup>). The error correction level determines how much damage the code can survive:</p>
+        <table>
+          <tr><th>Level</th><th>Recovery</th><th>Overhead</th></tr>
+          <tr><td>L (Low)</td><td class="accent">~7%</td><td>Minimal</td></tr>
+          <tr><td>M (Medium)</td><td class="accent">~15%</td><td>Moderate</td></tr>
+          <tr><td>Q (Quartile)</td><td class="accent3">~25%</td><td>Significant</td></tr>
+          <tr><td>H (High)</td><td class="accent2">~30%</td><td>Maximum</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Why This Works</h3>
+        <p class="small">Level H: up to 30% of the QR code can be destroyed or obscured and it still scans correctly.</p>
+        <p class="small fragment">This is why you can put <span class="accent">logos in the center</span> of QR codes — the RS code recovers the hidden data.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>QR Code Structure</h3>
+        <div class="flow-row" style="font-size: 0.7em;">
+          <div class="flow-node">Data</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent);">RS encode</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent3);">Interleave</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent2);">Mask</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node">2D pattern</div>
+        </div>
+        <p class="small fragment dim" style="margin-top: 0.5em;">Invented by Denso Wave (1994). ISO/IEC 18004 standard. ~10 billion scans per day worldwide.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: Hard Drives and SSDs -->
+<section>
+  <h2>Hard Drives &amp; SSDs</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Hard Disk Drives</h3>
+      <p class="small">Modern HDDs use <span class="accent">LDPC codes</span> (since ~2010, replacing RS/Reed-Muller). The channel: magnetic medium read at extreme density.</p>
+      <table>
+        <tr><td>Raw BER</td><td class="accent2">~10<sup>-2</sup></td></tr>
+        <tr><td>After LDPC</td><td class="accent">~10<sup>-15</sup></td></tr>
+        <tr><td>Coding gain</td><td>~13 orders of magnitude!</td></tr>
+        <tr><td>Iterations</td><td>5-50 (adaptive)</td></tr>
+      </table>
+    </div>
+    <div class="panel fragment">
+      <h3>Solid State Drives</h3>
+      <p class="small">NAND flash cells degrade with writes. Coding is essential:</p>
+      <table>
+        <tr><th>Flash type</th><th>Raw BER</th><th>Code</th></tr>
+        <tr><td>SLC (1 bit/cell)</td><td>10<sup>-6</sup></td><td>BCH</td></tr>
+        <tr><td>MLC (2 bits/cell)</td><td>10<sup>-4</sup></td><td>BCH/LDPC</td></tr>
+        <tr><td>TLC (3 bits/cell)</td><td>10<sup>-3</sup></td><td class="accent">LDPC</td></tr>
+        <tr><td>QLC (4 bits/cell)</td><td class="accent2">10<sup>-2</sup></td><td class="accent">LDPC (strong)</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="fragment warning">
+    <p class="small">QLC SSDs literally <span class="accent2">cannot work</span> without LDPC codes. 1 in 100 bits is wrong coming off the flash — the LDPC decoder corrects this to fewer than 1 in 10<sup>15</sup>.</p>
+  </div>
+</section>
+
+<!-- Slide 9: RAID -->
+<section>
+  <h2>RAID: Redundant Arrays</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>RAID Levels &amp; Coding</h3>
+        <table>
+          <tr><th>RAID</th><th>Method</th><th>Code</th><th>Tolerance</th></tr>
+          <tr><td>RAID 0</td><td>Striping</td><td class="accent2">None</td><td>0 drives</td></tr>
+          <tr><td>RAID 1</td><td>Mirroring</td><td>Repetition</td><td>1 drive</td></tr>
+          <tr><td class="accent">RAID 5</td><td>Parity</td><td>XOR parity</td><td>1 drive</td></tr>
+          <tr><td class="accent">RAID 6</td><td>Double parity</td><td>RS / P+Q</td><td>2 drives</td></tr>
+        </table>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">RAID 5 uses a simple XOR parity — the most basic error-correcting code. RAID 6 adds a second parity using a Reed-Solomon-like code over GF(2<sup>8</sup>).</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>RAID 5: XOR Parity</h3>
+        <div class="formula small">
+          P = D<sub>1</sub> &oplus; D<sub>2</sub> &oplus; D<sub>3</sub> &oplus; D<sub>4</sub>
+        </div>
+        <p class="small">If any one drive fails, XOR the others to recover it. This is a [5,4] single-parity-check code!</p>
+      </div>
+      <div class="panel fragment">
+        <h3>RAID 6: RS Code</h3>
+        <div class="formula small">
+          P = &Sigma; D<sub>i</sub><br>
+          Q = &Sigma; g<sup>i</sup> &middot; D<sub>i</sub>
+        </div>
+        <p class="small">Two independent syndromes enable recovery from any 2 drive failures. Exactly the RS code principle.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 10: Ethernet -->
+<section>
+  <h2>Ethernet: CRC in Every Frame</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>CRC-32</h3>
+        <p class="small">Every Ethernet frame ends with a 4-byte <span class="accent">Frame Check Sequence</span> — a CRC-32 computed over the entire frame.</p>
+        <div class="formula small">
+          g(x) = x<sup>32</sup> + x<sup>26</sup> + x<sup>23</sup> + ... + x<sup>2</sup> + x + 1
+        </div>
+        <p class="small fragment">This polynomial detects:</p>
+        <ul class="small">
+          <li class="fragment">All single-bit errors</li>
+          <li class="fragment">All double-bit errors (up to ~4 GB frames)</li>
+          <li class="fragment">All odd numbers of bit errors</li>
+          <li class="fragment">All burst errors up to 32 bits</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Beyond Error Detection</h3>
+        <p class="small">Modern Ethernet uses FEC for the physical layer:</p>
+        <table>
+          <tr><th>Standard</th><th>FEC</th></tr>
+          <tr><td>10GBase-T</td><td class="accent">LDPC (2048,1723)</td></tr>
+          <tr><td>25/50/100GBase</td><td>RS(544,514) + CRC</td></tr>
+          <tr><td>400GBase</td><td>RS(544,514) concatenated</td></tr>
+          <tr><td>800GBase</td><td>RS + LDPC (proposed)</td></tr>
+        </table>
+      </div>
+      <div class="fragment">
+        <p class="small dim">Billions of CRC-32 computations happen every second across the world's Ethernet networks. Dedicated hardware computes CRC at line rate.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 11: Wi-Fi -->
+<section>
+  <h2>Wi-Fi: LDPC &amp; BCC</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="panel fragment">
+    <h3>Evolution of Wi-Fi Coding</h3>
+    <table>
+      <tr><th>Standard</th><th>Year</th><th>FEC</th><th>Max Rate</th></tr>
+      <tr><td>802.11a/g</td><td>1999/2003</td><td>Convolutional (BCC)</td><td>54 Mbps</td></tr>
+      <tr><td>802.11n (Wi-Fi 4)</td><td>2009</td><td>BCC + LDPC (optional)</td><td>600 Mbps</td></tr>
+      <tr><td>802.11ac (Wi-Fi 5)</td><td>2013</td><td>BCC + LDPC</td><td>6.9 Gbps</td></tr>
+      <tr><td class="accent">802.11ax (Wi-Fi 6)</td><td>2020</td><td class="accent">LDPC mandatory for high MCS</td><td>9.6 Gbps</td></tr>
+      <tr><td class="accent">802.11be (Wi-Fi 7)</td><td>2024</td><td class="accent">LDPC for all advanced modes</td><td>46 Gbps</td></tr>
+    </table>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Why LDPC for Wi-Fi?</h3>
+      <p class="small"><span class="accent">~1.5 dB gain</span> over convolutional coding at high data rates (256-QAM, 1024-QAM). This translates to <span class="accent3">30-50% range improvement</span> or higher throughput at the same range.</p>
+    </div>
+    <div class="card">
+      <h3>QC-LDPC in 802.11</h3>
+      <p class="small">Three codeword lengths: 648, 1296, 1944 bits. Four rates: 1/2, 2/3, 3/4, 5/6. Parity check matrix specified as circulant shift values.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 12: 5G -->
+<section>
+  <h2>5G NR: The Full Coding Stack</h2>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">5G NR is the first standard to use <span class="accent">three different modern code families</span> simultaneously: LDPC, polar, and CRC.</p>
+  </div>
+  <div class="panel fragment" style="margin-top: 0.5em;">
+    <table>
+      <tr><th>Channel</th><th>Code</th><th>Block Size</th><th>Why</th></tr>
+      <tr><td class="accent">Data (PDSCH/PUSCH)</td><td>LDPC (QC)</td><td>100-8000+ bits</td><td>High throughput, parallel decoding</td></tr>
+      <tr><td class="accent3">Control (PDCCH/PUCCH)</td><td>Polar (CA-SCL)</td><td>12-140 bits</td><td>Short block excellence</td></tr>
+      <tr><td>Broadcast (PBCH)</td><td>Polar</td><td>32 bits + CRC</td><td>Reliability for system info</td></tr>
+      <tr><td class="dim">Small control</td><td>Repetition/simplex</td><td>1-11 bits</td><td>Very short messages</td></tr>
+    </table>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>5G Performance</h3>
+      <p class="small accent">20 Gbps peak downlink</p>
+      <p class="small accent3">10 Gbps peak uplink</p>
+      <p class="small accent2">1 ms latency target</p>
+      <p class="small accent4">99.999% reliability (URLLC)</p>
+    </div>
+    <div class="card">
+      <h3>Coding Enables This</h3>
+      <p class="small">Without LDPC/polar, 5G would need ~3 dB more transmit power or 50% more spectrum to achieve the same performance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 13: Submarine Cables -->
+<section>
+  <h2>Submarine Cables</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Undersea Network</h3>
+        <p class="small">Over 500 submarine cables carry <span class="accent">&gt;95% of intercontinental data</span>. Lengths: up to 20,000 km. Fiber signals degrade over thousands of km.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>FEC Stack</h3>
+        <div class="flow-row" style="font-size: 0.7em;">
+          <div class="flow-node">Data</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent);">Outer<br>Staircase/LDPC</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent3);">Inner<br>Soft-decision</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent2);">Fiber</div>
+        </div>
+        <p class="small fragment">Net coding gain: <span class="accent">11-12 dB</span>. This is the difference between a working trans-Pacific link and a useless one.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Coding Evolution</h3>
+        <table>
+          <tr><th>Gen</th><th>FEC</th><th>NCG</th></tr>
+          <tr><td>1G</td><td>RS + hard decision</td><td>6 dB</td></tr>
+          <tr><td>2G</td><td>Concatenated RS + BCH</td><td>8 dB</td></tr>
+          <tr><td class="accent">3G</td><td>Soft-decision LDPC</td><td class="accent">11+ dB</td></tr>
+          <tr><td class="accent">4G</td><td>Probabilistic shaping + LDPC</td><td class="accent">12+ dB</td></tr>
+        </table>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">Each 1 dB of coding gain allows ~25% more cable length or ~25% more capacity. Modern FEC enables 400 Gbps per wavelength across the Atlantic.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 14: Digital Television -->
+<section>
+  <h2>Digital Television: DVB</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="panel fragment">
+    <h3>DVB Family of Standards</h3>
+    <table>
+      <tr><th>Standard</th><th>Medium</th><th>Inner FEC</th><th>Outer FEC</th></tr>
+      <tr><td>DVB-S (1994)</td><td>Satellite</td><td>Convolutional</td><td>RS(204,188)</td></tr>
+      <tr><td class="accent">DVB-S2 (2004)</td><td>Satellite</td><td class="accent">LDPC (64800)</td><td>BCH</td></tr>
+      <tr><td>DVB-T (1997)</td><td>Terrestrial</td><td>Convolutional</td><td>RS(204,188)</td></tr>
+      <tr><td class="accent">DVB-T2 (2009)</td><td>Terrestrial</td><td class="accent">LDPC (64800)</td><td>BCH</td></tr>
+      <tr><td>DVB-C (1994)</td><td>Cable</td><td>—</td><td>RS(204,188)</td></tr>
+      <tr><td class="accent">DVB-C2 (2010)</td><td>Cable</td><td class="accent">LDPC</td><td>BCH</td></tr>
+    </table>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>DVB-S vs DVB-S2</h3>
+      <p class="small">DVB-S2's LDPC code provides <span class="accent">~2.5 dB improvement</span> over DVB-S's convolutional code. This translates to ~30% more TV channels on the same satellite transponder.</p>
+    </div>
+    <div class="card">
+      <h3>DVB-S2X (2014)</h3>
+      <p class="small">Extended with new LDPC rates (2/9, 13/45, ...) and modulations up to 256-APSK. Within <span class="accent">0.5 dB</span> of Shannon limit across all rates.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 15: USB, Bluetooth, NFC -->
+<section>
+  <h2>USB, Bluetooth, NFC</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="grid-3">
+    <div class="panel fragment">
+      <h3>USB</h3>
+      <p class="small"><span class="accent">USB 3.x/4:</span> 128b/132b encoding with CRC-32 for link-layer error detection.</p>
+      <p class="small fragment"><span class="accent">USB4 (2019):</span> Adds link-layer retry and FEC for tunneled protocols.</p>
+      <p class="small fragment">CRC-5 protects the token packet; CRC-16 protects data packets.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Bluetooth</h3>
+      <p class="small"><span class="accent">Classic BT:</span> 1/3 and 2/3 rate convolutional codes + CRC-16.</p>
+      <p class="small fragment"><span class="accent">BLE (Low Energy):</span> CRC-24 for data integrity. Bluetooth 5.x adds coded PHY with convolutional codes for extended range.</p>
+      <p class="small fragment"><span class="accent3">BLE coded PHY:</span> S=2 or S=8 spreading with convolutional code — 4x range vs standard BLE.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>NFC</h3>
+      <p class="small"><span class="accent">NFC-A:</span> Modified Miller encoding + CRC.</p>
+      <p class="small fragment"><span class="accent">NFC-V:</span> CRC-16 for data integrity.</p>
+      <p class="small fragment">Short range (~10 cm) means noise is low, so simple CRC suffices. The bigger concern is collision resolution with multiple tags.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 16: The Coding Theory Zoo -->
+<section>
+  <h2>The Coding Theory "Zoo"</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="key-point fragment">
+    <p class="small">Choosing the right code for a system depends on many factors. Here's a guide to matching codes to requirements.</p>
+  </div>
+  <div class="panel fragment" style="margin-top: 0.5em;">
+    <table>
+      <tr>
+        <th>Requirement</th>
+        <th>Best Code Family</th>
+        <th>Why</th>
+      </tr>
+      <tr class="fragment">
+        <td>Maximum throughput</td>
+        <td class="accent">LDPC (QC)</td>
+        <td>Parallel decoding, hardware friendly</td>
+      </tr>
+      <tr class="fragment">
+        <td>Short messages (&lt;256 bits)</td>
+        <td class="accent3">Polar (CA-SCL)</td>
+        <td>Best known short-block performance</td>
+      </tr>
+      <tr class="fragment">
+        <td>Algebraic guarantees</td>
+        <td class="accent2">RS / BCH</td>
+        <td>Guaranteed correction capability</td>
+      </tr>
+      <tr class="fragment">
+        <td>Error detection only</td>
+        <td>CRC</td>
+        <td>Simple, fast, well-understood</td>
+      </tr>
+      <tr class="fragment">
+        <td>Broadcast/multicast</td>
+        <td class="accent">Raptor / RaptorQ</td>
+        <td>Rateless, no feedback needed</td>
+      </tr>
+      <tr class="fragment">
+        <td>Very long blocks, near capacity</td>
+        <td class="accent">LDPC (irregular)</td>
+        <td>Within 0.01 dB of Shannon</td>
+      </tr>
+      <tr class="fragment">
+        <td>Burst errors</td>
+        <td>RS + interleaving</td>
+        <td>RS naturally handles bursts</td>
+      </tr>
+      <tr class="fragment">
+        <td>Ultra-low latency</td>
+        <td>Convolutional (Viterbi)</td>
+        <td>Streaming decode, no block delay</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- Slide 17: Shannon Limit Comparison -->
+<section>
+  <h2>Shannon Limit: Code Family Comparison</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>Gap to Shannon Limit at Rate 1/2, BER = 10<sup>-5</sup>, AWGN</h3>
+    <table>
+      <tr>
+        <th>Code</th>
+        <th>Year</th>
+        <th>Gap to Shannon</th>
+        <th style="width:30%;">Visual</th>
+      </tr>
+      <tr class="fragment">
+        <td>Uncoded BPSK</td>
+        <td>—</td>
+        <td class="accent2">~9.6 dB</td>
+        <td><span style="display:inline-block; width:100%; height:12px; background: linear-gradient(90deg, var(--accent2) 100%, transparent 0); border-radius: 4px;"></span></td>
+      </tr>
+      <tr class="fragment">
+        <td>Hamming (7,4)</td>
+        <td>1950</td>
+        <td class="accent2">~6.0 dB</td>
+        <td><span style="display:inline-block; width:63%; height:12px; background: linear-gradient(90deg, var(--accent2) 100%, transparent 0); border-radius: 4px;"></span></td>
+      </tr>
+      <tr class="fragment">
+        <td>Convolutional (K=7)</td>
+        <td>1955</td>
+        <td>~3.0 dB</td>
+        <td><span style="display:inline-block; width:31%; height:12px; background: linear-gradient(90deg, var(--accent3) 100%, transparent 0); border-radius: 4px;"></span></td>
+      </tr>
+      <tr class="fragment">
+        <td>RS(255,128) + Conv</td>
+        <td>1977</td>
+        <td>~2.0 dB</td>
+        <td><span style="display:inline-block; width:21%; height:12px; background: linear-gradient(90deg, var(--accent3) 100%, transparent 0); border-radius: 4px;"></span></td>
+      </tr>
+      <tr class="fragment">
+        <td>Turbo (N=65536)</td>
+        <td>1993</td>
+        <td class="accent">~0.7 dB</td>
+        <td><span style="display:inline-block; width:7%; height:12px; background: linear-gradient(90deg, var(--accent) 100%, transparent 0); border-radius: 4px;"></span></td>
+      </tr>
+      <tr class="fragment">
+        <td>LDPC (irregular, N=10<sup>6</sup>)</td>
+        <td>1996</td>
+        <td class="accent">~0.04 dB</td>
+        <td><span style="display:inline-block; width:1%; min-width:4px; height:12px; background: var(--accent); border-radius: 4px;"></span></td>
+      </tr>
+      <tr class="fragment">
+        <td>Polar (CA-SCL, N=2<sup>20</sup>)</td>
+        <td>2009</td>
+        <td class="accent">~0.1 dB</td>
+        <td><span style="display:inline-block; width:2%; min-width:4px; height:12px; background: var(--accent); border-radius: 4px;"></span></td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- Slide 18: Timeline of Coding in Industry -->
+<section>
+  <h2>Timeline: Coding Theory in Industry</h2>
+  <span class="badge badge-history">History</span>
+  <div class="panel" style="margin-top: 0.5em; max-height: 600px; overflow-y: auto;">
+    <table>
+      <tr><th>Year</th><th>Milestone</th><th>Code</th></tr>
+      <tr class="fragment"><td class="accent">1948</td><td>Shannon's channel coding theorem</td><td>Theoretical foundation</td></tr>
+      <tr class="fragment"><td>1950</td><td>Hamming code in IBM computers</td><td>Hamming (7,4)</td></tr>
+      <tr class="fragment"><td>1960</td><td>Reed-Solomon codes invented</td><td>RS</td></tr>
+      <tr class="fragment"><td>1967</td><td>Viterbi algorithm</td><td>Convolutional</td></tr>
+      <tr class="fragment"><td>1977</td><td>Voyager 1 & 2 launch</td><td>Golay + Conv</td></tr>
+      <tr class="fragment"><td class="accent">1982</td><td>Compact Disc (CD)</td><td>RS (CIRC)</td></tr>
+      <tr class="fragment"><td>1993</td><td>Turbo codes announced</td><td>PCCC</td></tr>
+      <tr class="fragment"><td>1994</td><td>QR codes invented</td><td>RS</td></tr>
+      <tr class="fragment"><td>1996</td><td>LDPC codes rediscovered</td><td>LDPC</td></tr>
+      <tr class="fragment"><td>1999</td><td>3G UMTS standardized</td><td>Turbo</td></tr>
+      <tr class="fragment"><td class="accent">2004</td><td>DVB-S2 standard</td><td>LDPC + BCH</td></tr>
+      <tr class="fragment"><td>2009</td><td>Polar codes invented</td><td>Polar</td></tr>
+      <tr class="fragment"><td>2009</td><td>Wi-Fi 4 (802.11n)</td><td>LDPC (optional)</td></tr>
+      <tr class="fragment"><td class="accent">2018</td><td>5G NR Release 15</td><td>LDPC + Polar</td></tr>
+      <tr class="fragment"><td>2024</td><td>Wi-Fi 7 (802.11be)</td><td>LDPC (mandatory)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- Slide 19: Coding Layers in a Modern Phone -->
+<section>
+  <h2>Coding in Your Smartphone</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="key-point fragment">
+    <p class="small">A single smartphone uses <span class="accent">dozens</span> of different error-correcting codes simultaneously — perhaps more coding theory per gram than any other device in history.</p>
+  </div>
+  <div class="panel fragment" style="margin-top: 0.5em;">
+    <table>
+      <tr><th>Component</th><th>Code(s)</th><th>Purpose</th></tr>
+      <tr class="fragment"><td>5G modem (data)</td><td class="accent">LDPC</td><td>Wireless data protection</td></tr>
+      <tr class="fragment"><td>5G modem (control)</td><td class="accent">Polar</td><td>Control signaling</td></tr>
+      <tr class="fragment"><td>Wi-Fi 6/7</td><td class="accent">LDPC</td><td>Local wireless</td></tr>
+      <tr class="fragment"><td>Bluetooth</td><td>Convolutional + CRC</td><td>Short-range wireless</td></tr>
+      <tr class="fragment"><td>NFC</td><td>CRC</td><td>Contactless payments</td></tr>
+      <tr class="fragment"><td>Flash storage (NAND)</td><td class="accent">LDPC</td><td>Data integrity in storage</td></tr>
+      <tr class="fragment"><td>RAM (LPDDR5)</td><td>ECC (Hamming-like)</td><td>Memory error correction</td></tr>
+      <tr class="fragment"><td>GPS</td><td>Convolutional + CRC</td><td>Navigation signals</td></tr>
+      <tr class="fragment"><td>Camera (QR scan)</td><td>RS</td><td>QR code decoding</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- Slide 20: Cloud Storage -->
+<section>
+  <h2>Cloud Storage &amp; Data Centers</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Erasure Coding at Scale</h3>
+        <p class="small">Major cloud providers replace 3x replication with erasure codes to reduce storage overhead:</p>
+        <table>
+          <tr><th>Provider</th><th>Scheme</th><th>Overhead</th></tr>
+          <tr><td>Google (GFS)</td><td>RS(6,3)</td><td class="accent">1.5x</td></tr>
+          <tr><td>Facebook (f4)</td><td>RS(10,4)</td><td class="accent">1.4x</td></tr>
+          <tr><td>Azure (LRC)</td><td>LRC(12,2,2)</td><td class="accent">1.33x</td></tr>
+          <tr><td>HDFS 3.x</td><td>RS(6,3) or RS(10,4)</td><td class="accent">1.5x/1.4x</td></tr>
+        </table>
+        <p class="small fragment dim">Compare: 3x replication = 3.0x overhead!</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Locally Repairable Codes (LRC)</h3>
+        <p class="small">Azure's innovation: groups of data blocks have <span class="accent">local</span> parity (repairs from 2-3 blocks) plus <span class="accent3">global</span> parity (handles worst-case).</p>
+        <p class="small fragment">Repair cost: read 2-3 blocks instead of 6-10. Crucial when drives fail daily in million-disk data centers.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">At exabyte scale, switching from 3x replication to erasure coding saves <span class="accent">millions of dollars</span> in storage hardware annually. Coding theory has enormous economic impact.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 21: Future: Quantum Error Correction -->
+<section>
+  <h2>Future: Quantum Error Correction</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Challenge</h3>
+        <p class="small">Quantum computers need error correction even more desperately than classical systems. Qubit error rates: <span class="accent2">~10<sup>-3</sup></span> (1000x worse than transistors).</p>
+        <p class="small fragment">But quantum information cannot be copied (no-cloning theorem) — classical codes don't directly apply.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Quantum Codes</h3>
+        <p class="small accent">Surface codes: 2D lattice of qubits with nearest-neighbor checks. Leading candidate for near-term quantum computers.</p>
+        <p class="small fragment accent3">CSS codes: Constructed from pairs of classical codes (Calderbank-Shor-Steane).</p>
+        <p class="small fragment accent2">Quantum LDPC: Sparse parity checks on qubits. Active research frontier.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>The Overhead Problem</h3>
+        <p class="small">Current estimates: <span class="accent2">1,000-10,000 physical qubits</span> per logical qubit (with surface codes).</p>
+        <p class="small fragment">A useful quantum computer (1000 logical qubits) would need millions of physical qubits — most performing error correction!</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">Quantum error correction is the <span class="accent2">single biggest bottleneck</span> in quantum computing. Better quantum codes = practical quantum computers sooner. The field is desperate for coding theory breakthroughs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 22: Future: DNA Data Storage -->
+<section>
+  <h2>Future: DNA Data Storage</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>DNA as a Storage Medium</h3>
+        <p class="small">DNA stores information at <span class="accent">~1 exabyte per gram</span>. Stable for thousands of years. Replicated naturally.</p>
+        <p class="small fragment">Alphabet: {A, C, G, T} — quaternary, not binary.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Error Sources</h3>
+        <p class="small accent2">Synthesis errors: ~1% per base</p>
+        <p class="small accent2">Sequencing errors: ~1-5%</p>
+        <p class="small accent2">Insertions and deletions (indels)</p>
+        <p class="small accent2">Missing strands (erasures)</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Coding Solutions</h3>
+        <p class="small"><span class="accent">Reed-Solomon</span> over GF(4) or GF(256) for substitution errors.</p>
+        <p class="small fragment"><span class="accent3">Fountain codes</span> (Erlich & Zielinski, 2017): Each DNA strand is a fountain-encoded symbol. Perfect match — read order is random!</p>
+        <p class="small fragment"><span class="accent2">Synchronization codes</span> for insertion/deletion correction — a new frontier.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">DNA storage combines multiple coding challenges: quaternary alphabet, insertion/deletion errors, and random-access reads. A rich frontier for coding theory research.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 23: Coding Everywhere Diagram -->
+<section>
+  <h2>Coding Theory: An Ecosystem</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="flow-row fragment" style="margin: 0.5em 0;">
+    <div class="flow-node" style="border-color: var(--accent3); padding: 0.8em;">Shannon<br>(1948)</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-arrow">&darr;</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-node" style="border-color: var(--accent);">Hamming<br>codes</div>
+    <div class="flow-node" style="border-color: var(--accent);">Golay<br>codes</div>
+    <div class="flow-node" style="border-color: var(--accent);">Convolutional<br>codes</div>
+    <div class="flow-node" style="border-color: var(--accent);">Reed-Solomon<br>codes</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-arrow">&darr;</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-node" style="border-color: var(--accent3);">Turbo codes<br>(1993)</div>
+    <div class="flow-node" style="border-color: var(--accent3);">LDPC codes<br>(1962/1996)</div>
+    <div class="flow-node" style="border-color: var(--accent3);">Polar codes<br>(2009)</div>
+    <div class="flow-node" style="border-color: var(--accent3);">Fountain codes<br>(2002)</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-arrow">&darr;</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-node" style="border-color: var(--accent2);">5G</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Wi-Fi</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Storage</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Space</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Broadcast</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Internet</div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.3em 0;">
+    <div class="flow-arrow">&darr;</div>
+  </div>
+  <div class="flow-row fragment">
+    <div class="flow-node" style="border-color: var(--accent4);">Quantum<br>codes</div>
+    <div class="flow-node" style="border-color: var(--accent4);">DNA<br>storage</div>
+    <div class="flow-node" style="border-color: var(--accent4);">Coded<br>computing</div>
+    <div class="flow-node" style="border-color: var(--accent4);">AI/ML<br>communications</div>
+  </div>
+</section>
+
+<!-- Slide 24: Choosing the Right Code -->
+<section>
+  <h2>Decision Guide: Choosing the Right Code</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Step 1: Channel Type</h3>
+      <p class="small"><span class="accent">AWGN/Fading:</span> LDPC, Turbo, Polar</p>
+      <p class="small"><span class="accent3">Erasure:</span> RS, Fountain, LDPC</p>
+      <p class="small"><span class="accent2">Burst errors:</span> RS + interleaving</p>
+      <p class="small"><span class="accent4">Mixed:</span> Concatenated codes</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Step 2: Block Length</h3>
+      <p class="small"><span class="accent">Very short (&lt;128):</span> Polar, BCH, short RS</p>
+      <p class="small"><span class="accent3">Medium (128-10K):</span> Polar, Turbo, LDPC</p>
+      <p class="small"><span class="accent2">Long (&gt;10K):</span> LDPC, Turbo</p>
+      <p class="small"><span class="accent4">Very long (&gt;64K):</span> LDPC</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Step 3: Constraints</h3>
+      <p class="small"><span class="accent">Max throughput:</span> QC-LDPC (parallel decoder)</p>
+      <p class="small"><span class="accent3">Min latency:</span> Convolutional (streaming)</p>
+      <p class="small"><span class="accent2">Min power:</span> Min-sum LDPC</p>
+      <p class="small"><span class="accent4">Min complexity:</span> CRC, Hamming, RS</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Step 4: Special Needs</h3>
+      <p class="small"><span class="accent">No feedback:</span> Fountain codes</p>
+      <p class="small"><span class="accent3">Guaranteed correction:</span> Algebraic (RS, BCH)</p>
+      <p class="small"><span class="accent2">No error floor:</span> Polar, RS</p>
+      <p class="small"><span class="accent4">Rate adaptation:</span> Polar, Raptor</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 25: The Economic Impact -->
+<section>
+  <h2>The Economic Impact of Coding Theory</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Direct Value</h3>
+      <p class="small"><span class="accent">Mobile industry:</span> LDPC/Polar in 5G enables ~$800B/year mobile ecosystem</p>
+      <p class="small fragment"><span class="accent3">Storage:</span> LDPC enables QLC flash — 4x density, saving billions in SSD costs</p>
+      <p class="small fragment"><span class="accent2">Cloud:</span> Erasure coding saves ~50% storage costs vs replication</p>
+      <p class="small fragment"><span class="accent4">Satellites:</span> Better codes = same performance from cheaper/smaller hardware</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Indirect Value</h3>
+      <p class="small">Coding theory enables the digital economy itself. Without error-correcting codes:</p>
+      <ul class="small">
+        <li class="fragment">No reliable wireless communication</li>
+        <li class="fragment">No high-density storage (SSD, HDD)</li>
+        <li class="fragment">No deep space exploration</li>
+        <li class="fragment">No streaming video</li>
+        <li class="fragment">No cloud computing at scale</li>
+      </ul>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Coding theory is among the most commercially impactful branches of mathematics in human history — rivaling calculus and statistics in economic contribution.</p>
+  </div>
+</section>
+
+<!-- Slide 26: Key Takeaways & Further Reading -->
+<section>
+  <h2>Key Takeaways &amp; Further Reading</h2>
+  <span class="badge badge-history">History</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Core Insights</h3>
+        <p class="small accent">1. Every digital system uses error-correcting codes — they're the invisible foundation.</p>
+        <p class="small fragment accent3">2. The right code depends on channel, block length, latency, and throughput requirements.</p>
+        <p class="small fragment accent2">3. We've nearly closed the gap to Shannon's limit — but new challenges (quantum, DNA) await.</p>
+        <p class="small fragment accent4">4. Coding theory continuously evolves — 5G uses codes invented in 2009 (polar) and rediscovered in 1996 (LDPC).</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Further Reading</h3>
+        <p class="small"><span class="accent">Textbooks:</span></p>
+        <p class="tiny">Richardson & Urbanke, "Modern Coding Theory" (LDPC, turbo)</p>
+        <p class="tiny">Lin & Costello, "Error Control Coding" (comprehensive)</p>
+        <p class="tiny">Arikan, "Channel Polarization" (original polar paper)</p>
+        <p class="small fragment" style="margin-top: 0.5em;"><span class="accent3">Standards:</span></p>
+        <p class="tiny">3GPP TS 38.212 (5G NR coding)</p>
+        <p class="tiny">IEEE 802.11ax (Wi-Fi 6 LDPC)</p>
+        <p class="tiny">ETSI EN 302 307 (DVB-S2)</p>
+        <p class="small fragment" style="margin-top: 0.5em;"><span class="accent2">Online:</span></p>
+        <p class="tiny">errorcorrectionzoo.org — catalog of known codes</p>
+      </div>
+    </div>
+  </div>
+  <div class="fragment" style="text-align: center; margin-top: 0.5em;">
+    <p class="small dim">End of Coding Theory Series. Thank you for following along.</p>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  transition: 'slide',
+  slideNumber: 'c/t',
+  plugins: [RevealHighlight]
+});
+
+function fixSlides() {
+  document.querySelectorAll('.reveal .slides section').forEach(s => {
+    s.style.textAlign = 'left';
+  });
+}
+fixSlides();
+Reveal.on('ready', fixSlides);
+Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

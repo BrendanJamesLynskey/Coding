@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convolutional Codes & Viterbi Decoding — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+.math-block { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+.trellis-node { display: inline-block; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--accent); text-align: center; line-height: 28px; font-size: 0.65em; font-weight: 700; }
+.trellis-node.active { background: var(--accent); color: #0a0a0f; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+    <div class="series-tag">Coding Theory Series — 06</div>
+    <h1 class="title-gradient">Convolutional Codes &amp; Viterbi Decoding</h1>
+    <p style="font-size:0.7em; color: var(--dim); margin-top:0.5em;">Memory-based encoding, trellis representations, and the algorithm that reached the edge of the solar system</p>
+    <div style="margin-top:1.5em;">
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <span class="badge badge-history">History</span>
+        <span class="badge badge-app">Applications</span>
+    </div>
+    <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+    <h2>Roadmap</h2>
+    <div class="grid-3">
+        <div class="panel fragment">
+            <h3>Origins</h3>
+            <p class="small">Elias (1955), Viterbi (1967), history and motivation</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Encoder</h3>
+            <p class="small">Shift registers, generator polynomials, state machines</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Representations</h3>
+            <p class="small">State diagrams, trellis diagrams, code trees</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Viterbi Algorithm</h3>
+            <p class="small">Path metrics, branch metrics, survivor paths, trace-back</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Advanced Topics</h3>
+            <p class="small">Soft decisions, puncturing, sequential decoding</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Applications</h3>
+            <p class="small">Deep space, GSM, WiFi, modems — everywhere!</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 3: History -->
+<section>
+    <h2>Historical Origins</h2>
+    <span class="badge badge-history">History</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel fragment">
+            <h3>Peter Elias (1955)</h3>
+            <p class="small">At MIT, Elias introduced convolutional codes as an alternative to block codes. Unlike block codes that operate on fixed-size message blocks, convolutional codes process data as a <span class="accent">continuous stream</span>.</p>
+            <p class="small dim">Elias was motivated by the impracticality of achieving Shannon's capacity with block codes of the lengths available at the time.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Andrew Viterbi (1967)</h3>
+            <p class="small">At UCLA/Linkabit, Viterbi invented the decoding algorithm that bears his name. Originally described for decoding convolutional codes, the <span class="accent">Viterbi algorithm</span> is now recognized as a general solution for finding the most likely sequence of hidden states.</p>
+            <p class="small dim">Viterbi later co-founded Qualcomm. The algorithm is used in speech recognition, DNA sequence analysis, and more.</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Impact:</strong> Convolutional codes + Viterbi decoding became the standard for reliable communication in space, cellular, and data networks for over 40 years.
+    </div>
+</section>
+
+<!-- Slide 4: Block vs Convolutional -->
+<section>
+    <h2>Block Codes vs. Convolutional Codes</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <table>
+            <tr>
+                <th>Property</th>
+                <th>Block Codes</th>
+                <th>Convolutional Codes</th>
+            </tr>
+            <tr class="fragment">
+                <td>Input</td>
+                <td>Fixed k-bit blocks</td>
+                <td>Continuous bit stream</td>
+            </tr>
+            <tr class="fragment">
+                <td>Memory</td>
+                <td>None (memoryless)</td>
+                <td>Depends on previous m inputs</td>
+            </tr>
+            <tr class="fragment">
+                <td>Encoding</td>
+                <td>Matrix multiplication</td>
+                <td>Shift register + XOR</td>
+            </tr>
+            <tr class="fragment">
+                <td>Output</td>
+                <td>n-bit codewords</td>
+                <td>n bits per input bit (continuous)</td>
+            </tr>
+            <tr class="fragment">
+                <td>Decoding</td>
+                <td>Syndrome, algebraic</td>
+                <td>Viterbi (trellis search)</td>
+            </tr>
+            <tr class="fragment">
+                <td>Latency</td>
+                <td>One block delay</td>
+                <td>5× constraint length typical</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>Key insight:</strong> Convolutional codes spread redundancy across the bit stream rather than within fixed blocks, enabling better performance at the same rate.
+    </div>
+</section>
+
+<!-- Slide 5: Encoder Structure -->
+<section>
+    <h2>Encoder Structure</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Shift Register Encoder</h3>
+        <div class="flow-row fragment">
+            <div class="flow-node" style="background:rgba(100,255,218,0.1);">Input<br><span class="accent">u<sub>t</sub></span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Register<br><span class="accent3">s<sub>1</sub></span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Register<br><span class="accent3">s<sub>2</sub></span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent2);">XOR<br><span class="accent2">Outputs</span></div>
+        </div>
+    </div>
+    <div class="cols" style="margin-top:0.5em;">
+        <div class="card fragment">
+            <h3>Parameters</h3>
+            <ul class="small">
+                <li><span class="accent">Rate R = k/n:</span> k input bits produce n output bits</li>
+                <li><span class="accent">Constraint length K:</span> number of shift register stages + 1 (total memory)</li>
+                <li><span class="accent">Memory m = K - 1:</span> number of delay elements</li>
+                <li><span class="accent">States:</span> 2<sup>m</sup> possible encoder states</li>
+            </ul>
+        </div>
+        <div class="card fragment">
+            <h3>Generator Polynomials</h3>
+            <p class="small">Each output is a mod-2 sum of selected register taps:</p>
+            <div class="math-block">
+                g<sup>(1)</sup> = (1, 1, 1) &rarr; output 1 = u ⊕ s₁ ⊕ s₂<br>
+                g<sup>(2)</sup> = (1, 0, 1) &rarr; output 2 = u ⊕ s₂
+            </div>
+            <p class="small dim">Octal notation: g₁ = 7, g₂ = 5 (common rate-1/2 code)</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 6: Generator Polynomials -->
+<section>
+    <h2>Generator Polynomials</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Polynomial Representation</h3>
+        <p class="small fragment">The encoder output can be described as convolution (hence the name!):</p>
+        <div class="formula fragment">
+            v<sup>(j)</sup>(D) = u(D) · g<sup>(j)</sup>(D) &nbsp;&nbsp; (mod 2)
+        </div>
+        <p class="small fragment">where D is the delay operator (D-transform).</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Example: Rate 1/2, K=3 Encoder (NASA Standard)</h3>
+        <div class="grid-2">
+            <div class="card">
+                <p class="small"><span class="accent">g₁(D) = 1 + D + D²</span></p>
+                <p class="tiny dim">Binary: 111, Octal: 7</p>
+                <p class="small">Taps: input, s₁, s₂</p>
+            </div>
+            <div class="card">
+                <p class="small"><span class="accent">g₂(D) = 1 + D²</span></p>
+                <p class="tiny dim">Binary: 101, Octal: 5</p>
+                <p class="small">Taps: input, s₂ only</p>
+            </div>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Convention:</strong> Generator polynomials are often written in octal: (7, 5) for K=3 rate-1/2. NASA's Voyager used (171, 133) — a K=7 rate-1/2 code.
+    </div>
+</section>
+
+<!-- Slide 7: State Diagram -->
+<section>
+    <h2>State Diagram</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Rate 1/2, K=3 Encoder — States: {00, 01, 10, 11}</h3>
+        <div class="grid-2 fragment">
+            <div class="card" style="text-align:center;">
+                <p class="small"><strong>State Transitions</strong></p>
+                <table>
+                    <tr><th>Current</th><th>Input 0</th><th>Output</th><th>Input 1</th><th>Output</th></tr>
+                    <tr><td><span class="accent">00</span></td><td>00</td><td>00</td><td>10</td><td>11</td></tr>
+                    <tr><td><span class="accent">01</span></td><td>00</td><td>11</td><td>10</td><td>00</td></tr>
+                    <tr><td><span class="accent">10</span></td><td>01</td><td>10</td><td>11</td><td>01</td></tr>
+                    <tr><td><span class="accent">11</span></td><td>01</td><td>01</td><td>11</td><td>10</td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <p class="small"><strong>Reading the Table</strong></p>
+                <ul class="small">
+                    <li class="fragment">State = contents of shift registers (s₁s₂)</li>
+                    <li class="fragment">Input 0: new bit is 0, shift right</li>
+                    <li class="fragment">Input 1: new bit is 1, shift right</li>
+                    <li class="fragment">Output: computed from taps via XOR</li>
+                </ul>
+                <p class="small fragment dim">The state diagram is a finite state machine with 2<sup>m</sup> = 4 states.</p>
+            </div>
+        </div>
+    </div>
+    <div class="warning fragment">
+        <strong>State diagram vs code tree:</strong> State diagram shows all possible transitions compactly. The code tree expands every path — exponential growth but shows complete history.
+    </div>
+</section>
+
+<!-- Slide 8: Trellis Diagram -->
+<section>
+    <h2>Trellis Diagram</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Key to Viterbi Decoding</h3>
+        <p class="small fragment">The trellis <span class="accent">unfolds the state diagram in time</span>. Each column represents one time step; each node represents a state.</p>
+    </div>
+    <div class="panel fragment" style="text-align:center;">
+        <p class="small dim">Time: &nbsp; t=0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t=1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t=2 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t=3</p>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.65em; line-height: 2.2;">
+            <p>State 00: &nbsp; <span class="trellis-node active">00</span> ——<span class="dim">00</span>—→ <span class="trellis-node active">00</span> ——<span class="dim">00</span>—→ <span class="trellis-node">00</span> ——<span class="dim">00</span>—→ <span class="trellis-node">00</span></p>
+            <p>State 01: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">01</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">01</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">01</span></p>
+            <p>State 10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">10</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">10</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">10</span></p>
+            <p>State 11: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">11</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">11</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="trellis-node">11</span></p>
+        </div>
+        <p class="tiny dim">Solid lines = input 0, dashed = input 1. Labels = output bits.</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>Crucial property:</strong> Many paths merge at each state. At most 2<sup>m</sup> surviving paths need to be tracked — this is what makes Viterbi tractable!
+    </div>
+</section>
+
+<!-- Slide 9: Code Rate and Constraint Length -->
+<section>
+    <h2>Code Rate &amp; Constraint Length</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="grid-2" style="margin-top:1em;">
+        <div class="panel fragment">
+            <h3>Code Rate R = k/n</h3>
+            <p class="small">Common rates:</p>
+            <table>
+                <tr><th>Rate</th><th>Meaning</th><th>Use Case</th></tr>
+                <tr><td><span class="accent">1/2</span></td><td>1 in → 2 out</td><td>Deep space, WiFi</td></tr>
+                <tr><td><span class="accent">1/3</span></td><td>1 in → 3 out</td><td>Very noisy channels</td></tr>
+                <tr><td><span class="accent">2/3</span></td><td>2 in → 3 out</td><td>Bandwidth-limited</td></tr>
+                <tr><td><span class="accent">3/4</span></td><td>3 in → 4 out</td><td>Punctured codes</td></tr>
+            </table>
+        </div>
+        <div class="panel fragment">
+            <h3>Constraint Length K</h3>
+            <p class="small">K determines the encoder's memory and code strength:</p>
+            <table>
+                <tr><th>K</th><th>States</th><th>Viterbi Complexity</th></tr>
+                <tr><td>3</td><td>4</td><td>Trivial</td></tr>
+                <tr><td>5</td><td>16</td><td>Easy</td></tr>
+                <tr><td>7</td><td>64</td><td>Standard (Voyager)</td></tr>
+                <tr><td>9</td><td>256</td><td>Moderate</td></tr>
+                <tr><td>14</td><td>8192</td><td>Near practical limit</td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="warning fragment">
+        <strong>Complexity trade-off:</strong> Viterbi decoder complexity grows as O(2<sup>K</sup>) — exponential in constraint length! This is why K rarely exceeds ~10 in practice.
+    </div>
+</section>
+
+<!-- Slide 10: Free Distance -->
+<section>
+    <h2>Free Distance</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Key Performance Metric</h3>
+        <p class="small fragment">The <span class="accent">free distance</span> d<sub>free</sub> is the minimum Hamming distance between any two codeword sequences that start and end in the same state:</p>
+        <div class="formula fragment">
+            d<sub>free</sub> = min { d(v, v') : v ≠ v', both start and end at state 0 }
+        </div>
+        <p class="small fragment">Equivalently: the minimum weight path that diverges from and re-merges with the all-zeros path.</p>
+    </div>
+    <div class="grid-2 fragment">
+        <div class="card">
+            <h3>Error Correction Capability</h3>
+            <div class="formula">t = ⌊(d<sub>free</sub> - 1) / 2⌋</div>
+            <p class="small">For the (7,5) code: d<sub>free</sub> = 5, so t = 2.</p>
+        </div>
+        <div class="card">
+            <h3>Common Codes</h3>
+            <table class="small">
+                <tr><th>Code</th><th>d<sub>free</sub></th></tr>
+                <tr><td>R=1/2, K=3 (7,5)</td><td>5</td></tr>
+                <tr><td>R=1/2, K=5 (23,35)</td><td>7</td></tr>
+                <tr><td>R=1/2, K=7 (171,133)</td><td>10</td></tr>
+                <tr><td>R=1/3, K=3 (7,7,5)</td><td>8</td></tr>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 11: Viterbi Algorithm Overview -->
+<section>
+    <h2>The Viterbi Algorithm</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Maximum Likelihood Sequence Estimation</h3>
+        <p class="small fragment">Given received sequence <strong>r</strong>, find the most likely transmitted sequence <strong>v</strong>:</p>
+        <div class="formula fragment">
+            v̂ = argmax<sub>v</sub> P(r | v) = argmin<sub>v</sub> d(r, v)
+        </div>
+    </div>
+    <div class="flow-row fragment" style="margin-top:1em;">
+        <div class="flow-node" style="background:rgba(108,92,231,0.15);">Initialize<br><span class="accent4">metrics = 0</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Compute<br><span class="accent">branch metrics</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(255,217,61,0.1);">Add-Compare<br><span class="accent3">Select (ACS)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(255,107,157,0.1);">Store<br><span class="accent2">survivors</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Trace<br><span class="accent">Back</span></div>
+    </div>
+    <div class="key-point fragment" style="margin-top:1em;">
+        <strong>Key insight:</strong> At each state, only the BEST path (survivor) needs to be kept. All other paths merging at that state are provably suboptimal and can be discarded.
+    </div>
+</section>
+
+<!-- Slide 12: Branch Metrics -->
+<section>
+    <h2>Branch &amp; Path Metrics</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel">
+            <h3>Branch Metric</h3>
+            <p class="small fragment">Distance between received bits and expected output on each trellis branch:</p>
+            <div class="formula fragment">
+                BM = d<sub>H</sub>(received, expected)
+            </div>
+            <p class="small fragment"><strong>Hard decision:</strong> Hamming distance (count differing bits)</p>
+            <p class="small fragment"><strong>Soft decision:</strong> Euclidean distance or correlation metric</p>
+        </div>
+        <div class="panel">
+            <h3>Path Metric</h3>
+            <p class="small fragment">Cumulative metric along a path through the trellis:</p>
+            <div class="formula fragment">
+                PM(state, t) = PM(prev, t-1) + BM
+            </div>
+            <p class="small fragment">The path with the <span class="accent">smallest cumulative metric</span> is the most likely (for hard decisions).</p>
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>Add-Compare-Select (ACS)</h3>
+        <p class="small">For each state at time t, exactly 2 paths arrive. <span class="accent">Add</span> branch metric to each predecessor's path metric, <span class="accent">compare</span> the two candidates, <span class="accent">select</span> the survivor (lower metric wins).</p>
+    </div>
+</section>
+
+<!-- Slide 13: Viterbi Worked Example Part 1 -->
+<section>
+    <h2>Viterbi: Worked Example (1/3)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Setup: Rate 1/2, K=3, generators (7,5)</h3>
+        <p class="small fragment"><span class="accent">Transmitted message:</span> u = [1, 1, 0, 1, 0]</p>
+        <p class="small fragment"><span class="accent">Encoded output:</span> v = [11, 10, 01, 00, 01, 11, 00, 00]</p>
+        <p class="small fragment"><span class="accent2">Received with errors:</span> r = [11, <span class="accent2">00</span>, 01, 00, 01, 11, 00, 00]</p>
+        <p class="small fragment dim">(Error in second pair: received 00 instead of 10)</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Step 1: Initialize</h3>
+        <table>
+            <tr><th>State</th><th>Metric at t=0</th></tr>
+            <tr><td><span class="accent">00</span> (start)</td><td>0</td></tr>
+            <tr><td>01, 10, 11</td><td>∞ (impossible)</td></tr>
+        </table>
+    </div>
+    <div class="panel fragment">
+        <h3>Step 2: t=0, received r₁ = 11</h3>
+        <p class="small">From state 00: input 0 → output 00, BM = d(11,00) = 2 → state 00, PM = 2</p>
+        <p class="small">From state 00: input 1 → output 11, BM = d(11,11) = 0 → state 10, PM = 0</p>
+    </div>
+</section>
+
+<!-- Slide 14: Viterbi Worked Example Part 2 -->
+<section>
+    <h2>Viterbi: Worked Example (2/3)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Step 3: t=1, received r₂ = 00</h3>
+        <table class="fragment">
+            <tr><th>To State</th><th>From</th><th>Path Metric</th><th>Survivor?</th></tr>
+            <tr><td>00</td><td>00 (input 0, out 00)</td><td>2 + d(00,00) = 2</td><td class="accent">Yes</td></tr>
+            <tr><td>00</td><td>01 (input 0, out 11)</td><td>∞</td><td>No</td></tr>
+            <tr><td>01</td><td>10 (input 0, out 10)</td><td>0 + d(00,10) = 1</td><td class="accent">Yes</td></tr>
+            <tr><td>10</td><td>00 (input 1, out 11)</td><td>2 + d(00,11) = 4</td><td>No</td></tr>
+            <tr><td>10</td><td>01 (input 1, out 00)</td><td>∞</td><td>—</td></tr>
+            <tr><td>10</td><td>—</td><td>0 + d(00,11) = 2</td><td class="accent">Yes (tie)</td></tr>
+            <tr><td>11</td><td>10 (input 1, out 01)</td><td>0 + d(00,01) = 1</td><td class="accent">Yes</td></tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>Notice:</strong> Even though there was an error in the received data, the correct path (through state 10) has a competitive metric. The Viterbi algorithm keeps it alive!
+    </div>
+</section>
+
+<!-- Slide 15: Viterbi Worked Example Part 3 -->
+<section>
+    <h2>Viterbi: Worked Example (3/3)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Continuing the ACS process...</h3>
+        <p class="small fragment">After processing all received pairs, each state has a single surviving path and a cumulative path metric.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Trace-Back</h3>
+        <p class="small">Starting from state 00 at the final time step (after tail bits flush the encoder), trace the survivor path backward:</p>
+        <div class="flow-row fragment">
+            <div class="flow-node" style="background:rgba(100,255,218,0.15);">00<br><span class="tiny dim">t=0</span></div>
+            <div class="flow-arrow">&rarr; <span class="tiny accent">1</span></div>
+            <div class="flow-node" style="background:rgba(100,255,218,0.15);">10<br><span class="tiny dim">t=1</span></div>
+            <div class="flow-arrow">&rarr; <span class="tiny accent">1</span></div>
+            <div class="flow-node" style="background:rgba(100,255,218,0.15);">11<br><span class="tiny dim">t=2</span></div>
+            <div class="flow-arrow">&rarr; <span class="tiny accent">0</span></div>
+            <div class="flow-node" style="background:rgba(100,255,218,0.15);">01<br><span class="tiny dim">t=3</span></div>
+            <div class="flow-arrow">&rarr; <span class="tiny accent">1</span></div>
+            <div class="flow-node" style="background:rgba(100,255,218,0.15);">10<br><span class="tiny dim">t=4</span></div>
+            <div class="flow-arrow">&rarr; <span class="tiny accent">0</span></div>
+            <div class="flow-node" style="background:rgba(100,255,218,0.15);">00<br><span class="tiny dim">final</span></div>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Decoded message: [1, 1, 0, 1, 0]</strong> — matches the original! The single error was successfully corrected by the Viterbi algorithm.
+    </div>
+</section>
+
+<!-- Slide 16: Hard vs Soft Decision -->
+<section>
+    <h2>Hard vs. Soft Decision Decoding</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel fragment">
+            <h3>Hard Decision</h3>
+            <p class="small">Demodulator outputs 0 or 1 (binary).</p>
+            <p class="small"><span class="accent">Branch metric:</span> Hamming distance</p>
+            <div class="math-block">BM = Σ |r<sub>i</sub> - v<sub>i</sub>|</div>
+            <p class="small dim">Simpler hardware, but throws away reliability information.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Soft Decision</h3>
+            <p class="small">Demodulator outputs analog values (e.g., 3-bit quantization: 0-7).</p>
+            <p class="small"><span class="accent">Branch metric:</span> Euclidean or correlation</p>
+            <div class="math-block">BM = Σ (r<sub>i</sub> - v<sub>i</sub>)²</div>
+            <p class="small dim">More complex but preserves channel reliability.</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Soft decision gain:</strong> approximately <span class="accent">2 dB</span> improvement over hard decision — equivalent to doubling the transmitter power or halving the distance! This is practically "free" performance.
+    </div>
+    <p class="small fragment dim">Most modern Viterbi decoders use 3-bit (8-level) soft quantization. Diminishing returns beyond 4 bits.</p>
+</section>
+
+<!-- Slide 17: Punctured Convolutional Codes -->
+<section>
+    <h2>Punctured Convolutional Codes</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-app">Applications</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Achieving Higher Rates from a Base Code</h3>
+        <p class="small fragment">Start with a low-rate code (e.g., R=1/2) and periodically <span class="accent">delete (puncture)</span> some output bits to increase the effective rate.</p>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Puncture Pattern Example</h3>
+            <p class="small">Base: R=1/2, K=7</p>
+            <div class="math-block">
+                P = [ 1 1 ]  → R = 2/3<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;[ 1 0 ]<br><br>
+                1 = transmit, 0 = puncture
+            </div>
+            <p class="small dim">Every 2 input bits: transmit 3 of 4 output bits.</p>
+        </div>
+        <div class="card">
+            <h3>Advantages</h3>
+            <ul class="small">
+                <li class="fragment"><span class="accent">Flexible rate:</span> one encoder/decoder supports many rates</li>
+                <li class="fragment"><span class="accent">Rate-compatible:</span> can adapt to channel conditions</li>
+                <li class="fragment"><span class="accent">Used in:</span> WiFi (802.11), LTE, DVB</li>
+            </ul>
+            <p class="small fragment dim">Decoder inserts "erasures" at punctured positions and runs standard Viterbi.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 18: Applications — Deep Space -->
+<section>
+    <h2>Applications: Deep Space</h2>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-history">History</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Convolutional Codes in Space Exploration</h3>
+        <div class="grid-2">
+            <div class="card fragment">
+                <p class="small"><span class="accent3">Voyager 1 &amp; 2 (1977)</span></p>
+                <p class="small">R=1/2, K=7 convolutional code (171, 133)</p>
+                <p class="small">Later concatenated with RS outer code</p>
+                <p class="small dim">Still transmitting from interstellar space at 160 bps!</p>
+            </div>
+            <div class="card fragment">
+                <p class="small"><span class="accent3">Mars Rovers (2004+)</span></p>
+                <p class="small">Concatenated turbo code + convolutional inner code</p>
+                <p class="small">E<sub>b</sub>/N<sub>0</sub> as low as 0.8 dB from Shannon limit</p>
+            </div>
+            <div class="card fragment">
+                <p class="small"><span class="accent3">New Horizons (2015)</span></p>
+                <p class="small">K=15 convolutional code for Pluto flyby</p>
+                <p class="small">Signal power: 10<sup>-16</sup> watts at Earth!</p>
+            </div>
+            <div class="card fragment">
+                <p class="small"><span class="accent3">James Webb (2022)</span></p>
+                <p class="small">Modern LDPC codes, but heritage from convolutional era</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 19: Applications — Terrestrial -->
+<section>
+    <h2>Applications: Terrestrial Communications</h2>
+    <span class="badge badge-app">Applications</span>
+    <div class="grid-2" style="margin-top:1em;">
+        <div class="panel fragment">
+            <h3>GSM Cellular (2G)</h3>
+            <p class="small">R=1/2, K=5 convolutional code</p>
+            <p class="small">Different rates for voice (R=1/2) and data (R=1/3)</p>
+            <p class="small dim">Deployed 1991, billions of phones</p>
+        </div>
+        <div class="panel fragment">
+            <h3>WiFi (802.11a/g/n)</h3>
+            <p class="small">R=1/2, K=7 base code (171, 133)</p>
+            <p class="small">Punctured to R=2/3, 3/4, 5/6</p>
+            <p class="small dim">Viterbi decoder in every WiFi chip</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Dial-Up Modems (V.32/V.34)</h3>
+            <p class="small">Trellis-coded modulation (TCM)</p>
+            <p class="small">Ungerboeck's coding + modulation</p>
+            <p class="small dim">Enabled 28.8/33.6 kbps over phone lines</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Digital TV (DVB-T)</h3>
+            <p class="small">Convolutional inner code + RS outer code</p>
+            <p class="small">Multiple rate options for different conditions</p>
+            <p class="small dim">Replaced by LDPC in DVB-T2</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 20: Sequential Decoding -->
+<section>
+    <h2>Sequential Decoding</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>An Alternative to Viterbi</h3>
+        <p class="small fragment">For large constraint lengths (K &gt; 15), Viterbi is impractical. Sequential decoding explores the trellis <span class="accent">selectively</span> rather than exhaustively.</p>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Fano Algorithm (1963)</h3>
+            <ul class="small">
+                <li>Explores code tree depth-first</li>
+                <li>Uses a running threshold</li>
+                <li>Moves forward if metric improves</li>
+                <li>Backs up and tries alternatives otherwise</li>
+                <li>Adjusts threshold dynamically</li>
+            </ul>
+            <p class="small dim">Variable computation time — fast when channel is good.</p>
+        </div>
+        <div class="card">
+            <h3>Stack Algorithm (Zigangirov-Jelinek)</h3>
+            <ul class="small">
+                <li>Maintains a sorted stack of partial paths</li>
+                <li>Always extends the best path</li>
+                <li>Simpler logic than Fano</li>
+                <li>Requires more memory (stack grows)</li>
+            </ul>
+            <p class="small dim">Guaranteed to find ML path eventually.</p>
+        </div>
+    </div>
+    <div class="warning fragment">
+        <strong>Average vs. worst case:</strong> Sequential decoders have variable computation — occasional "computational blowup" when noise is severe. Not suitable for hard real-time systems.
+    </div>
+</section>
+
+<!-- Slide 21: Python Encoder -->
+<section>
+    <h2>Python: Convolutional Encoder</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python">class ConvolutionalEncoder:
+    """Rate 1/n convolutional encoder with K constraint length."""
+    def __init__(self, generators, K):
+        """
+        generators: list of generator polynomials (octal)
+        K: constraint length
+        """
+        self.generators = [int(oct_str) for oct_str in generators]
+        self.K = K
+        self.n = len(generators)
+        self.state = 0  # shift register state
+
+    def _octal_to_taps(self, octal_val):
+        """Convert octal generator to binary tap positions."""
+        binary = bin(int(str(octal_val), 8))[2:]
+        return [int(b) for b in binary.zfill(self.K)]
+
+    def encode_bit(self, input_bit):
+        """Encode single input bit, return n output bits."""
+        # Shift input into register
+        combined = (input_bit << (self.K - 1)) | self.state
+        outputs = []
+        for gen in self.generators:
+            taps = self._octal_to_taps(gen)
+            out = 0
+            for i, tap in enumerate(taps):
+                if tap:
+                    out ^= (combined >> (self.K - 1 - i)) & 1
+            outputs.append(out)
+        # Update state
+        self.state = (combined >> 1) & ((1 << (self.K-1)) - 1)
+        return outputs
+
+    def encode(self, message):
+        """Encode full message with tail bits."""
+        self.state = 0
+        output = []
+        # Encode message bits
+        for bit in message:
+            output.extend(self.encode_bit(bit))
+        # Add tail bits to flush encoder to state 0
+        for _ in range(self.K - 1):
+            output.extend(self.encode_bit(0))
+        return output</code></pre>
+</section>
+
+<!-- Slide 22: Python Encoder Demo -->
+<section>
+    <h2>Python: Encoder Demo &amp; Test</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python"># Create rate 1/2, K=3 encoder with generators (7, 5)
+encoder = ConvolutionalEncoder(['7', '5'], K=3)
+
+# Encode a message
+message = [1, 1, 0, 1, 0]
+encoded = encoder.encode(message)
+print(f"Message:  {message}")
+print(f"Encoded:  {encoded}")
+# Output: [1,1, 1,0, 0,1, 0,0, 0,1, 1,1, 0,0]
+
+# Show output as pairs
+pairs = [(encoded[i], encoded[i+1]) for i in range(0, len(encoded), 2)]
+print(f"As pairs: {pairs}")
+# [(1,1), (1,0), (0,1), (0,0), (0,1), (1,1), (0,0)]
+
+# Verify by tracing state machine manually
+encoder2 = ConvolutionalEncoder(['7', '5'], K=3)
+print("\nStep-by-step trace:")
+print(f"{'Time':>4} {'Input':>5} {'State':>7} {'Output':>7}")
+for i, bit in enumerate(message + [0, 0]):  # +tail
+    state_before = format(encoder2.state, '02b')
+    out = encoder2.encode_bit(bit)
+    print(f"{i:>4} {bit:>5} {state_before:>7} {''.join(map(str,out)):>7}")
+
+# Verify: rate = len(message) / len(encoded)
+rate = len(message) / (len(message) + encoder.K - 1) / encoder.n
+print(f"\nEffective rate: {len(message)}/{len(encoded)} "
+      f"= {len(message)/len(encoded):.3f}")</code></pre>
+</section>
+
+<!-- Slide 23: Viterbi Decoder Python -->
+<section>
+    <h2>Python: Viterbi Decoder</h2>
+    <span class="badge badge-code">Code</span>
+    <pre style="font-size:0.42em;"><code class="language-python">def viterbi_decode(received, generators, K):
+    """Hard-decision Viterbi decoder for rate 1/n convolutional code."""
+    n_outputs = len(generators)
+    n_states = 1 << (K - 1)
+    n_steps = len(received) // n_outputs
+
+    # Precompute branch outputs for each state and input
+    enc = ConvolutionalEncoder([str(g) for g in generators], K)
+    branch_output = {}
+    for state in range(n_states):
+        for inp in [0, 1]:
+            enc.state = state
+            out = enc.encode_bit(inp)
+            next_state = enc.state
+            branch_output[(state, inp)] = (next_state, out)
+
+    # Initialize path metrics
+    INF = float('inf')
+    path_metric = [INF] * n_states
+    path_metric[0] = 0
+    survivor = [[[] for _ in range(n_states)] for _ in range(n_steps)]
+
+    # Forward pass: ACS
+    for t in range(n_steps):
+        rx = received[t * n_outputs : (t + 1) * n_outputs]
+        new_metric = [INF] * n_states
+        for state in range(n_states):
+            if path_metric[state] == INF:
+                continue
+            for inp in [0, 1]:
+                ns, out = branch_output[(state, inp)]
+                bm = sum(r != o for r, o in zip(rx, out))
+                candidate = path_metric[state] + bm
+                if candidate < new_metric[ns]:
+                    new_metric[ns] = candidate
+                    survivor[t][ns] = survivor[max(0,t-1)][state] + [inp] \
+                                       if t > 0 else [inp]
+        path_metric = new_metric
+
+    # Trace back from state 0
+    return survivor[n_steps - 1][0][: -(K-1)]  # remove tail bits</code></pre>
+</section>
+
+<!-- Slide 24: Performance Comparison -->
+<section>
+    <h2>Performance Characteristics</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-app">Applications</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>BER vs E<sub>b</sub>/N<sub>0</sub> Comparison</h3>
+        <table>
+            <tr>
+                <th>Scheme</th>
+                <th>BER = 10<sup>-5</sup></th>
+                <th>Coding Gain</th>
+            </tr>
+            <tr class="fragment">
+                <td>Uncoded BPSK</td>
+                <td>9.6 dB</td>
+                <td>—</td>
+            </tr>
+            <tr class="fragment">
+                <td>R=1/2 K=3 Hard Viterbi</td>
+                <td>6.5 dB</td>
+                <td>3.1 dB</td>
+            </tr>
+            <tr class="fragment">
+                <td>R=1/2 K=7 Hard Viterbi</td>
+                <td>5.2 dB</td>
+                <td>4.4 dB</td>
+            </tr>
+            <tr class="fragment">
+                <td>R=1/2 K=7 Soft Viterbi</td>
+                <td>3.3 dB</td>
+                <td><span class="accent">6.3 dB</span></td>
+            </tr>
+            <tr class="fragment">
+                <td>R=1/2 K=7 Soft + RS outer</td>
+                <td>2.5 dB</td>
+                <td><span class="accent">7.1 dB</span></td>
+            </tr>
+            <tr class="fragment">
+                <td>Shannon limit R=1/2</td>
+                <td>0.2 dB</td>
+                <td>9.4 dB</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>Concatenated coding</strong> (Viterbi inner + RS outer) was the workhorse of deep space communication from 1977 to the early 2000s, operating within ~2 dB of Shannon's limit.
+    </div>
+</section>
+
+<!-- Slide 25: Summary -->
+<section>
+    <h2>Summary</h2>
+    <div class="grid-2" style="margin-top:0.8em;">
+        <div class="panel fragment">
+            <h3>Convolutional Codes</h3>
+            <ul class="small">
+                <li>Memory-based encoding via shift registers</li>
+                <li>Characterized by rate R, constraint length K</li>
+                <li>d<sub>free</sub> determines error correction power</li>
+                <li>Trellis representation enables efficient decoding</li>
+            </ul>
+        </div>
+        <div class="panel fragment">
+            <h3>Viterbi Algorithm</h3>
+            <ul class="small">
+                <li>Optimal (ML) sequence decoder</li>
+                <li>Complexity: O(2<sup>K</sup>) per time step</li>
+                <li>Soft decision: ~2 dB gain over hard</li>
+                <li>One of the most important algorithms in history</li>
+            </ul>
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>Legacy &amp; Impact</h3>
+        <div class="flow-row">
+            <div class="flow-node">Voyager<br><span class="tiny accent">1977</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">GSM<br><span class="tiny accent">1991</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">WiFi<br><span class="tiny accent">1999</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">LTE<br><span class="tiny accent">2009</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Turbo/LDPC<br><span class="tiny accent2">successors</span></div>
+        </div>
+    </div>
+    <div class="key-point fragment" style="margin-top:0.5em;">
+        <strong>Next up:</strong> BCH codes — powerful algebraic block codes built on finite field theory.
+    </div>
+    <div class="nav-hint fragment">End of Part 06 &bull; Convolutional Codes &amp; Viterbi Decoding</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+    width: 1200,
+    height: 900,
+    margin: 0.02,
+    transition: 'slide',
+    slideNumber: 'c/t',
+    plugins: [ RevealHighlight ]
+});
+
+function fixSlides() {
+    document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+        if (!slide.getAttribute('data-background-color')) {
+            slide.setAttribute('data-background-color', '#0a0a0f');
+        }
+    });
+}
+fixSlides();
+</script>
+</body>
+</html>

@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turbo Codes & Iterative Decoding — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+  <div class="series-tag">Coding Theory Series — 09</div>
+  <h1 class="title-gradient">Turbo Codes &<br>Iterative Decoding</h1>
+  <p style="font-size:0.7em; color: var(--dim); max-width: 700px;">The near-Shannon-limit codes that revolutionized digital communications and proved that Shannon's theoretical limits were practically achievable.</p>
+  <div style="margin-top: 1em;">
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-history">History</span>
+    <span class="badge badge-app">Applications</span>
+    <span class="badge badge-standards">Standards</span>
+  </div>
+  <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="grid-3">
+    <div class="panel fragment">
+      <h3>Origins</h3>
+      <p class="small">The 1993 ICC paper that shocked the world and the history behind parallel concatenation.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Architecture</h3>
+      <p class="small">RSC encoders, interleavers, and the parallel concatenated structure.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Decoding</h3>
+      <p class="small">Iterative MAP decoding, extrinsic information, and the turbo principle.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Analysis</h3>
+      <p class="small">EXIT charts, convergence, waterfall/floor regions, and puncturing.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Applications</h3>
+      <p class="small">3G, 4G, deep space, satellite — turbo codes in the real world.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Legacy</h3>
+      <p class="small">How turbo codes transformed coding theory and inspired modern codes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: The ICC 1993 Paper -->
+<section>
+  <h2>The Paper That Shocked the World</h2>
+  <span class="badge badge-history">History</span>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel">
+        <p class="small"><span class="accent">ICC 1993, Geneva</span> — Claude Berrou, Alain Glavieux, and Punya Thitimajshima presented:</p>
+        <p class="small" style="font-style: italic; color: var(--accent3);">"Near Shannon Limit Error-Correcting Coding and Decoding: Turbo-Codes"</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">Achieved BER = 10<sup>-5</sup> at E<sub>b</sub>/N<sub>0</sub> = <span class="accent">0.7 dB</span> from Shannon limit — with a practical decoder!</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">Initial reaction: disbelief. Many attendees assumed the results were wrong. It took months of independent verification.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Key Parameters</h3>
+        <table>
+          <tr><td>Rate</td><td class="accent">1/2</td></tr>
+          <tr><td>Block length</td><td>65,536 bits</td></tr>
+          <tr><td>Iterations</td><td>18</td></tr>
+          <tr><td>E<sub>b</sub>/N<sub>0</sub></td><td>0.7 dB from capacity</td></tr>
+          <tr><td>Decoder</td><td>Iterative MAP</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: Shannon Limit Context -->
+<section>
+  <h2>Near-Shannon-Limit Performance</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="formula fragment">
+    C = W log<sub>2</sub>(1 + SNR) &nbsp; [Shannon Capacity]
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>What "Near Shannon" Means</h3>
+        <p class="small">For a rate-1/2 code on AWGN, Shannon limit is E<sub>b</sub>/N<sub>0</sub> = <span class="accent">0.187 dB</span>.</p>
+        <p class="small fragment">Before turbo codes, the best practical codes operated <span class="accent2">2-3 dB</span> away from this limit.</p>
+        <p class="small fragment">Turbo codes achieved <span class="accent">~0.7 dB</span> gap — an extraordinary leap.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Gap to Shannon Limit</h3>
+        <table>
+          <tr><th>Code</th><th>Gap (dB)</th></tr>
+          <tr><td>Uncoded BPSK</td><td class="accent2">~9.6</td></tr>
+          <tr><td>Convolutional (K=7)</td><td>~3.0</td></tr>
+          <tr><td>Concatenated RS+Conv</td><td>~2.0</td></tr>
+          <tr><td class="accent">Turbo (1993)</td><td class="accent">~0.7</td></tr>
+          <tr><td>Turbo (optimized)</td><td class="accent">~0.3</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: PCCC Concept -->
+<section>
+  <h2>Parallel Concatenated Convolutional Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">A turbo code is a <span class="accent">parallel concatenation</span> of two (or more) constituent convolutional encoders, separated by an interleaver.</p>
+  </div>
+  <div class="flow-row fragment" style="margin: 1.5em 0;">
+    <div class="flow-node" style="border-color: var(--accent3);">Input<br>Data u</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">RSC<br>Encoder 1</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Parity p<sub>1</sub></div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.5em 0;">
+    <div class="flow-node" style="border-color: var(--accent3);">Input<br>Data u</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent4);">Interleaver &pi;</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">RSC<br>Encoder 2</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Parity p<sub>2</sub></div>
+  </div>
+  <div class="fragment panel small" style="margin-top: 0.8em;">
+    <p><span class="accent">Transmitted codeword:</span> [u, p<sub>1</sub>, p<sub>2</sub>] &mdash; systematic bits + two sets of parity bits.</p>
+    <p>Base rate = 1/3 (before puncturing). The systematic nature is crucial for iterative decoding.</p>
+  </div>
+</section>
+
+<!-- Slide 6: RSC Encoders -->
+<section>
+  <h2>Recursive Systematic Convolutional Encoders</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Why Recursive?</h3>
+        <p class="small">Feedback in the encoder creates an <span class="accent">infinite impulse response</span>, ensuring that low-weight inputs produce high-weight outputs.</p>
+        <p class="small fragment">This is key — non-recursive encoders allow low-weight codewords that limit performance.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Why Systematic?</h3>
+        <p class="small">The input bits appear directly in the output. This enables the iterative decoder to exchange <span class="accent">extrinsic information</span> about the same set of information bits.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Standard RSC (rate 1/2, K=4)</h3>
+        <div class="formula small">
+          G(D) = [1, g<sub>1</sub>(D)/g<sub>0</sub>(D)]
+        </div>
+        <p class="small">Typical generators for turbo codes:</p>
+        <table>
+          <tr><th>Standard</th><th>g<sub>0</sub></th><th>g<sub>1</sub></th><th>K</th></tr>
+          <tr><td>3GPP</td><td class="accent">13<sub>8</sub></td><td>15<sub>8</sub></td><td>4</td></tr>
+          <tr><td>CCSDS</td><td>23<sub>8</sub></td><td>33<sub>8</sub></td><td>5</td></tr>
+          <tr><td>DVB-RCS</td><td>13<sub>8</sub></td><td>15<sub>8</sub></td><td>4</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7: RSC Encoder Detail -->
+<section>
+  <h2>RSC Encoder: Internal Structure</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <div class="panel fragment" style="margin-top: 0.8em;">
+    <h3>3GPP Turbo Code RSC (K=4)</h3>
+    <div class="flow-row" style="margin: 0.8em 0;">
+      <div class="flow-node">u<sub>k</sub></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent3);">&oplus;<br><span class="tiny">(+ feedback)</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node">S<sub>0</sub></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node">S<sub>1</sub></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node">S<sub>2</sub></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent3);">&oplus;</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent);">p<sub>k</sub></div>
+    </div>
+  </div>
+  <pre class="fragment"><code class="language-python">def rsc_encode(data, g0=0b1101, g1=0b1111, K=4):
+    """RSC encoder for 3GPP turbo code (octal 13, 15)"""
+    state = 0
+    systematic = []
+    parity = []
+    num_states = K - 1
+
+    for bit in data:
+        # Feedback: XOR input with feedback taps
+        fb = bit
+        for i in range(num_states):
+            if (g0 >> (i + 1)) & 1:
+                fb ^= (state >> i) & 1
+
+        # Parity output
+        p = fb
+        for i in range(num_states):
+            if (g1 >> (i + 1)) & 1:
+                p ^= (state >> i) & 1
+
+        systematic.append(bit)
+        parity.append(p)
+
+        # Shift state register
+        state = ((state >> 1) | (fb << (num_states - 1))) & ((1 << num_states) - 1)
+
+    return systematic, parity</code></pre>
+</section>
+
+<!-- Slide 8: The Interleaver -->
+<section>
+  <h2>The Interleaver: Heart of the Turbo Code</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">The interleaver &pi; permutes the input sequence before feeding it to the second encoder. This is what gives turbo codes their power — it decorrelates the inputs to the two encoders.</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="panel">
+      <h3>Why Randomness Matters</h3>
+      <p class="small">If input pattern has low weight through Encoder 1, the interleaver scrambles it so Encoder 2 likely produces <span class="accent">high-weight parity</span>.</p>
+      <p class="small fragment">Result: the combined codeword almost always has high weight &mdash; good minimum distance on average.</p>
+    </div>
+    <div class="panel">
+      <h3>Interleaver Types</h3>
+      <table>
+        <tr><th>Type</th><th>Properties</th></tr>
+        <tr><td class="accent">Random</td><td>Best performance, hard to implement</td></tr>
+        <tr><td>S-random</td><td>Random with spread constraint</td></tr>
+        <tr><td class="accent3">QPP</td><td>Quadratic permutation polynomial — 3GPP</td></tr>
+        <tr><td>Block</td><td>Simple but suboptimal</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="fragment formula small">
+    QPP: &pi;(i) = (f<sub>1</sub> &middot; i + f<sub>2</sub> &middot; i<sup>2</sup>) mod N
+  </div>
+  <div class="fragment warning">
+    <p class="small">The interleaver design is critical: a poor interleaver can waste 1-2 dB of performance. 3GPP standardized QPP interleavers for deterministic, parallelizable operation.</p>
+  </div>
+</section>
+
+<!-- Slide 9: Turbo Encoder Full Structure -->
+<section>
+  <h2>Complete Turbo Encoder</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">import numpy as np
+
+def turbo_encode(data, interleaver_perm):
+    """
+    Complete turbo encoder: 2 RSC encoders + interleaver
+    Returns: systematic bits, parity1, parity2
+    """
+    N = len(data)
+
+    # Encoder 1: operates on original data
+    sys1, parity1 = rsc_encode(data)
+
+    # Interleave the data
+    interleaved = [data[interleaver_perm[i]] for i in range(N)]
+
+    # Encoder 2: operates on interleaved data
+    _, parity2 = rsc_encode(interleaved)
+
+    # Overall rate = N / (N + N + N) = 1/3 before puncturing
+    return sys1, parity1, parity2
+
+def generate_random_interleaver(N):
+    """Generate a random interleaver permutation"""
+    perm = list(range(N))
+    np.random.shuffle(perm)
+    return perm
+
+# Example usage
+N = 1024
+data = np.random.randint(0, 2, N).tolist()
+perm = generate_random_interleaver(N)
+sys_bits, p1, p2 = turbo_encode(data, perm)
+print(f"Input: {N} bits -> Output: {3*N} bits (rate 1/3)")</code></pre>
+  <div class="fragment key-point">
+    <p class="small">Trellis termination: each encoder must be driven to the zero state. 3GPP uses tail-biting to avoid rate loss from termination bits.</p>
+  </div>
+</section>
+
+<!-- Slide 10: Turbo Decoder Overview -->
+<section>
+  <h2>Turbo Decoder: Iterative Architecture</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="flow-row fragment" style="margin: 1em 0;">
+    <div class="flow-node" style="border-color: var(--accent);">Received<br>y<sub>s</sub>, y<sub>p1</sub></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent3); padding: 0.8em 1.2em;">SISO<br>Decoder 1<br><span class="tiny">(BCJR/MAP)</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">L<sub>e1</sub><br><span class="tiny">Extrinsic</span></div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.5em 0;">
+    <div class="flow-node" style="border-color: var(--accent2);">L<sub>e1</sub><br><span class="tiny">(interleaved)</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent4);">Interleaver<br>&pi;</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent3); padding: 0.8em 1.2em;">SISO<br>Decoder 2<br><span class="tiny">(BCJR/MAP)</span></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">L<sub>e2</sub><br><span class="tiny">Extrinsic</span></div>
+  </div>
+  <div class="flow-row fragment" style="margin: 0.5em 0;">
+    <div class="flow-node" style="border-color: var(--accent2);">L<sub>e2</sub></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent4);">De-interleaver<br>&pi;<sup>-1</sup></div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">A priori for<br>Decoder 1</div>
+    <div class="flow-arrow">&circlearrowleft;</div>
+    <div class="flow-node" style="border-color: var(--accent3);">Iterate</div>
+  </div>
+  <div class="fragment warning">
+    <p class="small">Each decoder produces <span class="accent">soft outputs</span> (log-likelihood ratios), not hard decisions. This is essential for iterative improvement.</p>
+  </div>
+</section>
+
+<!-- Slide 11: BCJR/MAP Algorithm -->
+<section>
+  <h2>The BCJR / MAP Algorithm</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>Soft-Input Soft-Output (SISO) Decoding</h3>
+    <p class="small">The BCJR algorithm (Bahl, Cocke, Jelinek, Raviv, 1974) computes the <span class="accent">a posteriori probability</span> (APP) for each bit given the entire received sequence.</p>
+  </div>
+  <div class="formula fragment">
+    L(u<sub>k</sub> | y) = log &alpha;<sub>k-1</sub>(s') &middot; &gamma;<sub>k</sub>(s',s) &middot; &beta;<sub>k</sub>(s) &nbsp; [for u<sub>k</sub>=1 vs u<sub>k</sub>=0]
+  </div>
+  <div class="grid-3 fragment" style="margin-top: 0.8em;">
+    <div class="card">
+      <h3>&alpha; (Forward)</h3>
+      <p class="small">Forward recursion through the trellis. Probability of being in state s at time k given past observations.</p>
+    </div>
+    <div class="card">
+      <h3>&gamma; (Branch)</h3>
+      <p class="small">Branch metrics from the channel observations and a priori information.</p>
+    </div>
+    <div class="card">
+      <h3>&beta; (Backward)</h3>
+      <p class="small">Backward recursion through the trellis. Probability from future observations.</p>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Complexity: O(N &middot; 2<sup>K-1</sup>) per iteration — linear in block length, exponential in constraint length. This is why short constraint lengths (K=4) are preferred.</p>
+  </div>
+</section>
+
+<!-- Slide 12: Extrinsic Information -->
+<section>
+  <h2>Extrinsic Information Exchange</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="formula fragment">
+    L<sub>total</sub>(u<sub>k</sub>) = L<sub>channel</sub>(u<sub>k</sub>) + L<sub>a priori</sub>(u<sub>k</sub>) + L<sub>extrinsic</sub>(u<sub>k</sub>)
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>The Key Insight</h3>
+        <p class="small">Only <span class="accent">extrinsic</span> information is passed between decoders — information derived from the code constraints and parity, <em>not</em> from the systematic channel observation.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Why Only Extrinsic?</h3>
+        <p class="small">Passing the full LLR would cause <span class="accent2">positive feedback</span> — the decoder would reinforce its own previous decisions, leading to overconfident wrong answers.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card fragment">
+        <h3>Decomposition</h3>
+        <p class="small accent">L<sub>extrinsic</sub> = L<sub>total</sub> - L<sub>channel</sub> - L<sub>a priori</sub></p>
+        <p class="small" style="margin-top: 0.5em;">This is "new information" that one decoder has learned from its parity bits, which the other decoder hasn't seen yet.</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">The statistical independence assumption between the two decoders' extrinsic outputs is only approximate — it degrades with iterations, leading to diminishing returns.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 13: The Turbo Principle -->
+<section>
+  <h2>The Turbo Principle</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-history">History</span>
+  <div class="key-point fragment">
+    <p class="small">Named after the turbo engine: exhaust gases (extrinsic information) are fed back to boost performance, just as a turbocharger recycles exhaust to compress intake air.</p>
+  </div>
+  <div class="panel fragment">
+    <h3>Iterative Belief Passing</h3>
+    <div class="grid-2">
+      <div>
+        <p class="small"><span class="accent">Iteration 1:</span> Each decoder works with only channel information. Performance is modest.</p>
+        <p class="small fragment"><span class="accent">Iteration 2-3:</span> Decoders begin sharing useful extrinsic info. Rapid improvement.</p>
+        <p class="small fragment"><span class="accent">Iteration 4-8:</span> Refinement phase. Diminishing returns per iteration.</p>
+        <p class="small fragment"><span class="accent">Iteration 8+:</span> Convergence. Little further improvement.</p>
+      </div>
+      <div class="fragment">
+        <div class="card">
+          <p class="small accent3">Typical BER by Iteration</p>
+          <table>
+            <tr><th>Iteration</th><th>BER</th></tr>
+            <tr><td>1</td><td>10<sup>-1</sup></td></tr>
+            <tr><td>2</td><td>10<sup>-2</sup></td></tr>
+            <tr><td>4</td><td>10<sup>-3</sup></td></tr>
+            <tr><td>8</td><td>10<sup>-5</sup></td></tr>
+            <tr><td>18</td><td>10<sup>-6</sup></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 14: Turbo Decoder Implementation -->
+<section>
+  <h2>Turbo Decoder: Python Sketch</h2>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">def turbo_decode(y_sys, y_p1, y_p2, interleaver, n_iterations=8):
+    """
+    Iterative turbo decoder using log-MAP algorithm
+    """
+    N = len(y_sys)
+    L_a = np.zeros(N)  # A priori (initially zero)
+
+    for iteration in range(n_iterations):
+        # --- Decoder 1 ---
+        # Input: channel systematic + channel parity1 + a priori from Dec2
+        L_total_1 = map_decode(y_sys, y_p1, L_a)
+        # Extract extrinsic info: remove channel + a priori
+        L_e1 = L_total_1 - 2 * y_sys - L_a
+
+        # --- Interleave extrinsic for Decoder 2 ---
+        L_e1_interleaved = interleave(L_e1, interleaver)
+        y_sys_interleaved = interleave(y_sys, interleaver)
+
+        # --- Decoder 2 ---
+        L_total_2 = map_decode(y_sys_interleaved, y_p2, L_e1_interleaved)
+        L_e2 = L_total_2 - 2 * y_sys_interleaved - L_e1_interleaved
+
+        # --- De-interleave extrinsic for Decoder 1 ---
+        L_a = deinterleave(L_e2, interleaver)
+
+    # Final decision
+    L_final = deinterleave(L_total_2, interleaver)
+    decoded = (L_final < 0).astype(int)
+    return decoded</code></pre>
+  <div class="fragment key-point">
+    <p class="small">The log-MAP (max-log-MAP) approximation avoids costly exponentials while losing only ~0.1 dB compared to true MAP.</p>
+  </div>
+</section>
+
+<!-- Slide 15: EXIT Charts -->
+<section>
+  <h2>EXIT Charts</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>Extrinsic Information Transfer Charts</h3>
+    <p class="small">Introduced by <span class="accent">Stephan ten Brink (2001)</span>, EXIT charts visualize the convergence behavior of iterative decoders by tracking mutual information.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="card fragment">
+        <h3>Axes</h3>
+        <p class="small"><span class="accent">X-axis:</span> I<sub>A</sub> — mutual information of a priori input</p>
+        <p class="small"><span class="accent">Y-axis:</span> I<sub>E</sub> — mutual information of extrinsic output</p>
+      </div>
+      <div class="card fragment">
+        <h3>Reading the Chart</h3>
+        <p class="small">Plot transfer curves for both decoders (one flipped). Decoding converges if there's an <span class="accent">open tunnel</span> between the curves.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Convergence Conditions</h3>
+        <p class="small accent">Open tunnel &rarr; convergence</p>
+        <p class="small accent2">Curves touch/cross &rarr; convergence failure</p>
+        <p class="small fragment">The tunnel width indicates how many iterations are needed — narrow tunnel means more iterations.</p>
+        <p class="small fragment">EXIT charts can be used to <span class="accent3">design</span> better constituent codes by shaping the transfer curves.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 16: Convergence: Waterfall and Floor -->
+<section>
+  <h2>BER Curves: Waterfall &amp; Error Floor</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div>
+      <div class="panel fragment">
+        <h3>Waterfall Region</h3>
+        <p class="small">At a threshold SNR, BER drops <span class="accent">precipitously</span> — the "waterfall." This is where iterative decoding converges successfully.</p>
+        <p class="small fragment">The waterfall threshold is predicted by EXIT chart analysis and density evolution.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Error Floor Region</h3>
+        <p class="small">At high SNR, BER decrease <span class="accent2">slows dramatically</span>. Caused by low-weight codewords that the interleaver couldn't eliminate.</p>
+        <p class="small fragment">Floor typically at BER ~ 10<sup>-6</sup> to 10<sup>-9</sup> depending on interleaver design and block length.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Factors Affecting Performance</h3>
+        <table>
+          <tr><th>Factor</th><th>Waterfall</th><th>Floor</th></tr>
+          <tr><td>Block length &uarr;</td><td class="accent">&darr; better</td><td class="accent">&darr; better</td></tr>
+          <tr><td>Iterations &uarr;</td><td class="accent">&darr; better</td><td>No effect</td></tr>
+          <tr><td>Interleaver design</td><td>Moderate</td><td class="accent">Critical</td></tr>
+          <tr><td>Constraint length &uarr;</td><td>Slight &darr;</td><td class="accent">&darr; better</td></tr>
+        </table>
+      </div>
+      <div class="fragment warning">
+        <p class="small">The error floor is turbo codes' Achilles' heel — it limits their use in applications requiring BER &lt; 10<sup>-10</sup> (e.g., fiber optics).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 17: Puncturing -->
+<section>
+  <h2>Puncturing for Rate Control</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">The base turbo code is rate 1/3. <span class="accent">Puncturing</span> — selectively deleting parity bits — increases the rate to match channel conditions.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>Puncturing Patterns</h3>
+        <p class="small">Alternate which parity bits to keep:</p>
+        <div class="formula small">
+          Rate 1/2: keep p1[odd], p2[even]<br>
+          Rate 2/3: keep every 3rd parity<br>
+          Rate 4/5: keep every 8th parity
+        </div>
+      </div>
+      <div class="panel fragment">
+        <h3>Rate-Compatible Codes</h3>
+        <p class="small">Design puncturing so higher-rate patterns are <span class="accent">subsets</span> of lower-rate patterns. Enables HARQ: retransmit only the punctured bits.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>3GPP Rate Matching</h3>
+        <table>
+          <tr><th>Rate</th><th>Use Case</th><th>Gap to Shannon</th></tr>
+          <tr><td>1/3</td><td>Cell edge, high protection</td><td>~0.5 dB</td></tr>
+          <tr><td>1/2</td><td>Typical data</td><td>~0.8 dB</td></tr>
+          <tr><td>2/3</td><td>Good channel</td><td>~1.2 dB</td></tr>
+          <tr><td>3/4</td><td>High throughput</td><td>~1.5 dB</td></tr>
+          <tr><td>4/5</td><td>Very good channel</td><td>~2.0 dB</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 18: Max-Log-MAP vs Log-MAP -->
+<section>
+  <h2>Practical Decoder Variants</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>True MAP (BCJR)</h3>
+      <p class="small">Optimal bit-wise decisions. Requires log-sum-exp operations:</p>
+      <div class="formula small">
+        log(e<sup>a</sup> + e<sup>b</sup>) = max(a,b) + log(1 + e<sup>-|a-b|</sup>)
+      </div>
+      <p class="small">The correction term requires a lookup table. Best performance but highest complexity.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Max-Log-MAP</h3>
+      <p class="small">Approximation: drop the correction term.</p>
+      <div class="formula small">
+        log(e<sup>a</sup> + e<sup>b</sup>) &approx; max(a,b)
+      </div>
+      <p class="small"><span class="accent2">~0.1-0.3 dB loss</span> but dramatically simpler hardware. Most implementations use this.</p>
+    </div>
+  </div>
+  <div class="panel fragment">
+    <h3>SOVA (Soft Output Viterbi Algorithm)</h3>
+    <p class="small">Modified Viterbi that outputs reliability information. ~0.5 dB worse than MAP but even simpler. Used in early turbo decoder chips.</p>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">The trade-off: MAP gives optimal per-bit decisions; Max-Log-MAP trades ~0.2 dB for 50% complexity reduction; SOVA trades ~0.5 dB for further simplification.</p>
+  </div>
+</section>
+
+<!-- Slide 19: Applications: 3GPP -->
+<section>
+  <h2>Turbo Codes in 3G/4G</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>3GPP UMTS (3G)</h3>
+        <p class="small">First major standard to adopt turbo codes (Release 99, 1999).</p>
+        <table>
+          <tr><td>Constituent code</td><td class="accent">(13, 15)<sub>8</sub>, K=4</td></tr>
+          <tr><td>Block sizes</td><td>40 – 5114 bits</td></tr>
+          <tr><td>Interleaver</td><td>QPP</td></tr>
+          <tr><td>Iterations</td><td>Typically 6-8</td></tr>
+        </table>
+      </div>
+      <div class="panel fragment">
+        <h3>LTE (4G)</h3>
+        <p class="small">Enhanced turbo code for higher throughput.</p>
+        <table>
+          <tr><td>Block sizes</td><td class="accent">40 – 6144 bits</td></tr>
+          <tr><td>Interleaver</td><td>QPP (contention-free)</td></tr>
+          <tr><td>Max rate</td><td>~0.95 with rate matching</td></tr>
+          <tr><td>HARQ</td><td>Chase combining + IR</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Why Turbo for 4G?</h3>
+        <p class="small"><span class="accent">Near-capacity performance</span> for the block sizes used in LTE (hundreds to thousands of bits).</p>
+        <p class="small fragment"><span class="accent">Flexible rate matching</span> via puncturing supports adaptive modulation and coding.</p>
+        <p class="small fragment"><span class="accent">QPP interleaver</span> enables parallel decoding — essential for high data rates.</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">5G NR replaced turbo codes with LDPC for data and polar codes for control — turbo codes' higher decoding latency became a bottleneck at 5G data rates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Deep Space Applications -->
+<section>
+  <h2>Deep Space Communications</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">CCSDS (Consultative Committee for Space Data Systems) adopted turbo codes in 2003 for deep space missions where every fraction of a dB matters.</p>
+  </div>
+  <div class="grid-2" style="margin-top: 0.8em;">
+    <div class="panel fragment">
+      <h3>CCSDS Turbo Code</h3>
+      <table>
+        <tr><td>Constituent code</td><td class="accent">(23, 33)<sub>8</sub>, K=5</td></tr>
+        <tr><td>Rates</td><td>1/2, 1/3, 1/4, 1/6</td></tr>
+        <tr><td>Block sizes</td><td>1784, 3568, 7136, 8920</td></tr>
+        <tr><td>Interleaver</td><td>Permutation polynomial</td></tr>
+      </table>
+    </div>
+    <div class="panel fragment">
+      <h3>Missions Using Turbo Codes</h3>
+      <p class="small"><span class="accent">Mars Reconnaissance Orbiter</span> — high-res imagery from Mars</p>
+      <p class="small"><span class="accent">Messenger</span> — Mercury orbit</p>
+      <p class="small"><span class="accent">New Horizons</span> — Pluto flyby data</p>
+      <p class="small"><span class="accent">JWST</span> — alongside RS codes</p>
+    </div>
+  </div>
+  <div class="fragment panel">
+    <h3>Why Deep Space Needs Near-Capacity Codes</h3>
+    <p class="small">Signal from Mars: ~1 W transmitter, 225 million km distance. Every 0.5 dB saved doubles the data rate or halves the antenna size needed on Earth.</p>
+  </div>
+</section>
+
+<!-- Slide 21: DVB-RCS and Satellite -->
+<section>
+  <h2>Satellite &amp; Broadcasting</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>DVB-RCS</h3>
+      <p class="small">Digital Video Broadcasting — Return Channel via Satellite uses turbo codes for the <span class="accent">return link</span> from user terminals.</p>
+      <p class="small fragment">Rates: 1/3, 2/5, 1/2, 2/3, 3/4</p>
+      <p class="small fragment">Block sizes: 12 – 216 bytes</p>
+    </div>
+    <div class="panel fragment">
+      <h3>CDMA2000 / IS-2000</h3>
+      <p class="small">North American 3G standard independently adopted turbo codes with slightly different parameters than 3GPP.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>WiMAX (IEEE 802.16)</h3>
+      <p class="small">Convolutional turbo codes (CTC) with duo-binary structure — processes pairs of bits for higher throughput.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Military &amp; Tactical</h3>
+      <p class="small">MIL-STD-188-110C and Link 16 use turbo codes for <span class="accent">low-SNR tactical communications</span>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 22: Comparison with Classical Codes -->
+<section>
+  <h2>Comparison with Classical Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel" style="margin-top: 0.5em;">
+    <table>
+      <tr>
+        <th>Property</th>
+        <th>Convolutional</th>
+        <th>RS + Conv</th>
+        <th class="accent">Turbo</th>
+      </tr>
+      <tr class="fragment">
+        <td>Gap to Shannon</td>
+        <td>3-4 dB</td>
+        <td>2-3 dB</td>
+        <td class="accent">0.3-0.7 dB</td>
+      </tr>
+      <tr class="fragment">
+        <td>Decoding</td>
+        <td>Viterbi (hard)</td>
+        <td>Algebraic + Viterbi</td>
+        <td class="accent">Iterative MAP (soft)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Latency</td>
+        <td>Low</td>
+        <td>Medium</td>
+        <td class="accent2">High (iterative)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Error Floor</td>
+        <td>None</td>
+        <td>Very low</td>
+        <td class="accent2">Exists (~10<sup>-7</sup>)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Complexity</td>
+        <td>O(2<sup>K</sup>)</td>
+        <td>O(n<sup>2</sup>) + O(2<sup>K</sup>)</td>
+        <td>O(N &middot; 2<sup>K</sup> &middot; I)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Flexibility</td>
+        <td>Fixed rate</td>
+        <td>Fixed rate</td>
+        <td class="accent">Rate-compatible</td>
+      </tr>
+    </table>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Turbo codes' weakness: the error floor and high decoding latency. These drove the search for alternatives — leading to the rediscovery of LDPC codes and invention of polar codes.</p>
+  </div>
+</section>
+
+<!-- Slide 23: The Revolution -->
+<section>
+  <h2>The Revolution Turbo Codes Caused</h2>
+  <span class="badge badge-history">History</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Before 1993</h3>
+        <p class="small">Coding theory was considered a "mature" field. Shannon's limit seemed a theoretical ideal, forever out of practical reach.</p>
+        <p class="small fragment">Research funding was declining. The field was losing momentum.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>The Paradigm Shift</h3>
+        <p class="small"><span class="accent">Iterative decoding</span> was the breakthrough concept — not just turbo codes themselves. The idea that simple decoders exchanging soft information could approach optimality.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>What Turbo Codes Inspired</h3>
+        <p class="small accent">Rediscovery of LDPC codes (1996)</p>
+        <p class="small fragment accent3">Turbo equalization</p>
+        <p class="small fragment accent2">Iterative MIMO detection</p>
+        <p class="small fragment accent4">Turbo source-channel coding</p>
+        <p class="small fragment" style="color: var(--accent);">EXIT chart analysis framework</p>
+        <p class="small fragment" style="color: var(--accent2);">Factor graph / message passing unification</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">"Turbo codes didn't just give us a better code — they gave us a new way of thinking about decoding." — David Forney</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 24: Summary & Timeline -->
+<section>
+  <h2>Turbo Codes: Timeline &amp; Summary</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="panel" style="margin-top: 0.5em;">
+    <table>
+      <tr><th>Year</th><th>Milestone</th></tr>
+      <tr class="fragment"><td class="accent">1974</td><td>BCJR algorithm published (foundation for MAP decoding)</td></tr>
+      <tr class="fragment"><td class="accent">1993</td><td>Berrou, Glavieux, Thitimajshima present turbo codes at ICC</td></tr>
+      <tr class="fragment"><td>1995</td><td>Independent verification; turbo code theory develops rapidly</td></tr>
+      <tr class="fragment"><td>1999</td><td>3GPP Release 99 (UMTS) adopts turbo codes</td></tr>
+      <tr class="fragment"><td>2000</td><td>CDMA2000 standard adopts turbo codes</td></tr>
+      <tr class="fragment"><td>2001</td><td>EXIT charts introduced by ten Brink</td></tr>
+      <tr class="fragment"><td>2003</td><td>CCSDS adopts turbo codes for deep space</td></tr>
+      <tr class="fragment"><td>2008</td><td>3GPP LTE Release 8 uses enhanced turbo codes</td></tr>
+      <tr class="fragment"><td class="accent2">2018</td><td>5G NR replaces turbo codes with LDPC/Polar</td></tr>
+    </table>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Turbo codes reigned as the state-of-the-art for 25 years — an extraordinary run in a fast-moving field. Their iterative decoding principle lives on in every modern communication system.</p>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  transition: 'slide',
+  slideNumber: 'c/t',
+  plugins: [RevealHighlight]
+});
+
+function fixSlides() {
+  document.querySelectorAll('.reveal .slides section').forEach(s => {
+    s.style.textAlign = 'left';
+  });
+}
+fixSlides();
+Reveal.on('ready', fixSlides);
+Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

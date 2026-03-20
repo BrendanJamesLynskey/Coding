@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LDPC Codes — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+  <div class="series-tag">Coding Theory Series — 10</div>
+  <h1 class="title-gradient">LDPC Codes</h1>
+  <p style="font-size:0.7em; color: var(--dim); max-width: 700px;">Low-Density Parity-Check codes — from Gallager's forgotten thesis to the backbone of modern wireless, storage, and broadcast systems.</p>
+  <div style="margin-top: 1em;">
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <span class="badge badge-history">History</span>
+    <span class="badge badge-standards">Standards</span>
+  </div>
+  <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="grid-3">
+    <div class="panel fragment">
+      <h3>History</h3>
+      <p class="small">Gallager (1962), forgotten for 30 years, rediscovered by MacKay & Neal (1996).</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Structure</h3>
+      <p class="small">Sparse parity-check matrices, Tanner graphs, regular vs irregular codes.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Encoding</h3>
+      <p class="small">The encoding challenge and practical solutions.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Decoding</h3>
+      <p class="small">Belief propagation, sum-product, min-sum algorithms.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Analysis</h3>
+      <p class="small">Density evolution, thresholds, capacity-approaching designs.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Standards</h3>
+      <p class="small">Wi-Fi, 5G, DVB-S2, Ethernet — LDPC everywhere.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Gallager's Thesis -->
+<section>
+  <h2>Gallager's 1962 Thesis</h2>
+  <span class="badge badge-history">History</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Lost Masterpiece</h3>
+        <p class="small">Robert Gallager's 1960 MIT PhD thesis, published as a monograph in 1963, introduced LDPC codes with a near-complete theory:</p>
+        <ul class="small">
+          <li class="fragment">Sparse random parity-check matrices</li>
+          <li class="fragment">Iterative probabilistic decoding</li>
+          <li class="fragment">Proof of good minimum distance</li>
+          <li class="fragment">Capacity-approaching performance claims</li>
+        </ul>
+      </div>
+      <div class="fragment warning">
+        <p class="small">The work was decades ahead of its time. The computational requirements made it impractical in 1962, and the field moved on to convolutional codes and algebraic block codes.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>The Rediscovery</h3>
+        <p class="small"><span class="accent">1996:</span> David MacKay and Radford Neal independently rediscovered LDPC codes, demonstrating near-Shannon-limit performance comparable to turbo codes.</p>
+        <p class="small fragment"><span class="accent3">Key insight:</span> Modern computers could finally run the iterative decoder that Gallager envisioned.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Recognition</h3>
+        <p class="small">Gallager received the IEEE Medal of Honor (1990) — though primarily for his textbook on information theory, not LDPC codes. The true impact of LDPC wasn't recognized until the 2000s.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: What is "Low Density"? -->
+<section>
+  <h2>What Makes a Parity-Check Matrix "Low Density"?</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="formula fragment">
+    H &middot; c<sup>T</sup> = 0 &nbsp;&nbsp; (mod 2)
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>Dense vs Sparse</h3>
+        <p class="small">A typical algebraic code (Hamming, BCH, RS) has a <span class="accent2">dense</span> parity-check matrix — roughly half the entries are 1.</p>
+        <p class="small fragment">An LDPC matrix is <span class="accent">sparse</span> — the fraction of 1s goes to zero as the code length grows.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">For an (n, k) LDPC code with m = n-k check equations, each row has w<sub>r</sub> ones and each column has w<sub>c</sub> ones, where w<sub>r</sub>, w<sub>c</sub> &lt;&lt; n.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Example: (20, 10) Code</h3>
+        <p class="small" style="font-family: 'JetBrains Mono', monospace; font-size: 0.5em; line-height: 1.6;">
+          Dense H (Hamming-like):<br>
+          <span class="accent2">1 0 1 1 0 1 1 0 1 0 ...</span><br>
+          <span class="accent2">0 1 1 0 1 1 0 1 0 1 ...</span><br><br>
+          Sparse H (LDPC):<br>
+          <span class="accent">1 0 0 1 0 0 0 1 0 0 ...</span><br>
+          <span class="accent">0 1 0 0 0 1 0 0 0 1 ...</span>
+        </p>
+        <p class="small fragment">Typical: w<sub>c</sub> = 3-6 ones per column, w<sub>r</sub> = 6-30 ones per row, regardless of n.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Tanner Graphs -->
+<section>
+  <h2>Tanner Graphs</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">A Tanner graph is a <span class="accent">bipartite graph</span> representation of the parity-check matrix H. Introduced by Michael Tanner (1981) — another early LDPC-related contribution.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>Two Types of Nodes</h3>
+        <p class="small"><span class="accent">Variable nodes (VNs):</span> One per codeword bit (columns of H). Represented as circles.</p>
+        <p class="small fragment"><span class="accent3">Check nodes (CNs):</span> One per parity-check equation (rows of H). Represented as squares.</p>
+        <p class="small fragment">Edge between VN<sub>j</sub> and CN<sub>i</sub> if and only if H[i][j] = 1.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Example: H matrix</h3>
+        <p class="tiny" style="font-family: 'JetBrains Mono', monospace;">
+          &nbsp;&nbsp;&nbsp;v1 v2 v3 v4 v5 v6<br>
+          c1 [1&nbsp; 1&nbsp; 0&nbsp; 1&nbsp; 0&nbsp; 0]<br>
+          c2 [0&nbsp; 1&nbsp; 1&nbsp; 0&nbsp; 1&nbsp; 0]<br>
+          c3 [1&nbsp; 0&nbsp; 0&nbsp; 0&nbsp; 1&nbsp; 1]
+        </p>
+      </div>
+      <div class="fragment">
+        <div class="flow-row" style="font-size: 0.65em;">
+          <div class="flow-node" style="border-radius: 50%; border-color: var(--accent); width: 2em;">v1</div>
+          <div class="flow-node" style="border-radius: 50%; border-color: var(--accent); width: 2em;">v2</div>
+          <div class="flow-node" style="border-radius: 50%; border-color: var(--accent); width: 2em;">v3</div>
+          <div class="flow-node" style="border-radius: 50%; border-color: var(--accent); width: 2em;">v4</div>
+          <div class="flow-node" style="border-radius: 50%; border-color: var(--accent); width: 2em;">v5</div>
+          <div class="flow-node" style="border-radius: 50%; border-color: var(--accent); width: 2em;">v6</div>
+        </div>
+        <p class="tiny dim" style="text-align: center;">&darr; edges follow H[i][j]=1 &darr;</p>
+        <div class="flow-row" style="font-size: 0.65em;">
+          <div class="flow-node" style="border-color: var(--accent3); border-radius: 4px;">c1</div>
+          <div class="flow-node" style="border-color: var(--accent3); border-radius: 4px;">c2</div>
+          <div class="flow-node" style="border-color: var(--accent3); border-radius: 4px;">c3</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: Regular vs Irregular -->
+<section>
+  <h2>Regular vs Irregular LDPC Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Regular LDPC</h3>
+      <p class="small">Every variable node has degree <span class="accent">d<sub>v</sub></span> (same column weight), every check node has degree <span class="accent">d<sub>c</sub></span> (same row weight).</p>
+      <div class="formula small">
+        (d<sub>v</sub>, d<sub>c</sub>)-regular code<br>
+        Rate = 1 - d<sub>v</sub>/d<sub>c</sub>
+      </div>
+      <p class="small fragment">Gallager's original construction: (3,6)-regular gives rate 1/2.</p>
+      <p class="small fragment">Simple but not optimal — there's a gap to capacity.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Irregular LDPC</h3>
+      <p class="small">Variable and check nodes have <span class="accent">different degrees</span>, drawn from a degree distribution.</p>
+      <div class="formula small">
+        &lambda;(x) = &Sigma; &lambda;<sub>i</sub> x<sup>i-1</sup> &nbsp;(variable)<br>
+        &rho;(x) = &Sigma; &rho;<sub>i</sub> x<sup>i-1</sup> &nbsp;(check)
+      </div>
+      <p class="small fragment"><span class="accent">Key insight (Richardson, Shokrollahi, Urbanke, 2001):</span> Optimizing the degree distribution can get within <span class="accent">0.0045 dB</span> of Shannon limit!</p>
+    </div>
+  </div>
+  <div class="fragment warning">
+    <p class="small">Irregular codes perform better but are harder to construct and may have worse minimum distance. The degree distribution optimization is a convex optimization problem.</p>
+  </div>
+</section>
+
+<!-- Slide 7: Random Construction -->
+<section>
+  <h2>Constructing LDPC Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Gallager's Method</h3>
+        <p class="small">1. Create a base submatrix with exactly w<sub>c</sub>=1 per column in the first section</p>
+        <p class="small">2. Create random column permutations for subsequent sections</p>
+        <p class="small">3. Stack the sections to form H</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Avoiding Short Cycles</h3>
+        <p class="small">Short cycles (especially <span class="accent2">4-cycles</span>) in the Tanner graph hurt iterative decoding.</p>
+        <p class="small">Progressive Edge Growth (PEG) algorithm: add edges one at a time, maximizing local girth.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Construction Methods</h3>
+        <table>
+          <tr><th>Method</th><th>Pros</th><th>Cons</th></tr>
+          <tr><td class="accent">Random</td><td>Good performance</td><td>Encoding complexity</td></tr>
+          <tr><td>PEG</td><td>High girth</td><td>Slow construction</td></tr>
+          <tr><td class="accent3">Algebraic</td><td>Structured, easy encode</td><td>Less flexible</td></tr>
+          <tr><td>QC-LDPC</td><td>Hardware-friendly</td><td>Slightly suboptimal</td></tr>
+          <tr><td>Protograph</td><td>Excellent performance</td><td>Complex design</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: Python LDPC Construction -->
+<section>
+  <h2>Building an LDPC Matrix in Python</h2>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">import numpy as np
+from scipy.sparse import csr_matrix
+
+def gallager_ldpc(n, dv, dc):
+    """
+    Construct a regular (dv, dc)-LDPC parity-check matrix
+    using Gallager's random construction.
+
+    n  = code length (number of variable nodes)
+    dv = column weight (variable node degree)
+    dc = row weight (check node degree)
+    """
+    assert (n * dv) % dc == 0, "n*dv must be divisible by dc"
+    m = (n * dv) // dc  # number of check nodes
+    rate = 1.0 - dv / dc
+
+    # Build base submatrix: m/dv rows, each row has dc consecutive 1s
+    rows_per_section = m // dv
+    H = np.zeros((m, n), dtype=int)
+
+    # First section: identity-like structure
+    for i in range(rows_per_section):
+        for j in range(dc):
+            H[i, i * dc + j] = 1
+
+    # Remaining sections: random column permutations
+    for section in range(1, dv):
+        perm = np.random.permutation(n)
+        for i in range(rows_per_section):
+            for j in range(dc):
+                col = perm[i * dc + j]
+                H[section * rows_per_section + i, col] = 1
+
+    print(f"LDPC({n},{n-m}): rate={rate:.3f}, "
+          f"dv={dv}, dc={dc}, density={dv/m:.4f}")
+    return csr_matrix(H)
+
+# Example: (3,6)-regular LDPC code, rate 1/2
+H = gallager_ldpc(n=1200, dv=3, dc=6)
+print(f"H shape: {H.shape}, nnz: {H.nnz}, "
+      f"density: {H.nnz/(H.shape[0]*H.shape[1]):.4f}")</code></pre>
+</section>
+
+<!-- Slide 9: Encoding LDPC Codes -->
+<section>
+  <h2>Encoding LDPC Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="warning fragment">
+    <p class="small">Unlike turbo or convolutional codes, LDPC codes are defined by H, not G. Encoding requires finding a generator matrix or using efficient alternatives.</p>
+  </div>
+  <div class="grid-2" style="margin-top: 0.8em;">
+    <div class="panel fragment">
+      <h3>Naive Approach</h3>
+      <p class="small">Compute G from H using Gaussian elimination:</p>
+      <div class="formula small">
+        H = [A | I<sub>m</sub>] &rarr; G = [I<sub>k</sub> | A<sup>T</sup>]
+      </div>
+      <p class="small accent2">Problem: G is dense even when H is sparse! O(n<sup>2</sup>) encoding.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Richardson-Urbanke Method</h3>
+      <p class="small">Approximate lower triangular form via careful row/column permutations:</p>
+      <div class="formula small">
+        H &rarr; [A B T; C D E]
+      </div>
+      <p class="small">where T is lower triangular. Encoding becomes O(n + g<sup>2</sup>) where g is a small "gap" parameter.</p>
+    </div>
+  </div>
+  <div class="panel fragment">
+    <h3>Quasi-Cyclic LDPC (QC-LDPC)</h3>
+    <p class="small">H is composed of circulant permutation matrices. Encoding reduces to <span class="accent">shift-register operations</span> — O(n) complexity with simple hardware. This is why standards use QC-LDPC.</p>
+  </div>
+</section>
+
+<!-- Slide 10: Belief Propagation Overview -->
+<section>
+  <h2>Belief Propagation Decoding</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">Belief propagation (BP) is an iterative message-passing algorithm on the Tanner graph. Messages flow between variable nodes and check nodes, refining bit estimates.</p>
+  </div>
+  <div class="flow-row fragment" style="margin: 1em 0;">
+    <div class="flow-node" style="border-color: var(--accent);">Channel<br>observations</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent); border-radius: 50%;">Variable<br>Nodes</div>
+    <div class="flow-arrow">&harr;</div>
+    <div class="flow-node" style="border-color: var(--accent3);">Check<br>Nodes</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Iterate until<br>converged</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">Hard<br>decision</div>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Variable &rarr; Check</h3>
+      <p class="small">Each VN sends its current belief (LLR) to connected CNs, <span class="accent">excluding</span> the message from that specific CN.</p>
+      <div class="formula small">
+        &mu;<sub>v&rarr;c</sub> = L<sub>ch</sub> + &Sigma;<sub>c'&ne;c</sub> &mu;<sub>c'&rarr;v</sub>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Check &rarr; Variable</h3>
+      <p class="small">Each CN computes parity constraint satisfaction from connected VNs, <span class="accent">excluding</span> the target VN.</p>
+      <div class="formula small">
+        &mu;<sub>c&rarr;v</sub> = 2 tanh<sup>-1</sup>(&Pi;<sub>v'&ne;v</sub> tanh(&mu;<sub>v'&rarr;c</sub>/2))
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 11: Sum-Product Algorithm -->
+<section>
+  <h2>Sum-Product Algorithm: Step by Step</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <div class="panel fragment">
+    <h3>Algorithm Steps</h3>
+    <div class="grid-2">
+      <div>
+        <p class="small"><span class="accent">1. Initialize:</span> Set variable-to-check messages to channel LLRs</p>
+        <p class="small fragment"><span class="accent">2. Check update:</span> Each check node computes outgoing messages using the tanh rule</p>
+        <p class="small fragment"><span class="accent">3. Variable update:</span> Each variable node sums incoming check messages + channel LLR</p>
+        <p class="small fragment"><span class="accent">4. Tentative decision:</span> Compute total LLR, make hard decision</p>
+        <p class="small fragment"><span class="accent">5. Check syndrome:</span> If H&middot;c&#770; = 0, stop. Otherwise go to step 2.</p>
+      </div>
+      <div class="fragment">
+        <div class="card">
+          <h3>Convergence</h3>
+          <p class="small">Typically converges in <span class="accent">5-50 iterations</span>.</p>
+          <p class="small">For tree-like graphs, BP computes exact marginals. For graphs with cycles, it's an approximation — but works remarkably well in practice.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <pre class="fragment"><code class="language-python">def bp_decode(H, llr_channel, max_iter=50):
+    m, n = H.shape
+    # Messages: variable-to-check and check-to-variable
+    v2c = np.zeros((m, n))  # only nonzero where H[i][j]=1
+    c2v = np.zeros((m, n))
+
+    # Initialize v2c messages with channel LLRs
+    for i, j in zip(*H.nonzero()):
+        v2c[i, j] = llr_channel[j]
+
+    for iteration in range(max_iter):
+        # Check node update (tanh rule)
+        for i in range(m):
+            vn_indices = H[i].nonzero()[1]
+            for j in vn_indices:
+                product = 1.0
+                for j2 in vn_indices:
+                    if j2 != j:
+                        product *= np.tanh(v2c[i, j2] / 2.0)
+                c2v[i, j] = 2.0 * np.arctanh(np.clip(product, -0.9999, 0.9999))
+
+        # Variable node update
+        total_llr = llr_channel.copy()
+        for j in range(n):
+            cn_indices = H[:, j].nonzero()[0]
+            total_llr[j] = llr_channel[j] + sum(c2v[i, j] for i in cn_indices)
+            for i in cn_indices:
+                v2c[i, j] = total_llr[j] - c2v[i, j]
+
+        # Hard decision and syndrome check
+        decoded = (total_llr < 0).astype(int)
+        if np.all((H @ decoded) % 2 == 0):
+            return decoded, iteration + 1
+    return decoded, max_iter</code></pre>
+</section>
+
+<!-- Slide 12: Min-Sum Algorithm -->
+<section>
+  <h2>Min-Sum Algorithm</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Simplification</h3>
+        <p class="small">The tanh/arctanh in sum-product is expensive. Min-sum approximates:</p>
+        <div class="formula small">
+          2 tanh<sup>-1</sup>(&Pi; tanh(x<sub>i</sub>/2)) &approx; (&Pi; sign(x<sub>i</sub>)) &middot; min|x<sub>i</sub>|
+        </div>
+        <p class="small fragment">Only needs: signs, absolute values, and minimum — no transcendental functions!</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Performance Trade-off</h3>
+        <p class="small"><span class="accent2">~0.2-0.5 dB loss</span> compared to sum-product, but much simpler hardware.</p>
+        <p class="small fragment"><span class="accent">Normalized min-sum:</span> Multiply result by a correction factor &alpha; &approx; 0.75. Recovers ~0.1 dB.</p>
+        <p class="small fragment"><span class="accent">Offset min-sum:</span> Subtract a small constant &beta; from the minimum. Similar improvement.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Hardware Comparison</h3>
+        <table>
+          <tr><th>Algorithm</th><th>Operations</th><th>Loss</th></tr>
+          <tr><td>Sum-Product</td><td>tanh, atanh, &times;, +</td><td>0 dB (reference)</td></tr>
+          <tr><td class="accent">Min-Sum</td><td>min, sign, compare</td><td>~0.3 dB</td></tr>
+          <tr><td class="accent">Normalized MS</td><td>min, sign, &times; &alpha;</td><td>~0.1 dB</td></tr>
+          <tr><td class="accent">Offset MS</td><td>min, sign, - &beta;</td><td>~0.1 dB</td></tr>
+        </table>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">Nearly all commercial LDPC decoders use min-sum variants. The sum-product is mainly a theoretical/simulation reference.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 13: Message Passing Visualization -->
+<section>
+  <h2>Message Passing: A Visual Walk-Through</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>Iteration 0: Channel Initialization</h3>
+    <div class="flow-row">
+      <div class="flow-node" style="border-color: var(--accent);">v1<br><span class="tiny">LLR=+2.1</span></div>
+      <div class="flow-node" style="border-color: var(--accent2);">v2<br><span class="tiny">LLR=-0.8</span></div>
+      <div class="flow-node" style="border-color: var(--accent);">v3<br><span class="tiny">LLR=+1.5</span></div>
+      <div class="flow-node" style="border-color: var(--accent);">v4<br><span class="tiny">LLR=+3.2</span></div>
+      <div class="flow-node" style="border-color: var(--accent2);">v5<br><span class="tiny">LLR=-1.1</span></div>
+      <div class="flow-node" style="border-color: var(--accent);">v6<br><span class="tiny">LLR=+0.4</span></div>
+    </div>
+    <p class="tiny dim" style="text-align: center;">Positive LLR = likely 0; Negative LLR = likely 1</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Iteration 1 Messages</h3>
+      <p class="small">Check nodes compute: "Based on the OTHER variables in my parity check, what should this variable be?"</p>
+      <p class="small fragment">If c1 connects v1, v2, v4 and v2 looks like a 1, then c1 tells v1: "you should be a 1 too" (to satisfy parity).</p>
+    </div>
+    <div class="card">
+      <h3>After Several Iterations</h3>
+      <p class="small">Messages converge. Variable nodes accumulate evidence from <span class="accent">all their check node neighbors</span>, which in turn gather information from distant parts of the code.</p>
+      <p class="small fragment">Information propagates across the graph — v1 eventually "hears from" all other bits through multi-hop paths.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 14: Density Evolution -->
+<section>
+  <h2>Density Evolution &amp; Threshold Analysis</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">Density evolution tracks the <span class="accent">probability distribution of messages</span> through iterations, assuming the Tanner graph is a tree (valid for large codes).</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>The Threshold</h3>
+        <p class="small">For a given degree distribution, there exists a <span class="accent">channel parameter threshold</span>:</p>
+        <p class="small">Below threshold: error probability &rarr; 0 as iterations &rarr; &infin;</p>
+        <p class="small">Above threshold: error probability stays bounded away from 0</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Concentration</h3>
+        <p class="small">For large n, the actual code performance <span class="accent">concentrates</span> around the ensemble average predicted by density evolution — a random code is almost surely good.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Optimized Thresholds</h3>
+        <table>
+          <tr><th>Code</th><th>Rate</th><th>Threshold</th><th>Shannon</th><th>Gap</th></tr>
+          <tr><td>(3,6)-regular</td><td>1/2</td><td>1.11 dB</td><td>0.187 dB</td><td class="accent2">0.92 dB</td></tr>
+          <tr><td>Irregular (opt)</td><td>1/2</td><td>0.19 dB</td><td>0.187 dB</td><td class="accent">0.003 dB!</td></tr>
+          <tr><td>(4,8)-regular</td><td>1/2</td><td>1.00 dB</td><td>0.187 dB</td><td class="accent2">0.81 dB</td></tr>
+        </table>
+        <p class="small fragment accent">Optimized irregular LDPC: within 0.0045 dB of capacity for rate 1/2 on the BEC!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 15: Capacity-Approaching Performance -->
+<section>
+  <h2>Capacity-Approaching Performance</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>LDPC vs Turbo: Head to Head</h3>
+    <table>
+      <tr>
+        <th>Property</th>
+        <th>LDPC</th>
+        <th>Turbo</th>
+      </tr>
+      <tr class="fragment">
+        <td>Gap to capacity (R=1/2, BER=10<sup>-5</sup>)</td>
+        <td class="accent">~0.04 dB</td>
+        <td>~0.3 dB</td>
+      </tr>
+      <tr class="fragment">
+        <td>Error floor</td>
+        <td class="accent">Lower (10<sup>-10</sup>+)</td>
+        <td class="accent2">Higher (10<sup>-7</sup>)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Decoding parallelism</td>
+        <td class="accent">Highly parallel</td>
+        <td>Limited (sequential trellis)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Decoding latency</td>
+        <td class="accent">Lower per iteration</td>
+        <td>Higher (full trellis walk)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Short block performance</td>
+        <td class="accent2">Worse</td>
+        <td class="accent">Better</td>
+      </tr>
+      <tr class="fragment">
+        <td>Encoding complexity</td>
+        <td class="accent2">Higher (unless QC)</td>
+        <td class="accent">Linear</td>
+      </tr>
+    </table>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">For long blocks (n &gt; 10,000) and high throughput, LDPC consistently outperforms turbo codes. This is why 5G chose LDPC for the data channel.</p>
+  </div>
+</section>
+
+<!-- Slide 16: LDPC in Wi-Fi -->
+<section>
+  <h2>LDPC in Wi-Fi Standards</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>IEEE 802.11n/ac/ax/be</h3>
+        <p class="small">LDPC has been optional since 802.11n and <span class="accent">mandatory in 802.11ax (Wi-Fi 6)</span> for higher MCS indices.</p>
+        <table>
+          <tr><th>Parameter</th><th>Value</th></tr>
+          <tr><td>Code type</td><td>QC-LDPC</td></tr>
+          <tr><td>Codeword lengths</td><td>648, 1296, 1944</td></tr>
+          <tr><td>Rates</td><td>1/2, 2/3, 3/4, 5/6</td></tr>
+          <tr><td>Sub-matrix size</td><td>27, 54, 81</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Why LDPC for Wi-Fi?</h3>
+        <p class="small accent">1. ~1.5 dB gain over BCC at high rates</p>
+        <p class="small fragment accent3">2. QC structure enables parallel decoding</p>
+        <p class="small fragment accent2">3. Low error floor meets WiFi requirements</p>
+        <p class="small fragment" style="color: var(--accent4);">4. Scales well to 160/320 MHz channels</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">802.11be (Wi-Fi 7) requires LDPC for all OFDMA and MU-MIMO modes. BCC (convolutional) is being phased out.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 17: LDPC in 5G NR -->
+<section>
+  <h2>LDPC in 5G NR</h2>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">3GPP chose LDPC over turbo codes for <span class="accent">5G NR data channels</span> (PDSCH/PUSCH). This was a contentious decision — the "coding war" of 2016.</p>
+  </div>
+  <div class="grid-2" style="margin-top: 0.8em;">
+    <div class="panel fragment">
+      <h3>5G NR LDPC Design</h3>
+      <table>
+        <tr><td>Type</td><td class="accent">Quasi-cyclic (QC-LDPC)</td></tr>
+        <tr><td>Base graphs</td><td>BG1 (large blocks), BG2 (small blocks)</td></tr>
+        <tr><td>Lifting sizes</td><td>2-384 (51 values)</td></tr>
+        <tr><td>Max code length</td><td>~25,000 bits</td></tr>
+        <tr><td>Rates</td><td>1/5 to ~0.95</td></tr>
+        <tr><td>HARQ</td><td>Incremental redundancy</td></tr>
+      </table>
+    </div>
+    <div class="panel fragment">
+      <h3>Why LDPC Won for 5G Data</h3>
+      <p class="small"><span class="accent">Throughput:</span> 5G requires 20 Gbps. LDPC's parallel decoder architecture supports this; turbo codes' serial trellis doesn't.</p>
+      <p class="small fragment"><span class="accent">Low floor:</span> 5G data needs BER &lt; 10<sup>-5</sup> at BLER &lt; 10<sup>-1</sup> — LDPC's low error floor is a natural fit.</p>
+      <p class="small fragment"><span class="accent">Rate flexibility:</span> QC-LDPC with multiple lifting sizes provides fine-grained rate matching.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 18: DVB-S2 -->
+<section>
+  <h2>LDPC in DVB-S2 / DVB-S2X</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Digital Video Broadcasting</h3>
+        <p class="small">DVB-S2 (2004) was one of the first major standards to adopt LDPC codes, combined with BCH as an outer code.</p>
+        <div class="flow-row" style="margin: 0.5em 0;">
+          <div class="flow-node">Data</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent3);">BCH<br>outer</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent);">LDPC<br>inner</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node">Channel</div>
+        </div>
+      </div>
+      <div class="panel fragment">
+        <h3>DVB-S2 LDPC Parameters</h3>
+        <table>
+          <tr><td>Normal frame</td><td class="accent">64,800 bits</td></tr>
+          <tr><td>Short frame</td><td>16,200 bits</td></tr>
+          <tr><td>Rates</td><td>1/4, 1/3, 2/5, 1/2, 3/5, 2/3, 3/4, 4/5, 5/6, 8/9, 9/10</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Performance</h3>
+        <p class="small">DVB-S2 operates within <span class="accent">0.7-1.0 dB</span> of Shannon limit across all rates — a major improvement over DVB-S's RS+convolutional codes.</p>
+        <p class="small fragment">DVB-S2X (2014) added even more rates and modulation orders, tightening the gap further.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">DVB-S2 demonstrated that LDPC codes could be practically deployed in consumer hardware (satellite receivers) — a major milestone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 19: 10GBase-T Ethernet -->
+<section>
+  <h2>LDPC in 10GBase-T Ethernet</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="panel fragment">
+    <h3>IEEE 802.3an: 10 Gbps over Copper</h3>
+    <p class="small">10GBase-T sends 10 Gbps over Cat 6a/7 cables up to 100 meters. The signal environment is extremely harsh — crosstalk, echo, ISI. LDPC coding is essential.</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>LDPC Parameters</h3>
+      <table>
+        <tr><td>Code</td><td class="accent">(2048, 1723) LDPC</td></tr>
+        <tr><td>Rate</td><td>0.841</td></tr>
+        <tr><td>Column weight</td><td>6</td></tr>
+        <tr><td>Row weight</td><td>32</td></tr>
+        <tr><td>Decoder iterations</td><td>6-12</td></tr>
+        <tr><td>Throughput</td><td>&gt;10 Gbps sustained</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Why LDPC Here?</h3>
+      <p class="small"><span class="accent">Coding gain:</span> ~6 dB over uncoded. Without this, 10 Gbps over copper would require higher-quality (and more expensive) cables.</p>
+      <p class="small fragment">The LDPC decoder chip must run at extremely high clock rates — QC structure and min-sum decoding are essential.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 20: Quasi-Cyclic LDPC -->
+<section>
+  <h2>Quasi-Cyclic LDPC for Hardware</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">A QC-LDPC code's H matrix is composed of <span class="accent">circulant permutation matrices</span> (or zero matrices). This structure enables massively parallel hardware decoders.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>Structure</h3>
+        <p class="small">H is an array of Z&times;Z circulant blocks:</p>
+        <div class="formula small" style="font-size: 0.7em;">
+          H = [P<sup>a<sub>00</sub></sup> P<sup>a<sub>01</sub></sup> ... P<sup>a<sub>0n</sub></sup>]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[P<sup>a<sub>10</sub></sup> P<sup>a<sub>11</sub></sup> ... P<sup>a<sub>1n</sub></sup>]<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[... &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]
+        </div>
+        <p class="small">P is a Z&times;Z identity matrix cyclically shifted. a<sub>ij</sub> = -1 means zero block.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Hardware Advantages</h3>
+        <p class="small accent">Z processing units work in parallel</p>
+        <p class="small fragment accent3">Barrel shifters replace random interconnects</p>
+        <p class="small fragment accent2">Compact memory: store only shift values</p>
+        <p class="small fragment accent4">Regular routing = simpler chip layout</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Decoder Throughput</h3>
+        <p class="small">Modern QC-LDPC decoders achieve <span class="accent">100+ Gbps</span> in hardware (ASIC/FPGA) — enabling 5G, Wi-Fi 6/7, and 100G Ethernet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 21: Girth and Cycle Analysis -->
+<section>
+  <h2>Girth, Cycles, and Trapping Sets</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div>
+      <div class="panel fragment">
+        <h3>Girth</h3>
+        <p class="small">The <span class="accent">girth</span> of a Tanner graph is the length of the shortest cycle. Higher girth = better BP performance.</p>
+        <table>
+          <tr><th>Girth</th><th>Impact</th></tr>
+          <tr><td class="accent2">4</td><td>Very bad — correlated messages after 2 iterations</td></tr>
+          <tr><td class="accent3">6</td><td>Acceptable — most practical codes</td></tr>
+          <tr><td class="accent">8+</td><td>Good — messages stay nearly independent longer</td></tr>
+        </table>
+      </div>
+      <div class="fragment warning">
+        <p class="small">4-cycles: if H[i1][j1]=H[i1][j2]=H[i2][j1]=H[i2][j2]=1, there's a 4-cycle. These cause messages to "echo" immediately.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Trapping Sets</h3>
+        <p class="small">Small substructures in the Tanner graph where BP gets "trapped" — unable to correct a small number of errors.</p>
+        <p class="small fragment">An (a,b) trapping set: a variable nodes connected to b <span class="accent2">odd-degree</span> check nodes. Responsible for the error floor.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Error Floor Mitigation</h3>
+        <p class="small accent">Post-processing: detect trapping sets, flip bits</p>
+        <p class="small accent3">Code design: avoid known trapping set patterns</p>
+        <p class="small accent2">Outer code: BCH/CRC cleans up residual errors</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 22: Python QC-LDPC Construction -->
+<section>
+  <h2>QC-LDPC Construction in Python</h2>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">import numpy as np
+
+def build_qc_ldpc(base_matrix, Z):
+    """
+    Construct a QC-LDPC parity check matrix from a base matrix.
+
+    base_matrix: 2D array where entry a_ij is a shift value
+                 (-1 means zero block)
+    Z: lifting factor (circulant block size)
+    """
+    mb, nb = base_matrix.shape
+    H = np.zeros((mb * Z, nb * Z), dtype=int)
+
+    for i in range(mb):
+        for j in range(nb):
+            shift = base_matrix[i, j]
+            if shift >= 0:
+                # Create Z x Z identity matrix shifted by 'shift'
+                block = np.roll(np.eye(Z, dtype=int), shift, axis=1)
+                H[i*Z:(i+1)*Z, j*Z:(j+1)*Z] = block
+
+    return H
+
+# Example: Simple rate-1/2 QC-LDPC
+# Base matrix (3 x 6, rate = 1 - 3/6 = 1/2)
+base = np.array([
+    [ 0,  1,  3, -1,  2, -1],
+    [-1,  0,  2,  1, -1,  3],
+    [ 2, -1, -1,  3,  0,  1]
+])
+
+Z = 8  # Lifting factor
+H = build_qc_ldpc(base, Z)
+print(f"QC-LDPC H: {H.shape[0]} x {H.shape[1]}")
+print(f"Rate: {1 - H.shape[0]/H.shape[1]:.3f}")
+print(f"Column weights: {H.sum(axis=0)[:Z]}")
+print(f"Row weights: {H.sum(axis=1)[:Z]}")
+print(f"Density: {H.sum() / H.size:.4f}")</code></pre>
+  <div class="fragment key-point">
+    <p class="small">The base matrix is much smaller than H (e.g., 46&times;68 for 5G NR BG1 vs 17,664&times;26,112 after lifting with Z=384). Standards only need to specify the base matrix.</p>
+  </div>
+</section>
+
+<!-- Slide 23: LDPC vs Everything -->
+<section>
+  <h2>LDPC in the Coding Landscape</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-history">History</span>
+  <div class="panel" style="margin-top: 0.5em;">
+    <table>
+      <tr>
+        <th>Property</th>
+        <th>LDPC</th>
+        <th>Turbo</th>
+        <th>Polar</th>
+        <th>RS/BCH</th>
+      </tr>
+      <tr class="fragment">
+        <td>Year</td>
+        <td>1962/1996</td>
+        <td>1993</td>
+        <td>2009</td>
+        <td>1950s-60s</td>
+      </tr>
+      <tr class="fragment">
+        <td>Gap to capacity</td>
+        <td class="accent">&lt;0.1 dB</td>
+        <td>~0.3 dB</td>
+        <td>~0.3 dB</td>
+        <td>2+ dB</td>
+      </tr>
+      <tr class="fragment">
+        <td>Error floor</td>
+        <td class="accent">Very low</td>
+        <td class="accent2">Moderate</td>
+        <td class="accent">None (SC)</td>
+        <td class="accent">None</td>
+      </tr>
+      <tr class="fragment">
+        <td>Decoder parallelism</td>
+        <td class="accent">Excellent</td>
+        <td class="accent2">Poor</td>
+        <td>Moderate</td>
+        <td>Good</td>
+      </tr>
+      <tr class="fragment">
+        <td>Best block size</td>
+        <td>Long (&gt;1000)</td>
+        <td>Medium (100-6000)</td>
+        <td>Medium-Long</td>
+        <td>Short-Medium</td>
+      </tr>
+      <tr class="fragment">
+        <td>Encoding complexity</td>
+        <td class="accent2">O(n) QC</td>
+        <td class="accent">O(n)</td>
+        <td class="accent">O(n log n)</td>
+        <td class="accent">O(n)</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- Slide 24: Summary & Key Takeaways -->
+<section>
+  <h2>LDPC Codes: Summary</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="grid-2">
+    <div>
+      <div class="panel fragment">
+        <h3>Key Milestones</h3>
+        <table>
+          <tr><td class="accent">1962</td><td>Gallager's thesis</td></tr>
+          <tr><td>1981</td><td>Tanner graphs</td></tr>
+          <tr><td class="accent">1996</td><td>MacKay & Neal rediscovery</td></tr>
+          <tr><td>2001</td><td>Density evolution & irregular codes</td></tr>
+          <tr><td>2004</td><td>DVB-S2 standard</td></tr>
+          <tr><td>2009</td><td>Wi-Fi 802.11n</td></tr>
+          <tr><td>2016</td><td>10GBase-T Ethernet</td></tr>
+          <tr><td class="accent">2018</td><td>5G NR data channel</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Why LDPC Dominates Today</h3>
+        <p class="small accent">Nearest to Shannon limit of any practical code</p>
+        <p class="small accent3">Massively parallel decoding architecture</p>
+        <p class="small accent2">Low error floor with proper design</p>
+        <p class="small accent4">Flexible rate and length via QC structure</p>
+        <p class="small" style="color: var(--accent);">Mature, well-understood theory</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">From a forgotten thesis to the most widely deployed channel code in modern communications — LDPC codes are the ultimate "slow burn" success story of coding theory.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  transition: 'slide',
+  slideNumber: 'c/t',
+  plugins: [RevealHighlight]
+});
+
+function fixSlides() {
+  document.querySelectorAll('.reveal .slides section').forEach(s => {
+    s.style.textAlign = 'left';
+  });
+}
+fixSlides();
+Reveal.on('ready', fixSlides);
+Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

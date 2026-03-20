@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCH Codes — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+.math-block { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+    <div class="series-tag">Coding Theory Series — 07</div>
+    <h1 class="title-gradient">BCH Codes</h1>
+    <p style="font-size:0.7em; color: var(--dim); margin-top:0.5em;">Algebraic codes with guaranteed error correction — from finite field theory to flash memory</p>
+    <div style="margin-top:1.5em;">
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <span class="badge badge-history">History</span>
+    </div>
+    <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+    <h2>Roadmap</h2>
+    <div class="grid-3">
+        <div class="panel fragment">
+            <h3>History</h3>
+            <p class="small">Hocquenghem, Bose &amp; Ray-Chaudhuri — independent discovery</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Finite Fields</h3>
+            <p class="small">GF(2<sup>m</sup>), minimal polynomials, cyclotomic cosets</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Code Construction</h3>
+            <p class="small">BCH bound, generator polynomial, designed distance</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Encoding</h3>
+            <p class="small">Systematic &amp; non-systematic methods</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Decoding</h3>
+            <p class="small">PGZ, Berlekamp-Massey, Chien search</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Applications</h3>
+            <p class="small">Flash memory, satellite, connection to RS codes</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 3: History -->
+<section>
+    <h2>Historical Origins</h2>
+    <span class="badge badge-history">History</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel fragment">
+            <h3>Alexis Hocquenghem (1959)</h3>
+            <p class="small">French mathematician at the Conservatoire National des Arts et Metiers in Paris.</p>
+            <p class="small">Published the construction of a class of multiple-error-correcting codes in <em>Comptes Rendus</em>, September 1959.</p>
+            <p class="small dim">His work was less well-known initially due to the French publication venue.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Bose &amp; Ray-Chaudhuri (1960)</h3>
+            <p class="small">Raj Chandra Bose and Dwijendra Kumar Ray-Chaudhuri at the University of North Carolina.</p>
+            <p class="small">Published independently in March 1960 in the <em>Journal of Information and Control</em>.</p>
+            <p class="small dim">Provided a more detailed treatment with proofs of the BCH bound.</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>BCH = Bose-Chaudhuri-Hocquenghem.</strong> One of the most important families of cyclic error-correcting codes. Reed-Solomon codes are a special case!
+    </div>
+</section>
+
+<!-- Slide 4: Finite Field Review -->
+<section>
+    <h2>Finite Fields: GF(2<sup>m</sup>) Review</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Construction via Irreducible Polynomials</h3>
+        <p class="small fragment">GF(2<sup>m</sup>) is constructed as GF(2)[x] / p(x), where p(x) is an irreducible polynomial of degree m over GF(2).</p>
+        <div class="formula fragment">
+            GF(2<sup>4</sup>): p(x) = x<sup>4</sup> + x + 1 &nbsp; (irreducible over GF(2))
+        </div>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Elements</h3>
+            <p class="small">GF(2<sup>m</sup>) has 2<sup>m</sup> elements:</p>
+            <ul class="small">
+                <li><span class="accent">0</span> (additive identity)</li>
+                <li><span class="accent">1, &alpha;, &alpha;<sup>2</sup>, ..., &alpha;<sup>2<sup>m</sup>-2</sup></span></li>
+            </ul>
+            <p class="small dim">&alpha; is a root of p(x), called the primitive element.</p>
+        </div>
+        <div class="card">
+            <h3>Key Property</h3>
+            <p class="small">&alpha;<sup>2<sup>m</sup>-1</sup> = 1 (cyclic group of order 2<sup>m</sup>-1).</p>
+            <p class="small fragment">Every nonzero element is a power of &alpha;.</p>
+            <p class="small fragment">Addition: XOR of polynomial coefficients.</p>
+            <p class="small fragment">Multiplication: polynomial multiplication mod p(x).</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 5: GF(2^4) Example -->
+<section>
+    <h2>GF(2<sup>4</sup>) Worked Example</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>p(x) = x<sup>4</sup> + x + 1, so &alpha;<sup>4</sup> = &alpha; + 1</h3>
+        <table class="fragment">
+            <tr><th>Power</th><th>Polynomial</th><th>Binary</th><th>Decimal</th></tr>
+            <tr><td>0</td><td>0</td><td>0000</td><td>0</td></tr>
+            <tr><td>&alpha;<sup>0</sup></td><td>1</td><td>0001</td><td>1</td></tr>
+            <tr><td>&alpha;<sup>1</sup></td><td>&alpha;</td><td>0010</td><td>2</td></tr>
+            <tr><td>&alpha;<sup>2</sup></td><td>&alpha;<sup>2</sup></td><td>0100</td><td>4</td></tr>
+            <tr><td>&alpha;<sup>3</sup></td><td>&alpha;<sup>3</sup></td><td>1000</td><td>8</td></tr>
+            <tr><td>&alpha;<sup>4</sup></td><td>&alpha; + 1</td><td>0011</td><td>3</td></tr>
+            <tr><td>&alpha;<sup>5</sup></td><td>&alpha;<sup>2</sup> + &alpha;</td><td>0110</td><td>6</td></tr>
+            <tr><td>&alpha;<sup>6</sup></td><td>&alpha;<sup>3</sup> + &alpha;<sup>2</sup></td><td>1100</td><td>12</td></tr>
+            <tr><td>&alpha;<sup>7</sup></td><td>&alpha;<sup>3</sup> + &alpha; + 1</td><td>1011</td><td>11</td></tr>
+        </table>
+        <p class="tiny dim fragment">Table continues for &alpha;<sup>8</sup> through &alpha;<sup>14</sup>. All 15 nonzero elements are distinct powers of &alpha;.</p>
+    </div>
+</section>
+
+<!-- Slide 6: Minimal Polynomials -->
+<section>
+    <h2>Minimal Polynomials</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Definition</h3>
+        <p class="small fragment">The <span class="accent">minimal polynomial</span> m<sub>i</sub>(x) of &alpha;<sup>i</sup> is the smallest degree polynomial over GF(2) that has &alpha;<sup>i</sup> as a root:</p>
+        <div class="formula fragment">
+            m<sub>i</sub>(&alpha;<sup>i</sup>) = 0, &nbsp;&nbsp; m<sub>i</sub>(x) ∈ GF(2)[x], &nbsp;&nbsp; m<sub>i</sub>(x) is irreducible
+        </div>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Key Properties</h3>
+            <ul class="small">
+                <li class="fragment">m<sub>i</sub>(x) divides x<sup>2<sup>m</sup>-1</sup> + 1</li>
+                <li class="fragment">deg(m<sub>i</sub>) divides m</li>
+                <li class="fragment">If &alpha;<sup>i</sup> is a root, so is &alpha;<sup>2i</sup> (Frobenius endomorphism)</li>
+                <li class="fragment">Roots come in <span class="accent">conjugate sets</span>: {&alpha;<sup>i</sup>, &alpha;<sup>2i</sup>, &alpha;<sup>4i</sup>, ...}</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>GF(2<sup>4</sup>) Minimals</h3>
+            <p class="small">m<sub>1</sub>(x) = x<sup>4</sup> + x + 1</p>
+            <p class="small fragment">Roots: &alpha;, &alpha;<sup>2</sup>, &alpha;<sup>4</sup>, &alpha;<sup>8</sup></p>
+            <p class="small fragment">m<sub>3</sub>(x) = x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + x + 1</p>
+            <p class="small fragment">Roots: &alpha;<sup>3</sup>, &alpha;<sup>6</sup>, &alpha;<sup>12</sup>, &alpha;<sup>9</sup></p>
+            <p class="small fragment">m<sub>5</sub>(x) = x<sup>2</sup> + x + 1</p>
+            <p class="small fragment">Roots: &alpha;<sup>5</sup>, &alpha;<sup>10</sup></p>
+            <p class="small fragment">m<sub>7</sub>(x) = x<sup>4</sup> + x<sup>3</sup> + 1</p>
+            <p class="small fragment">Roots: &alpha;<sup>7</sup>, &alpha;<sup>14</sup>, &alpha;<sup>13</sup>, &alpha;<sup>11</sup></p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 7: Cyclotomic Cosets -->
+<section>
+    <h2>Cyclotomic Cosets</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Definition</h3>
+        <p class="small fragment">The <span class="accent">cyclotomic coset</span> of i modulo 2<sup>m</sup>-1 is:</p>
+        <div class="formula fragment">
+            C<sub>i</sub> = { i, 2i, 4i, 8i, ... } mod (2<sup>m</sup>-1)
+        </div>
+        <p class="small fragment">Elements in the same coset share the same minimal polynomial.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>GF(2<sup>4</sup>) Cyclotomic Cosets (mod 15)</h3>
+        <table>
+            <tr><th>Coset</th><th>Elements</th><th>Size</th><th>Minimal Polynomial</th></tr>
+            <tr><td>C<sub>0</sub></td><td>{0}</td><td>1</td><td>x + 1</td></tr>
+            <tr class="fragment"><td>C<sub>1</sub></td><td>{1, 2, 4, 8}</td><td>4</td><td>x<sup>4</sup> + x + 1</td></tr>
+            <tr class="fragment"><td>C<sub>3</sub></td><td>{3, 6, 12, 9}</td><td>4</td><td>x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + x + 1</td></tr>
+            <tr class="fragment"><td>C<sub>5</sub></td><td>{5, 10}</td><td>2</td><td>x<sup>2</sup> + x + 1</td></tr>
+            <tr class="fragment"><td>C<sub>7</sub></td><td>{7, 14, 13, 11}</td><td>4</td><td>x<sup>4</sup> + x<sup>3</sup> + 1</td></tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>Sizes sum to 15:</strong> 1 + 4 + 4 + 2 + 4 = 15 = 2<sup>4</sup> - 1. The coset structure determines the possible BCH code parameters.
+    </div>
+</section>
+
+<!-- Slide 8: BCH Bound -->
+<section>
+    <h2>The BCH Bound</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Designed Distance</h3>
+        <div class="key-point fragment">
+            <strong>BCH Bound:</strong> If the generator polynomial g(x) has &alpha;<sup>b</sup>, &alpha;<sup>b+1</sup>, ..., &alpha;<sup>b+d-2</sup> as roots (d-1 consecutive powers of &alpha;), then the minimum distance of the code is <span class="accent">at least d</span>.
+        </div>
+        <div class="formula fragment">
+            d<sub>min</sub> ≥ d<sub>designed</sub> = δ
+        </div>
+        <p class="small fragment">The <span class="accent3">designed distance</span> δ is a guaranteed lower bound on d<sub>min</sub>. Often d<sub>min</sub> = δ exactly, but sometimes d<sub>min</sub> &gt; δ.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Why Does This Work?</h3>
+        <p class="small">If c(x) is a codeword and g(x)|c(x), then c(&alpha;<sup>i</sup>) = 0 for all roots of g(x). A codeword of weight &lt; d would give a system of equations with a Vandermonde matrix that must have a nontrivial solution — but Vandermonde is always invertible for distinct roots! Contradiction.</p>
+    </div>
+</section>
+
+<!-- Slide 9: Generator Polynomial Construction -->
+<section>
+    <h2>Generator Polynomial Construction</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Recipe for a t-Error-Correcting BCH Code</h3>
+        <p class="small fragment"><strong>Step 1:</strong> Choose designed distance δ = 2t + 1 (to correct t errors).</p>
+        <p class="small fragment"><strong>Step 2:</strong> The generator must have roots &alpha;, &alpha;<sup>2</sup>, ..., &alpha;<sup>2t</sup>.</p>
+        <p class="small fragment"><strong>Step 3:</strong> Compute g(x) = LCM(m<sub>1</sub>(x), m<sub>2</sub>(x), ..., m<sub>2t</sub>(x)).</p>
+        <p class="small fragment dim">Since conjugate roots share minimal polynomials, many m<sub>i</sub>'s are redundant.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Example: Double-Error-Correcting BCH(15, 7)</h3>
+        <p class="small">t = 2, need roots &alpha;, &alpha;<sup>2</sup>, &alpha;<sup>3</sup>, &alpha;<sup>4</sup> in g(x).</p>
+        <div class="math-block fragment">
+            m<sub>1</sub>(x) = x<sup>4</sup> + x + 1 &nbsp; (contains roots &alpha;, &alpha;<sup>2</sup>, &alpha;<sup>4</sup>)<br>
+            m<sub>3</sub>(x) = x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + x + 1 &nbsp; (contains root &alpha;<sup>3</sup>)
+        </div>
+        <div class="formula fragment">
+            g(x) = m<sub>1</sub>(x) · m<sub>3</sub>(x) = x<sup>8</sup> + x<sup>7</sup> + x<sup>6</sup> + x<sup>4</sup> + 1
+        </div>
+        <p class="small fragment">n = 15, deg(g) = 8, so k = 15 - 8 = 7. BCH(15, 7, 5) code.</p>
+    </div>
+</section>
+
+<!-- Slide 10: BCH Code Parameters -->
+<section>
+    <h2>BCH Code Parameters</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Primitive Narrow-Sense BCH Codes over GF(2<sup>m</sup>)</h3>
+        <div class="formula fragment">
+            n = 2<sup>m</sup> - 1, &nbsp;&nbsp; k ≥ n - mt, &nbsp;&nbsp; d ≥ 2t + 1
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>Example Codes</h3>
+        <table>
+            <tr><th>m</th><th>n</th><th>t</th><th>k</th><th>d<sub>min</sub></th><th>Rate</th></tr>
+            <tr><td>4</td><td>15</td><td>1</td><td>11</td><td>3</td><td>0.733</td></tr>
+            <tr class="fragment"><td>4</td><td>15</td><td>2</td><td>7</td><td>5</td><td>0.467</td></tr>
+            <tr class="fragment"><td>4</td><td>15</td><td>3</td><td>5</td><td>7</td><td>0.333</td></tr>
+            <tr class="fragment"><td>5</td><td>31</td><td>1</td><td>26</td><td>3</td><td>0.839</td></tr>
+            <tr class="fragment"><td>5</td><td>31</td><td>3</td><td>16</td><td>7</td><td>0.516</td></tr>
+            <tr class="fragment"><td>5</td><td>31</td><td>5</td><td>11</td><td>11</td><td>0.355</td></tr>
+            <tr class="fragment"><td>8</td><td>255</td><td>2</td><td>239</td><td>5</td><td>0.937</td></tr>
+            <tr class="fragment"><td>8</td><td>255</td><td>4</td><td>223</td><td>9</td><td>0.875</td></tr>
+        </table>
+    </div>
+    <p class="small fragment dim">Note: The t=1 case for any m gives the Hamming code — BCH generalizes Hamming codes!</p>
+</section>
+
+<!-- Slide 11: Encoding -->
+<section>
+    <h2>BCH Encoding</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel">
+            <h3>Non-Systematic</h3>
+            <p class="small fragment">Simply multiply:</p>
+            <div class="formula fragment">c(x) = m(x) · g(x)</div>
+            <p class="small fragment">Message polynomial m(x) of degree &lt; k produces codeword c(x) of degree &lt; n.</p>
+            <p class="small dim fragment">Simple but message bits are not directly readable in the codeword.</p>
+        </div>
+        <div class="panel">
+            <h3>Systematic</h3>
+            <p class="small fragment">Place message in high-order positions:</p>
+            <div class="formula fragment">c(x) = x<sup>n-k</sup>·m(x) + r(x)</div>
+            <p class="small fragment">where r(x) = [x<sup>n-k</sup>·m(x)] mod g(x)</p>
+            <p class="small fragment dim">Codeword = [parity bits | message bits]</p>
+            <div class="key-point fragment">
+                <p class="small">First k bits of the codeword are the original message — easy to extract after decoding!</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 12: Encoding Example -->
+<section>
+    <h2>Encoding Example: BCH(15, 7)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Systematic Encoding</h3>
+        <p class="small fragment"><span class="accent">g(x) = x<sup>8</sup> + x<sup>7</sup> + x<sup>6</sup> + x<sup>4</sup> + 1</span></p>
+        <p class="small fragment"><span class="accent3">Message:</span> m = (1 0 1 1 0 0 1) → m(x) = x<sup>6</sup> + x<sup>4</sup> + x<sup>3</sup> + 1</p>
+    </div>
+    <div class="panel fragment">
+        <p class="small"><strong>Step 1:</strong> Compute x<sup>8</sup> · m(x) = x<sup>14</sup> + x<sup>12</sup> + x<sup>11</sup> + x<sup>8</sup></p>
+        <p class="small fragment"><strong>Step 2:</strong> Divide by g(x):</p>
+        <div class="math-block fragment">
+            x<sup>14</sup> + x<sup>12</sup> + x<sup>11</sup> + x<sup>8</sup> = q(x)·g(x) + r(x)
+        </div>
+        <p class="small fragment"><strong>Step 3:</strong> r(x) = x<sup>7</sup> + x<sup>6</sup> + x<sup>4</sup> + x<sup>3</sup> + x<sup>2</sup> + x (the remainder)</p>
+        <p class="small fragment"><strong>Step 4:</strong> c(x) = x<sup>8</sup>·m(x) + r(x)</p>
+        <div class="formula fragment">
+            Codeword: (1 1 0 1 1 1 1 0 | 1 0 1 1 0 0 1)<br>
+            <span class="tiny dim">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;parity &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; message</span>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 13: Decoding Overview -->
+<section>
+    <h2>BCH Decoding Pipeline</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="flow-row" style="margin-top:1.5em;">
+        <div class="flow-node" style="background:rgba(108,92,231,0.15);">Received<br><span class="accent4">r(x)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Syndromes<br><span class="accent">S₁...S₂ₜ</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(255,217,61,0.1);">Error Locator<br><span class="accent3">&sigma;(x)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(255,107,157,0.1);">Error Locations<br><span class="accent2">Chien Search</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Correct<br><span class="accent">ĉ(x)</span></div>
+    </div>
+    <div class="grid-2" style="margin-top:1em;">
+        <div class="card fragment">
+            <h3>Step 1: Syndrome Computation</h3>
+            <p class="small">Evaluate r(x) at the roots of g(x):</p>
+            <div class="math-block">S<sub>j</sub> = r(&alpha;<sup>j</sup>) = e(&alpha;<sup>j</sup>)</div>
+            <p class="small dim">If all S<sub>j</sub> = 0, no errors detected.</p>
+        </div>
+        <div class="card fragment">
+            <h3>Step 2: Error-Locator Polynomial</h3>
+            <p class="small">Find &sigma;(x) = (1 + X<sub>1</sub>x)(1 + X<sub>2</sub>x)...(1 + X<sub>v</sub>x)</p>
+            <p class="small dim">Where X<sub>i</sub> = &alpha;<sup>e<sub>i</sub></sup> marks error positions.</p>
+        </div>
+    </div>
+    <div class="key-point fragment" style="margin-top:0.5em;">
+        <strong>For binary BCH:</strong> errors are always in GF(2), so we only need to find error <em>locations</em> (bit positions to flip). Non-binary codes also need error <em>values</em>.
+    </div>
+</section>
+
+<!-- Slide 14: Syndrome Computation -->
+<section>
+    <h2>Syndrome Computation</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Calculating Syndromes</h3>
+        <p class="small fragment">For a t-error-correcting BCH code, compute 2t syndromes:</p>
+        <div class="formula fragment">
+            S<sub>j</sub> = r(&alpha;<sup>j</sup>) = &Sigma;<sub>i=0</sub><sup>n-1</sup> r<sub>i</sub> · &alpha;<sup>ij</sup>, &nbsp;&nbsp; j = 1, 2, ..., 2t
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>Syndromes in Terms of Error Positions</h3>
+        <p class="small">If v errors occurred at positions e₁, e₂, ..., e<sub>v</sub>:</p>
+        <div class="math-block">
+            S<sub>1</sub> = X<sub>1</sub> + X<sub>2</sub> + ... + X<sub>v</sub><br>
+            S<sub>2</sub> = X<sub>1</sub><sup>2</sup> + X<sub>2</sub><sup>2</sup> + ... + X<sub>v</sub><sup>2</sup><br>
+            S<sub>3</sub> = X<sub>1</sub><sup>3</sup> + X<sub>2</sub><sup>3</sup> + ... + X<sub>v</sub><sup>3</sup><br>
+            ⋮<br>
+            S<sub>2t</sub> = X<sub>1</sub><sup>2t</sup> + X<sub>2</sub><sup>2t</sup> + ... + X<sub>v</sub><sup>2t</sup>
+        </div>
+        <p class="small fragment dim">where X<sub>i</sub> = &alpha;<sup>e<sub>i</sub></sup> are the error locators.</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>Property:</strong> S<sub>2j</sub> = S<sub>j</sub><sup>2</sup> in binary fields (Frobenius). This halves the independent equations but also the unknowns!
+    </div>
+</section>
+
+<!-- Slide 15: Peterson-Gorenstein-Zierler Decoder -->
+<section>
+    <h2>Peterson-Gorenstein-Zierler Decoder</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Direct Matrix Approach</h3>
+        <p class="small fragment">The error-locator polynomial &sigma;(x) = 1 + &sigma;<sub>1</sub>x + &sigma;<sub>2</sub>x<sup>2</sup> + ... + &sigma;<sub>v</sub>x<sup>v</sup> satisfies Newton's identities:</p>
+        <div class="formula fragment" style="font-size:0.85em;">
+            ⎡ S₁&nbsp;&nbsp;S₂&nbsp;&nbsp;...&nbsp;S<sub>v</sub> ⎤ ⎡ &sigma;<sub>v</sub> ⎤   ⎡ S<sub>v+1</sub> ⎤<br>
+            ⎢ S₂&nbsp;&nbsp;S₃&nbsp;&nbsp;...&nbsp;S<sub>v+1</sub>⎥ ⎢ &sigma;<sub>v-1</sub>⎥ = ⎢ S<sub>v+2</sub> ⎥<br>
+            ⎢ &nbsp;⋮ &nbsp;&nbsp; ⋮ &nbsp;&nbsp; ⋱ &nbsp; ⋮ &nbsp;⎥ ⎢ &nbsp; ⋮ &nbsp; ⎥   ⎢ &nbsp; ⋮ &nbsp; ⎥<br>
+            ⎣ S<sub>v</sub> S<sub>v+1</sub>... S<sub>2v-1</sub>⎦ ⎣ &sigma;<sub>1</sub> ⎦   ⎣ S<sub>2v</sub> ⎦
+        </div>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Algorithm</h3>
+            <ol class="small">
+                <li>Start with v = t (assume maximum errors)</li>
+                <li>Form the syndrome matrix</li>
+                <li>If det = 0, reduce v by 1 and retry</li>
+                <li>Solve the linear system over GF(2<sup>m</sup>)</li>
+                <li>Find roots of &sigma;(x) via Chien search</li>
+            </ol>
+        </div>
+        <div class="card">
+            <h3>Complexity</h3>
+            <p class="small">Matrix inversion: O(t<sup>3</sup>) field operations.</p>
+            <p class="small fragment dim">Practical for small t, but Berlekamp-Massey is preferred for t &gt; 3 due to O(t<sup>2</sup>) complexity.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 16: Berlekamp-Massey Algorithm -->
+<section>
+    <h2>Berlekamp-Massey Algorithm</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Iterative Error-Locator Polynomial Construction</h3>
+        <p class="small fragment">The BM algorithm finds the <span class="accent">shortest LFSR</span> (Linear Feedback Shift Register) that generates the syndrome sequence S₁, S₂, ..., S₂ₜ.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Algorithm Outline</h3>
+        <ol class="small">
+            <li class="fragment"><strong>Initialize:</strong> &sigma;<sup>(0)</sup>(x) = 1, B(x) = 1, L = 0, r = 1</li>
+            <li class="fragment"><strong>For each r = 1 to 2t:</strong>
+                <ul>
+                    <li>Compute discrepancy: &Delta;<sub>r</sub> = S<sub>r</sub> + &sigma;<sub>1</sub>S<sub>r-1</sub> + ... + &sigma;<sub>L</sub>S<sub>r-L</sub></li>
+                    <li>If &Delta;<sub>r</sub> = 0: do nothing (current LFSR works)</li>
+                    <li>If &Delta;<sub>r</sub> ≠ 0: update &sigma;(x) using correction term</li>
+                    <li>If 2L &lt; r: increase LFSR length, update B(x)</li>
+                </ul>
+            </li>
+            <li class="fragment"><strong>Output:</strong> &sigma;(x) of degree v ≤ t</li>
+        </ol>
+    </div>
+    <div class="key-point fragment">
+        <strong>Complexity: O(t<sup>2</sup>)</strong> — much better than PGZ's O(t<sup>3</sup>). This is the standard decoder for practical BCH/RS implementations.
+    </div>
+</section>
+
+<!-- Slide 17: Chien Search -->
+<section>
+    <h2>Chien Search</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Finding Roots of &sigma;(x)</h3>
+        <p class="small fragment">Named after R.T. Chien (1964). An exhaustive search made efficient by exploiting the structure of finite fields.</p>
+        <div class="formula fragment">
+            Test each &alpha;<sup>-i</sup> for i = 0, 1, ..., n-1: &nbsp;&nbsp; &sigma;(&alpha;<sup>-i</sup>) = 0?
+        </div>
+        <p class="small fragment">If &sigma;(&alpha;<sup>-i</sup>) = 0, then position i has an error.</p>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Efficient Implementation</h3>
+            <p class="small">Instead of recomputing from scratch each time, update incrementally:</p>
+            <div class="math-block">
+                T<sub>j</sub> &larr; &sigma;<sub>j</sub> · &alpha;<sup>-j</sup> (initially)<br>
+                T<sub>j</sub> &larr; T<sub>j</sub> · &alpha;<sup>-j</sup> (each step)
+            </div>
+            <p class="small dim">Only v multiplications per step instead of evaluating the full polynomial.</p>
+        </div>
+        <div class="card">
+            <h3>Hardware Friendly</h3>
+            <ul class="small">
+                <li class="fragment">Constant-time operation (n iterations always)</li>
+                <li class="fragment">Parallelizable — test multiple roots simultaneously</li>
+                <li class="fragment">Only multipliers and adders in GF(2<sup>m</sup>)</li>
+                <li class="fragment">Can be pipelined for high throughput</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 18: Binary vs Non-Binary BCH -->
+<section>
+    <h2>Binary vs. Non-Binary BCH</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel">
+            <h3>Binary BCH Codes</h3>
+            <ul class="small">
+                <li class="fragment">Symbols are in <span class="accent">GF(2)</span> (bits)</li>
+                <li class="fragment">Roots of g(x) are in GF(2<sup>m</sup>)</li>
+                <li class="fragment">Error values are always 1 (just flip the bit)</li>
+                <li class="fragment">Only need to find error <em>positions</em></li>
+                <li class="fragment">Code length n = 2<sup>m</sup> - 1</li>
+            </ul>
+            <p class="small fragment dim">Simpler decoding — no need for Forney's algorithm.</p>
+        </div>
+        <div class="panel">
+            <h3>Non-Binary BCH (Reed-Solomon)</h3>
+            <ul class="small">
+                <li class="fragment">Symbols are in <span class="accent">GF(2<sup>m</sup>)</span> (m-bit symbols)</li>
+                <li class="fragment">Each symbol can take 2<sup>m</sup> values</li>
+                <li class="fragment">Error values are arbitrary field elements</li>
+                <li class="fragment">Must find positions AND values</li>
+                <li class="fragment">Code length n = 2<sup>m</sup> - 1 symbols</li>
+            </ul>
+            <p class="small fragment dim">Needs Forney's algorithm to compute error magnitudes.</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Reed-Solomon codes are non-binary BCH codes</strong> where the symbols and roots are in the <em>same</em> field. This gives them the MDS property: d = n - k + 1.
+    </div>
+</section>
+
+<!-- Slide 19: BCH and Reed-Solomon Relationship -->
+<section>
+    <h2>BCH → Reed-Solomon Connection</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Family Tree</h3>
+        <div class="flow-row">
+            <div class="flow-node" style="border-color:var(--accent3);">Linear Codes</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent3);">Cyclic Codes</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent);">BCH Codes</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent2);">Reed-Solomon</div>
+        </div>
+    </div>
+    <div class="grid-2" style="margin-top:0.8em;">
+        <div class="card fragment">
+            <h3>BCH Code (Binary)</h3>
+            <ul class="small">
+                <li>Alphabet: GF(2)</li>
+                <li>Length: n = 2<sup>m</sup> - 1 bits</li>
+                <li>g(x) has roots in GF(2<sup>m</sup>)</li>
+                <li>d ≥ 2t + 1 (BCH bound)</li>
+                <li><span class="accent2">NOT MDS</span> in general</li>
+            </ul>
+        </div>
+        <div class="card fragment">
+            <h3>Reed-Solomon Code</h3>
+            <ul class="small">
+                <li>Alphabet: GF(2<sup>m</sup>)</li>
+                <li>Length: n = 2<sup>m</sup> - 1 symbols</li>
+                <li>g(x) = &Pi;(x - &alpha;<sup>i</sup>), consecutive roots</li>
+                <li>d = n - k + 1 (exactly!)</li>
+                <li><span class="accent">Always MDS!</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="warning fragment">
+        <strong>Subtle difference:</strong> In RS codes, minimal polynomials are degree-1 (since roots are in the same field as the coefficients). In binary BCH, minimal polynomials have degree up to m, which is why binary BCH codes are not MDS.
+    </div>
+</section>
+
+<!-- Slide 20: Applications -->
+<section>
+    <h2>Applications of BCH Codes</h2>
+    <span class="badge badge-app">Applications</span>
+    <div class="grid-2" style="margin-top:1em;">
+        <div class="panel fragment">
+            <h3>Flash Memory (NAND)</h3>
+            <p class="small">BCH codes are the standard ECC for NAND flash storage.</p>
+            <ul class="small">
+                <li>SLC flash: 1-bit BCH sufficient</li>
+                <li>MLC flash: 4-8 bit BCH needed</li>
+                <li>TLC flash: 40-72 bit BCH or LDPC</li>
+            </ul>
+            <p class="small dim">BCH preferred for its deterministic latency and low power.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Satellite Communications</h3>
+            <p class="small">DVB-S2 uses BCH outer code + LDPC inner code.</p>
+            <ul class="small">
+                <li>BCH cleans up LDPC error floor</li>
+                <li>Typical: BCH(65535, 65343, t=12)</li>
+                <li>Near Shannon limit performance</li>
+            </ul>
+        </div>
+        <div class="panel fragment">
+            <h3>Barcodes &amp; QR Codes</h3>
+            <p class="small">QR codes use RS (a BCH generalization) for error correction at multiple levels.</p>
+            <p class="small dim">L: 7%, M: 15%, Q: 25%, H: 30% correction capability.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Disk Drives</h3>
+            <p class="small">Hard drives use BCH/RS codes in the read channel alongside other signal processing.</p>
+            <p class="small dim">Typical: t = 10-20 error correction.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 21: Python BCH Encoder -->
+<section>
+    <h2>Python: BCH Encoder</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python">def gf2_poly_mod(dividend, divisor):
+    """Polynomial division over GF(2), return remainder."""
+    dividend = list(dividend)  # copy
+    for i in range(len(dividend) - len(divisor) + 1):
+        if dividend[i] == 1:
+            for j in range(len(divisor)):
+                dividend[i + j] ^= divisor[j]
+    return dividend[-(len(divisor)-1):]
+
+def gf2_poly_mult(a, b):
+    """Polynomial multiplication over GF(2)."""
+    result = [0] * (len(a) + len(b) - 1)
+    for i, ai in enumerate(a):
+        if ai:
+            for j, bj in enumerate(b):
+                result[i + j] ^= bj
+    return result
+
+class BCHCode:
+    def __init__(self, n, g_coeffs):
+        """
+        n: code length (2^m - 1)
+        g_coeffs: generator polynomial as list [high...low]
+        """
+        self.n = n
+        self.g = g_coeffs
+        self.n_minus_k = len(g_coeffs) - 1
+        self.k = n - self.n_minus_k
+
+    def encode_systematic(self, message):
+        """Systematic BCH encoding."""
+        assert len(message) == self.k
+        # x^(n-k) * m(x)
+        shifted = message + [0] * self.n_minus_k
+        # Compute remainder
+        remainder = gf2_poly_mod(shifted, self.g)
+        # Codeword = message | parity
+        codeword = message + remainder
+        return codeword
+
+    def compute_syndrome(self, received, alpha_powers):
+        """Compute syndromes by evaluating r(x) at roots."""
+        # This requires GF(2^m) arithmetic - simplified here
+        pass  # Full implementation needs GF arithmetic</code></pre>
+</section>
+
+<!-- Slide 22: Python BCH Demo -->
+<section>
+    <h2>Python: BCH(15,7) Demo</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python"># BCH(15, 7, 5) generator: x^8 + x^7 + x^6 + x^4 + 1
+g = [1, 1, 1, 0, 1, 0, 0, 0, 1]  # coefficients high to low
+
+bch = BCHCode(15, g)
+
+# Encode a message
+message = [1, 0, 1, 1, 0, 0, 1]
+codeword = bch.encode_systematic(message)
+print(f"Message:  {message}")
+print(f"Codeword: {codeword}")
+# Output: [1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0]
+#          |--- message ---|  |--- parity ---|
+
+# Verify: codeword should be divisible by g(x)
+remainder = gf2_poly_mod(codeword, g)
+print(f"Remainder (should be all zeros): {remainder}")
+# [0, 0, 0, 0, 0, 0, 0, 0]
+
+# Introduce 2 errors (max correctable)
+received = codeword.copy()
+received[3] ^= 1  # flip bit 3
+received[10] ^= 1  # flip bit 10
+print(f"Received: {received}")
+
+# Check syndrome (non-zero = errors detected)
+rem = gf2_poly_mod(received, g)
+print(f"Syndrome check: {rem}")
+print(f"Errors detected: {any(rem)}")  # True
+
+# Encode all 2^7 = 128 messages to verify code properties
+min_weight = 15
+for i in range(1, 128):
+    m = [(i >> j) & 1 for j in range(6, -1, -1)]
+    c = bch.encode_systematic(m)
+    w = sum(c)
+    min_weight = min(min_weight, w)
+print(f"Minimum weight (= d_min): {min_weight}")  # 5</code></pre>
+</section>
+
+<!-- Slide 23: Summary -->
+<section>
+    <h2>Summary</h2>
+    <div class="grid-2" style="margin-top:0.8em;">
+        <div class="panel fragment">
+            <h3>BCH Code Essentials</h3>
+            <ul class="small">
+                <li>Cyclic codes with <span class="accent">algebraic decoding</span></li>
+                <li>n = 2<sup>m</sup>-1, guaranteed d ≥ 2t+1</li>
+                <li>Generator = LCM of minimal polynomials</li>
+                <li>Generalize Hamming codes (t=1 case)</li>
+            </ul>
+        </div>
+        <div class="panel fragment">
+            <h3>Decoding Pipeline</h3>
+            <ul class="small">
+                <li>Syndromes → Error-locator → Roots → Correct</li>
+                <li>PGZ: O(t<sup>3</sup>), small t</li>
+                <li>Berlekamp-Massey: O(t<sup>2</sup>), standard</li>
+                <li>Chien search: O(n) root finding</li>
+            </ul>
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>The Big Picture</h3>
+        <div class="flow-row">
+            <div class="flow-node">Hamming<br><span class="tiny dim">t=1</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent);">BCH<br><span class="tiny accent">t-error binary</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color:var(--accent2);">Reed-Solomon<br><span class="tiny accent2">non-binary BCH, MDS</span></div>
+        </div>
+    </div>
+    <div class="key-point fragment" style="margin-top:0.5em;">
+        <strong>Next up:</strong> Reed-Solomon codes — the "most widely deployed error correction code in history." Everything from CDs to QR codes to deep space.
+    </div>
+    <div class="nav-hint fragment">End of Part 07 &bull; BCH Codes</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+    width: 1200,
+    height: 900,
+    margin: 0.02,
+    transition: 'slide',
+    slideNumber: 'c/t',
+    plugins: [ RevealHighlight ]
+});
+
+function fixSlides() {
+    document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+        if (!slide.getAttribute('data-background-color')) {
+            slide.setAttribute('data-background-color', '#0a0a0f');
+        }
+    });
+}
+fixSlides();
+</script>
+</body>
+</html>

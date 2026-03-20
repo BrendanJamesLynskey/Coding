@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polar Codes — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+  <div class="series-tag">Coding Theory Series — 12</div>
+  <h1 class="title-gradient">Polar Codes</h1>
+  <p style="font-size:0.7em; color: var(--dim); max-width: 700px;">The first codes provably achieving channel capacity with efficient encoding and decoding — from Arikan's elegant theory to the 5G control channel.</p>
+  <div style="margin-top: 1em;">
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <span class="badge badge-history">History</span>
+    <span class="badge badge-standards">Standards</span>
+  </div>
+  <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="grid-3">
+    <div class="panel fragment">
+      <h3>Origins</h3>
+      <p class="small">Arikan's 2009 breakthrough and the concept of channel polarization.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Polarization</h3>
+      <p class="small">How channels split into perfect and useless — the core phenomenon.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Construction</h3>
+      <p class="small">Choosing information bits and the Kronecker product encoding.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Decoding</h3>
+      <p class="small">Successive cancellation, list decoding, and CRC-aided variants.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>5G Standards</h3>
+      <p class="small">How polar codes won the battle for 5G control channels.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Comparisons</h3>
+      <p class="small">Polar vs LDPC vs turbo — strengths and trade-offs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: Arikan's Breakthrough -->
+<section>
+  <h2>Arikan's 2009 Breakthrough</h2>
+  <span class="badge badge-history">History</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Holy Grail</h3>
+        <p class="small">Since Shannon (1948), the field searched for codes that:</p>
+        <ul class="small">
+          <li class="fragment"><span class="accent">Provably achieve</span> channel capacity</li>
+          <li class="fragment">Have <span class="accent">efficient</span> encoding: O(n log n)</li>
+          <li class="fragment">Have <span class="accent">efficient</span> decoding: O(n log n)</li>
+          <li class="fragment">Work for <span class="accent">any</span> symmetric channel</li>
+        </ul>
+        <p class="small fragment">For 60 years, no code satisfied all four conditions simultaneously.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Erdal Arikan</h3>
+        <p class="small">Professor at Bilkent University, Turkey. His 2009 paper "Channel Polarization: A Method for Constructing Capacity-Achieving Codes for Symmetric Binary-Input Discrete Memoryless Channels" solved the problem.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">Polar codes are the <span class="accent">first and only</span> family of codes with a rigorous proof of achieving Shannon capacity with polynomial complexity.</p>
+      </div>
+      <div class="fragment">
+        <p class="small dim">Arikan received the IEEE Richard W. Hamming Medal (2018) and the Shannon Award (2023, anticipated) for this contribution.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: Channel Polarization Concept -->
+<section>
+  <h2>Channel Polarization</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">Start with N copies of a channel W. Apply a specific linear transform. The resulting N "virtual channels" <span class="accent">polarize</span>: they become either nearly perfect (capacity &rarr; 1) or nearly useless (capacity &rarr; 0).</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>The Basic Transform (N=2)</h3>
+        <p class="small">Two uses of channel W with capacity I(W):</p>
+        <div class="formula small">
+          u<sub>1</sub> &rarr; x<sub>1</sub> = u<sub>1</sub> &oplus; u<sub>2</sub> &rarr; W &rarr; y<sub>1</sub><br>
+          u<sub>2</sub> &rarr; x<sub>2</sub> = u<sub>2</sub> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &rarr; W &rarr; y<sub>2</sub>
+        </div>
+        <p class="small fragment"><span class="accent2">W<sup>-</sup>:</span> Channel for u<sub>1</sub> (seeing only y<sub>1</sub>, y<sub>2</sub>) — <em>worse</em> than W</p>
+        <p class="small fragment"><span class="accent">W<sup>+</sup>:</span> Channel for u<sub>2</sub> (seeing y<sub>1</sub>, y<sub>2</sub>, u<sub>1</sub>) — <em>better</em> than W</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Conservation Law</h3>
+        <div class="formula small">
+          I(W<sup>-</sup>) + I(W<sup>+</sup>) = 2 I(W)
+        </div>
+        <p class="small">Total capacity is preserved! But:</p>
+        <div class="formula small">
+          I(W<sup>-</sup>) &le; I(W) &le; I(W<sup>+</sup>)
+        </div>
+        <p class="small fragment">One channel gets better, the other gets worse. Capacity is <span class="accent">redistributed</span>, not created or destroyed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 5: Polarization Phenomenon -->
+<section>
+  <h2>The Polarization Phenomenon</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>Recursive Application</h3>
+    <p class="small">Apply the basic transform recursively n = log<sub>2</sub>(N) times. After n levels, N = 2<sup>n</sup> virtual channels emerge.</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Polarization Theorem</h3>
+      <p class="small">As N &rarr; &infin;, the fraction of channels with capacity near 1 approaches <span class="accent">I(W)</span>, and the fraction with capacity near 0 approaches <span class="accent">1 - I(W)</span>.</p>
+      <div class="formula small" style="margin-top: 0.5em;">
+        For any &delta; &gt; 0:<br>
+        #{i : I(W<sub>N</sub><sup>(i)</sup>) &gt; 1-&delta;} / N &rarr; I(W)<br>
+        #{i : I(W<sub>N</sub><sup>(i)</sup>) &lt; &delta;} / N &rarr; 1-I(W)
+      </div>
+    </div>
+    <div class="card">
+      <h3>Example: BEC(&epsilon;=0.5)</h3>
+      <table>
+        <tr><th>N</th><th>Good (&gt;0.99)</th><th>Bad (&lt;0.01)</th><th>Middle</th></tr>
+        <tr><td>4</td><td>1 (25%)</td><td>1 (25%)</td><td>2 (50%)</td></tr>
+        <tr><td>16</td><td>5 (31%)</td><td>5 (31%)</td><td>6 (38%)</td></tr>
+        <tr><td>256</td><td>107 (42%)</td><td>107 (42%)</td><td>42 (16%)</td></tr>
+        <tr><td>4096</td><td>1946 (48%)</td><td>1946 (48%)</td><td>204 (5%)</td></tr>
+        <tr><td>&infin;</td><td class="accent">50%</td><td>50%</td><td class="accent">0%</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="fragment warning">
+    <p class="small">Polarization converges slowly: the "middle" channels vanish as O(2<sup>-N<sup>&beta;</sup></sup>) where &beta; &lt; 0.5. This means polar codes need long block lengths for best performance.</p>
+  </div>
+</section>
+
+<!-- Slide 6: Bhattacharyya Parameter -->
+<section>
+  <h2>Bhattacharyya Parameter &amp; Channel Reliability</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="formula fragment">
+    Z(W) = &Sigma;<sub>y</sub> &radic;(W(y|0) &middot; W(y|1))
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>What It Measures</h3>
+        <p class="small">Z(W) &in; [0, 1] quantifies channel reliability:</p>
+        <p class="small"><span class="accent">Z(W) = 0:</span> Perfect channel (noiseless)</p>
+        <p class="small"><span class="accent2">Z(W) = 1:</span> Useless channel (pure noise)</p>
+        <p class="small fragment">Upper bounds error probability: P<sub>e</sub> &le; Z(W)</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Recursive Computation</h3>
+        <div class="formula small">
+          Z(W<sup>-</sup>) = 2Z(W) - Z(W)<sup>2</sup><br>
+          Z(W<sup>+</sup>) = Z(W)<sup>2</sup>
+        </div>
+        <p class="small">The "minus" channel degrades, the "plus" channel improves — quadratically!</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Channel Ordering</h3>
+        <p class="small">For each of the N virtual channels, compute Z(W<sub>N</sub><sup>(i)</sup>). Sort by reliability.</p>
+        <p class="small fragment"><span class="accent">Best channels</span> (lowest Z) carry information bits.</p>
+        <p class="small fragment"><span class="accent2">Worst channels</span> (highest Z) carry frozen bits (set to 0).</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">The Bhattacharyya parameter gives us a simple, recursive way to identify which channels are reliable — this is how we <span class="accent">construct</span> polar codes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 7: Polar Code Construction -->
+<section>
+  <h2>Polar Code Construction</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <div class="panel fragment">
+    <h3>Choosing Information Bit Positions</h3>
+    <p class="small">For a polar code (N, K):</p>
+    <p class="small">1. Compute Z(W<sub>N</sub><sup>(i)</sup>) for all i = 0, ..., N-1</p>
+    <p class="small">2. Choose K channels with <span class="accent">smallest</span> Bhattacharyya parameter</p>
+    <p class="small">3. These carry information bits; the rest are "frozen" (set to known values, usually 0)</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Construction Methods</h3>
+      <table>
+        <tr><th>Method</th><th>Complexity</th><th>Optimality</th></tr>
+        <tr><td class="accent">Bhattacharyya</td><td>O(N)</td><td>Exact for BEC</td></tr>
+        <tr><td>Density evolution</td><td>O(N &middot; M)</td><td>Near-optimal AWGN</td></tr>
+        <tr><td class="accent3">Gaussian approx.</td><td>O(N)</td><td>Good approx.</td></tr>
+        <tr><td>Monte Carlo</td><td>Slow</td><td>Channel-specific</td></tr>
+        <tr><td>5G NR tables</td><td>O(1) lookup</td><td>Pre-computed</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Frozen Bits</h3>
+      <p class="small">Frozen bits are known to both encoder and decoder. They carry <span class="accent">no information</span> but are crucial for the decoder to work.</p>
+      <p class="small fragment">Think of them as "scaffolding" — they support the decoding process but add no data.</p>
+      <p class="small fragment accent2">Rate = K/N = fraction of good channels used</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: Encoding -->
+<section>
+  <h2>Polar Encoding: Kronecker Product</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="formula fragment">
+    G<sub>N</sub> = B<sub>N</sub> &middot; F<sup>&otimes;n</sup> &nbsp;&nbsp; where &nbsp; F = <span style="font-size: 0.9em;">[1 0; 1 1]</span> &nbsp; and &nbsp; N = 2<sup>n</sup>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>The Kernel Matrix F</h3>
+        <p class="small">The 2&times;2 matrix F is the fundamental building block. The Kronecker power F<sup>&otimes;n</sup> creates the N&times;N generator matrix.</p>
+        <div class="formula small">
+          F<sup>&otimes;2</sup> = [1 0 0 0; 1 1 0 0; 1 0 1 0; 1 1 1 1]
+        </div>
+        <p class="small fragment">B<sub>N</sub> is a bit-reversal permutation matrix.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Butterfly Structure</h3>
+        <p class="small">Encoding has a recursive butterfly structure (like FFT):</p>
+        <div class="flow-row" style="font-size: 0.7em;">
+          <div class="flow-node">u<sub>0</sub></div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent3);">&oplus;</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node" style="border-color: var(--accent3);">&oplus;</div>
+          <div class="flow-arrow">&rarr;</div>
+          <div class="flow-node">x<sub>0</sub></div>
+        </div>
+        <p class="small fragment">Each stage: XOR pairs of values. Total: n stages of N/2 XORs each.</p>
+        <div class="formula small fragment">
+          Encoding complexity: O(N log N)
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">The encoding is simply: set frozen positions to 0, place information bits in good positions, then multiply by G<sub>N</sub> (using the butterfly).</p>
+  </div>
+</section>
+
+<!-- Slide 9: Python Polar Encoding -->
+<section>
+  <h2>Polar Encoding in Python</h2>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">import numpy as np
+
+def polar_encode(info_bits, frozen_positions, N):
+    """
+    Polar encoder using butterfly (Kronecker) structure.
+
+    info_bits: K information bits
+    frozen_positions: set of frozen bit indices
+    N: code length (must be power of 2)
+    """
+    n = int(np.log2(N))
+    assert N == 2**n, "N must be a power of 2"
+
+    # Place bits: frozen = 0, info = data
+    u = np.zeros(N, dtype=int)
+    info_idx = 0
+    for i in range(N):
+        if i not in frozen_positions:
+            u[i] = info_bits[info_idx]
+            info_idx += 1
+
+    # Butterfly encoding (in-place Kronecker product)
+    x = u.copy()
+    for stage in range(n):
+        step = 2 ** (stage + 1)
+        half = step // 2
+        for i in range(0, N, step):
+            for j in range(half):
+                x[i + j] ^= x[i + j + half]
+                # x[i + j + half] stays the same
+
+    return x
+
+def construct_polar_code_bec(N, K, epsilon):
+    """
+    Construct polar code for BEC(epsilon).
+    Returns set of frozen positions.
+    """
+    n = int(np.log2(N))
+
+    # Compute Bhattacharyya parameters recursively
+    z = [epsilon]  # Start with single channel
+    for stage in range(n):
+        new_z = []
+        for zi in z:
+            z_minus = 2 * zi - zi**2   # Worse channel
+            z_plus = zi**2              # Better channel
+            new_z.append(z_minus)
+            new_z.append(z_plus)
+        z = new_z
+
+    # Sort channels by reliability (lower Z = more reliable)
+    indexed = [(z[i], i) for i in range(N)]
+    indexed.sort()
+
+    # Best K channels carry information; rest are frozen
+    frozen = set(idx for _, idx in indexed[K:])
+    return frozen, z
+
+# Example: (8, 4) polar code for BEC(0.5)
+N, K = 8, 4
+frozen, bhatt = construct_polar_code_bec(N, K, epsilon=0.5)
+print(f"Frozen positions: {sorted(frozen)}")
+print(f"Info positions:   {sorted(set(range(N)) - frozen)}")
+
+info = np.array([1, 0, 1, 1])
+codeword = polar_encode(info, frozen, N)
+print(f"Info bits:  {info}")
+print(f"Codeword:   {codeword}")</code></pre>
+</section>
+
+<!-- Slide 10: Successive Cancellation Decoding -->
+<section>
+  <h2>Successive Cancellation (SC) Decoding</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">SC decoding estimates bits one at a time, from u<sub>0</sub> to u<sub>N-1</sub>, using previously decoded bits as side information — mimicking the genie that knows u<sub>1</sub>, ..., u<sub>i-1</sub> in the polarization analysis.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>Algorithm</h3>
+        <p class="small">For each bit position i = 0, 1, ..., N-1:</p>
+        <p class="small fragment"><span class="accent">If i is frozen:</span> Set u&#770;<sub>i</sub> = 0 (known)</p>
+        <p class="small fragment"><span class="accent3">If i is information:</span> Compute LLR from received signal y and previously decoded bits u&#770;<sub>0</sub>...u&#770;<sub>i-1</sub>. Decide: u&#770;<sub>i</sub> = 0 if LLR &ge; 0, else 1.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Complexity</h3>
+        <div class="formula small">O(N log N)</div>
+        <p class="small">Same butterfly structure as encoding, but processing LLRs instead of bits. Like a "reverse FFT" on log-likelihoods.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>LLR Recursions</h3>
+        <div class="formula small">
+          f(a, b) = 2 tanh<sup>-1</sup>(tanh(a/2) &middot; tanh(b/2))<br><br>
+          g(a, b, u) = (-1)<sup>u</sup> a + b
+        </div>
+        <p class="small fragment">f-function: combines two LLRs (check-node-like)</p>
+        <p class="small fragment">g-function: uses a decoded bit to refine (variable-node-like)</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">SC decoding is <span class="accent2">sequential</span> — each bit depends on all previous bits. This makes it inherently serial and limits throughput. Also, a single wrong decision propagates errors.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 11: SC List Decoding -->
+<section>
+  <h2>SC List (SCL) Decoding</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>The Key Improvement</h3>
+    <p class="small">Instead of making a single hard decision at each step, SCL maintains a <span class="accent">list of L candidate paths</span>. At each information bit, the list doubles (try both 0 and 1), then prune back to L best paths.</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Algorithm</h3>
+      <p class="small">1. Start with one path (all frozen bits known)</p>
+      <p class="small fragment">2. At frozen bit: extend all paths with known value</p>
+      <p class="small fragment">3. At info bit: <span class="accent">split</span> each path into two (0 and 1)</p>
+      <p class="small fragment">4. Keep only the L most likely paths (by path metric)</p>
+      <p class="small fragment">5. After all N bits, select the best surviving path</p>
+    </div>
+    <div class="card">
+      <h3>Performance vs List Size</h3>
+      <table>
+        <tr><th>L</th><th>Performance</th><th>Complexity</th></tr>
+        <tr><td>1</td><td>SC (baseline)</td><td>O(N log N)</td></tr>
+        <tr><td>4</td><td>~0.5 dB gain</td><td>4x SC</td></tr>
+        <tr><td>8</td><td>~0.7 dB gain</td><td>8x SC</td></tr>
+        <tr><td class="accent">32</td><td>~1.0 dB gain</td><td>32x SC</td></tr>
+        <tr><td>ML bound</td><td>Optimal</td><td>Exponential</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">SCL with L=32 approaches maximum-likelihood decoding performance for practical block lengths. The gain over basic SC is substantial — this made polar codes competitive.</p>
+  </div>
+</section>
+
+<!-- Slide 12: CRC-Aided SCL -->
+<section>
+  <h2>CRC-Aided SCL Decoding (CA-SCL)</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">The breakthrough that made polar codes practical: append a <span class="accent">CRC</span> to the information bits before encoding. The CRC helps the list decoder select the correct path.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>How It Works</h3>
+        <p class="small">1. Before encoding: compute CRC over K' info bits, append r CRC bits. Total K = K' + r info bits encoded.</p>
+        <p class="small fragment">2. Decode with SCL (list size L)</p>
+        <p class="small fragment">3. Among L surviving paths, pick the one that <span class="accent">passes the CRC check</span></p>
+        <p class="small fragment">4. If no path passes CRC, report decoding failure</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Performance Impact</h3>
+        <p class="small">CA-SCL with L=32 and CRC-11:</p>
+        <p class="small accent">~1.5 dB better than SC alone</p>
+        <p class="small accent3">Matches or exceeds turbo/LDPC at short blocks</p>
+        <p class="small accent2">Reliable error detection via CRC</p>
+      </div>
+      <div class="fragment">
+        <div class="formula small">
+          5G NR: CRC-6 for short blocks<br>
+          CRC-11 for medium blocks<br>
+          CRC-24 for long blocks
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="fragment warning">
+    <p class="small">The CRC bits reduce the effective code rate slightly (e.g., 11 CRC bits out of 128 info bits = 8.6% overhead). But the performance gain far outweighs this cost.</p>
+  </div>
+</section>
+
+<!-- Slide 13: SC Decoding Python -->
+<section>
+  <h2>SC Decoder in Python</h2>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">import numpy as np
+
+def sc_decode(llr, frozen_positions, N):
+    """
+    Successive Cancellation decoder for polar codes.
+    llr: channel LLRs (length N)
+    frozen_positions: set of frozen bit indices
+    Returns: decoded bits (length N)
+    """
+    n = int(np.log2(N))
+    decoded = np.zeros(N, dtype=int)
+
+    # Recursive SC decode
+    def recurse(llrs, node_bits, depth, node_idx):
+        if depth == n:
+            # Leaf node
+            if node_idx in frozen_positions:
+                return np.array([0])
+            else:
+                return np.array([0 if llrs[0] >= 0 else 1])
+
+        half = len(llrs) // 2
+
+        # f-function: combine upper and lower LLRs
+        f_llr = np.sign(llrs[:half]) * np.sign(llrs[half:]) * \
+                np.minimum(np.abs(llrs[:half]), np.abs(llrs[half:]))
+
+        # Decode left (upper) half
+        left = recurse(f_llr, None, depth + 1, 2 * node_idx)
+
+        # g-function: use left decisions to refine
+        g_llr = llrs[half:] + (1 - 2 * left) * llrs[:half]
+
+        # Decode right (lower) half
+        right = recurse(g_llr, None, depth + 1, 2 * node_idx + 1)
+
+        # Combine: upper = left XOR right, lower = right
+        combined = np.concatenate([left ^ right, right])
+        return combined
+
+    result = recurse(llr, None, 0, 0)
+    return result
+
+# Example: decode (8,4) polar code
+N = 8
+frozen = {0, 1, 2, 4}  # Example frozen set
+
+# Simulated received LLRs (positive = likely 0)
+channel_llr = np.array([2.1, -0.5, 1.3, -1.8, 0.9, -2.3, 1.1, -0.7])
+decoded = sc_decode(channel_llr, frozen, N)
+print(f"Decoded bits: {decoded}")</code></pre>
+</section>
+
+<!-- Slide 14: Comparison with LDPC and Turbo -->
+<section>
+  <h2>Polar vs LDPC vs Turbo</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel" style="margin-top: 0.5em;">
+    <table>
+      <tr>
+        <th>Property</th>
+        <th>Polar (CA-SCL)</th>
+        <th>LDPC</th>
+        <th>Turbo</th>
+      </tr>
+      <tr class="fragment">
+        <td>Capacity achieving?</td>
+        <td class="accent">Proven</td>
+        <td>Empirical (near)</td>
+        <td>Empirical (near)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Short blocks (N&lt;256)</td>
+        <td class="accent">Excellent</td>
+        <td class="accent2">Poor</td>
+        <td>Good</td>
+      </tr>
+      <tr class="fragment">
+        <td>Long blocks (N&gt;10K)</td>
+        <td>Good</td>
+        <td class="accent">Excellent</td>
+        <td>Good</td>
+      </tr>
+      <tr class="fragment">
+        <td>Decoding latency</td>
+        <td class="accent2">High (serial SC)</td>
+        <td class="accent">Low (parallel BP)</td>
+        <td class="accent2">Medium</td>
+      </tr>
+      <tr class="fragment">
+        <td>Error floor</td>
+        <td class="accent">None (SC)</td>
+        <td>Low (trapping sets)</td>
+        <td class="accent2">Moderate</td>
+      </tr>
+      <tr class="fragment">
+        <td>Rate flexibility</td>
+        <td class="accent">Any K/N (change frozen set)</td>
+        <td>Needs new H matrix</td>
+        <td>Puncturing</td>
+      </tr>
+      <tr class="fragment">
+        <td>Encoding</td>
+        <td class="accent">O(N log N), simple</td>
+        <td>O(N) QC, complex</td>
+        <td class="accent">O(N), simple</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- Slide 15: 5G NR Polar Codes -->
+<section>
+  <h2>5G NR: Polar Codes for Control Channels</h2>
+  <span class="badge badge-standards">Standards</span>
+  <div class="key-point fragment">
+    <p class="small">3GPP selected polar codes for <span class="accent">control channels</span> (PDCCH, PUCCH) in 5G NR Release 15 (2018). This was a historic first deployment of polar codes in a major standard.</p>
+  </div>
+  <div class="grid-2" style="margin-top: 0.8em;">
+    <div class="panel fragment">
+      <h3>5G NR Polar Parameters</h3>
+      <table>
+        <tr><td>Channel</td><td class="accent">PDCCH (DL control)</td></tr>
+        <tr><td>Also</td><td>PUCCH, PBCH</td></tr>
+        <tr><td>Info bits K</td><td>12 to 140</td></tr>
+        <tr><td>Code length N</td><td>32 to 512 (max 1024)</td></tr>
+        <tr><td>CRC</td><td>CRC-6, CRC-11, CRC-24</td></tr>
+        <tr><td>Decoder</td><td>CA-SCL (L=8 typical)</td></tr>
+      </table>
+    </div>
+    <div class="panel fragment">
+      <h3>Why Polar for Control?</h3>
+      <p class="small"><span class="accent">Short blocks:</span> Control info is 20-140 bits. Polar codes excel here.</p>
+      <p class="small fragment"><span class="accent3">Flexible rate:</span> Just change the frozen set — no new code design needed.</p>
+      <p class="small fragment"><span class="accent2">Built-in CRC:</span> Error detection comes free with CA-SCL.</p>
+      <p class="small fragment"><span class="accent4">No error floor:</span> Critical for control reliability (BLER &lt; 10<sup>-5</sup>).</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 16: The 5G Standards Battle -->
+<section>
+  <h2>The 5G Coding Standards Battle</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Contenders (2016-2017)</h3>
+        <table>
+          <tr><th>Channel</th><th>Candidates</th><th>Winner</th></tr>
+          <tr><td>Data (long)</td><td>LDPC, Polar, Turbo</td><td class="accent">LDPC</td></tr>
+          <tr><td>Control (short)</td><td>Polar, LDPC, TBCC</td><td class="accent">Polar</td></tr>
+        </table>
+        <p class="small fragment">Turbo codes — the incumbent from 4G — were eliminated early due to throughput limitations at 5G data rates.</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">The decision was intensely political. Huawei championed polar codes; Qualcomm pushed LDPC. The final split — LDPC for data, polar for control — was a compromise.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Technical Rationale</h3>
+        <p class="small accent">LDPC for data: superior throughput at long block lengths (1000+ bits), parallel decoding, mature hardware.</p>
+        <p class="small fragment accent3">Polar for control: superior performance at short block lengths (20-200 bits), flexible rate, no error floor.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Impact</h3>
+        <p class="small">The 5G adoption validated 10 years of polar code research and established them as a mainstream coding family alongside LDPC.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 17: Polar Codes and Source Coding -->
+<section>
+  <h2>Polar Codes Beyond Channel Coding</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Source Coding (Compression)</h3>
+      <p class="small">Polar codes can achieve the <span class="accent">source coding bound</span> (lossless compression at entropy rate).</p>
+      <p class="small fragment">Dual of channel coding: freeze the "good" channels (carry randomness) and compress via the "bad" channels.</p>
+      <div class="formula small">
+        Channel coding: info on good channels<br>
+        Source coding: info on bad channels
+      </div>
+    </div>
+    <div class="panel fragment">
+      <h3>Joint Source-Channel Coding</h3>
+      <p class="small">Polar codes can simultaneously compress and protect — achieving the optimal rate-distortion-capacity trade-off.</p>
+      <p class="small fragment accent">This unification was one of Arikan's key insights: the same polarization phenomenon governs both compression and error correction.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Wiretap Channels</h3>
+      <p class="small">Polar codes achieve the <span class="accent3">secrecy capacity</span> of wiretap channels — providing information-theoretic security.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Multiple Access</h3>
+      <p class="small">Polarization extends to multi-user channels, achieving the <span class="accent4">capacity region</span> of the multiple access channel.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 18: Hardware Implementation -->
+<section>
+  <h2>Hardware Implementation Challenges</h2>
+  <span class="badge badge-standards">Standards</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>SC Decoder</h3>
+        <p class="small"><span class="accent">Pro:</span> Simple, low area</p>
+        <p class="small"><span class="accent2">Con:</span> Sequential — latency O(N log N). For N=1024, that's ~10,000 clock cycles.</p>
+        <p class="small fragment">Throughput: limited to ~100 Mbps.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>SCL Decoder</h3>
+        <p class="small"><span class="accent2">Challenge:</span> L parallel SC decoders + sorting/pruning. Area grows linearly with L.</p>
+        <p class="small fragment">For L=8 in 5G: manageable in modern ASIC processes.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Fast SC Techniques</h3>
+        <table>
+          <tr><th>Technique</th><th>Speedup</th></tr>
+          <tr><td class="accent">Rate-0 node skip</td><td>2-3x</td></tr>
+          <tr><td>Rate-1 node skip</td><td>2-3x</td></tr>
+          <tr><td>REP/SPC merge</td><td>1.5x</td></tr>
+          <tr><td class="accent3">Unrolled decoder</td><td>5-10x</td></tr>
+          <tr><td>Combined</td><td class="accent">10-30x</td></tr>
+        </table>
+        <p class="small fragment">Fast-SSC (Simplified SC) identifies subtree patterns (all-frozen, all-info) and decodes them in one step.</p>
+      </div>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Modern fast-SCL decoders achieve 1+ Gbps throughput — sufficient for 5G control channel requirements. Research into BP decoding of polar codes continues for higher throughput.</p>
+  </div>
+</section>
+
+<!-- Slide 19: Rate Matching -->
+<section>
+  <h2>Rate Matching for Polar Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="panel fragment">
+    <h3>The Challenge</h3>
+    <p class="small">Polar codes require N = 2<sup>n</sup>. But 5G needs arbitrary output lengths M. Solution: encode at N &ge; M, then <span class="accent">rate-match</span> to M bits.</p>
+  </div>
+  <div class="grid-3 fragment">
+    <div class="card">
+      <h3>Puncturing</h3>
+      <p class="small">M &lt; N: Delete N-M coded bits. Receiver treats punctured positions as erasures (LLR = 0).</p>
+      <p class="small accent2">Used when M is slightly less than N.</p>
+    </div>
+    <div class="card">
+      <h3>Shortening</h3>
+      <p class="small">M &lt; N: Set N-M input bits to known values. Receiver knows these bits perfectly (LLR = &infin;).</p>
+      <p class="small accent">Better than puncturing when M &lt;&lt; N.</p>
+    </div>
+    <div class="card">
+      <h3>Repetition</h3>
+      <p class="small">M &gt; N: Repeat some coded bits. Receiver combines repeated copies for improved LLRs.</p>
+      <p class="small accent3">Used for very low rates.</p>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">5G NR uses a combination of these techniques with interleaving to support any desired output length and code rate. The frozen set must be adapted for the rate-matching scheme.</p>
+  </div>
+</section>
+
+<!-- Slide 20: Polarization Beyond Binary -->
+<section>
+  <h2>Extensions and Future Directions</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Non-Binary Polar Codes</h3>
+      <p class="small">Polarization works over any finite field GF(q). Non-binary kernels can achieve <span class="accent">faster polarization</span> — fewer "middle" channels at finite N.</p>
+      <p class="small fragment">Trade-off: better performance vs higher decoding complexity.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Larger Kernels</h3>
+      <p class="small">Replace the 2&times;2 kernel with larger matrices (3&times;3, 4&times;4, ...). Larger kernels polarize faster — better finite-length performance.</p>
+      <div class="formula small">
+        Polarization exponent &beta;:<br>
+        2&times;2: &beta; = 0.5<br>
+        Large kernel: &beta; &rarr; 1
+      </div>
+    </div>
+    <div class="panel fragment">
+      <h3>PAC Codes</h3>
+      <p class="small"><span class="accent">Polarization-Adjusted Convolutional</span> codes (Arikan, 2019): pre-transform the data with a convolutional code before polar encoding. Remarkable short-block performance.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Quantum Polar Codes</h3>
+      <p class="small">Polar codes have been extended to quantum error correction, achieving the quantum channel capacity. An active research area.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 21: Polar Code Design Flow -->
+<section>
+  <h2>Polar Code Design: End-to-End</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <span class="badge badge-code">Code</span>
+  <div class="flow-row fragment">
+    <div class="flow-node" style="border-color: var(--accent3);">Choose<br>N, K, R</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">Channel<br>estimation</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent4);">Compute<br>Z(W<sup>(i)</sup>)</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">Select frozen<br>positions</div>
+  </div>
+  <div class="flow-row fragment" style="margin-top: 0.5em;">
+    <div class="flow-node" style="border-color: var(--accent2);">Add CRC<br>to info bits</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">Place in<br>info positions</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent3);">Butterfly<br>encode</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent4);">Rate<br>match</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">Transmit</div>
+  </div>
+  <div class="flow-row fragment" style="margin-top: 0.5em;">
+    <div class="flow-node" style="border-color: var(--accent);">Receive</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent4);">Rate de-<br>match</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent3);">CA-SCL<br>decode</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent2);">CRC<br>check</div>
+    <div class="flow-arrow">&rarr;</div>
+    <div class="flow-node" style="border-color: var(--accent);">Decoded<br>info bits</div>
+  </div>
+  <div class="fragment panel">
+    <p class="small">This is exactly the flow used in <span class="accent">5G NR</span> for control channel encoding/decoding. The entire process is defined in 3GPP TS 38.212.</p>
+  </div>
+</section>
+
+<!-- Slide 22: Summary -->
+<section>
+  <h2>Polar Codes: Summary</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-standards">Standards</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Timeline</h3>
+        <table>
+          <tr><td class="accent">2009</td><td>Arikan's foundational paper</td></tr>
+          <tr><td>2011</td><td>SC List decoding (Tal & Vardy)</td></tr>
+          <tr><td>2012</td><td>CRC-aided SCL</td></tr>
+          <tr><td>2015</td><td>Fast-SSC decoding</td></tr>
+          <tr><td class="accent">2018</td><td>5G NR standardization</td></tr>
+          <tr><td>2019</td><td>PAC codes (Arikan)</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Key Contributions</h3>
+        <p class="small accent">First provably capacity-achieving codes with efficient encoding/decoding</p>
+        <p class="small fragment accent3">Elegant theory: one simple transform, recursive structure</p>
+        <p class="small fragment accent2">Excellent short-block performance with CA-SCL</p>
+        <p class="small fragment accent4">Deployed in the world's most advanced wireless standard</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">Polar codes closed a 60-year gap between Shannon's promise and practical reality. They represent the most significant theoretical advance in coding since turbo codes, and arguably since Shannon himself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  transition: 'slide',
+  slideNumber: 'c/t',
+  plugins: [RevealHighlight]
+});
+
+function fixSlides() {
+  document.querySelectorAll('.reveal .slides section').forEach(s => {
+    s.style.textAlign = 'left';
+  });
+}
+fixSlides();
+Reveal.on('ready', fixSlides);
+Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

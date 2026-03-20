@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamming Codes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --text: #e0e0e8;
+            --dim: #6a6a7a;
+            --accent: #64ffda;
+            --accent2: #ff6b9d;
+            --accent3: #ffd93d;
+            --accent4: #6c5ce7;
+            --panel: rgba(255,255,255,0.04);
+            --border: rgba(100,255,218,0.15);
+        }
+        .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+        .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        .reveal h1 { font-size: 2.4em; }
+        .reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+        .reveal h3 { font-size: 1.2em; color: var(--accent3); }
+        .reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+        .reveal code { font-family: 'JetBrains Mono', monospace; }
+        .reveal .slides section { text-align: left; }
+        .reveal .progress { color: var(--accent); height: 3px; }
+        .reveal .controls { color: var(--accent); }
+        .badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+        .badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+        .badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+        .badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+        .badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+        .cols { display: flex; gap: 1em; align-items: flex-start; }
+        .cols > * { flex: 1; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+        .formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+        .key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .dim { color: var(--dim); }
+        .small { font-size: 0.75em; }
+        .tiny { font-size: 0.6em; }
+        .accent { color: var(--accent); }
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .accent4 { color: var(--accent4); }
+        .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+        .flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+        .flow-arrow { color: var(--accent); font-size: 1.2em; }
+        .stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 0.7em; color: var(--dim); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+        th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+        td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+        .nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+        .math-block { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+    <!-- Slide 1: Title -->
+    <section>
+        <div class="series-tag">Coding Theory Series &mdash; 03</div>
+        <h1 class="title-gradient">Hamming Codes</h1>
+        <p style="font-size: 0.7em; color: var(--dim); margin-top: 0.5em;">The first practical error-correcting codes &mdash; elegant, efficient, and perfect</p>
+        <div style="margin-top: 1.5em;">
+            <span class="badge badge-math">Mathematics</span>
+            <span class="badge badge-code">Code</span>
+            <span class="badge badge-history">History</span>
+        </div>
+        <div class="nav-hint">Use arrow keys or swipe to navigate &bull; Press ESC for overview</div>
+    </section>
+
+    <!-- Slide 2: Roadmap -->
+    <section>
+        <h2>Roadmap</h2>
+        <div class="grid-3">
+            <div class="card fragment">
+                <h3>Hamming's Story</h3>
+                <p class="small">The Bell Labs frustration that launched error-correcting codes</p>
+            </div>
+            <div class="card fragment">
+                <h3>Hamming(7,4)</h3>
+                <p class="small">Step-by-step construction and encoding</p>
+            </div>
+            <div class="card fragment">
+                <h3>Syndrome Decoding</h3>
+                <p class="small">Detecting and locating single-bit errors</p>
+            </div>
+            <div class="card fragment">
+                <h3>Matrix View</h3>
+                <p class="small">Generator and parity-check matrices</p>
+            </div>
+            <div class="card fragment">
+                <h3>SECDED</h3>
+                <p class="small">Extending Hamming codes for double-error detection</p>
+            </div>
+            <div class="card fragment">
+                <h3>Perfect Codes</h3>
+                <p class="small">Why Hamming codes are mathematically special</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Hamming's Story -->
+    <section>
+        <h2>Hamming's Story at Bell Labs</h2>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>In the late 1940s, Richard Hamming worked at Bell Labs alongside Claude Shannon. He used relay-based computers that ran programs over weekends.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>The Problem</h3>
+                <p class="small">The machines used parity checking. When an error was detected, the machine would stop and flash lights indicating the error. On weekdays, operators would fix the error and restart. On weekends &mdash; no operators. Hamming would arrive Monday to find his jobs had failed early Friday evening.</p>
+            </div>
+            <div class="card">
+                <h3>The Insight</h3>
+                <p class="small">Hamming realized: <em>"If the machine can detect an error, why can't it locate and correct the error?"</em> He needed multiple parity checks, each covering a different subset of bits, so that the <span class="accent">pattern of parity failures</span> would point to the exact error location.</p>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            Hamming published his results in 1950: <em>"Error Detecting and Error Correcting Codes"</em> in the Bell System Technical Journal. Marcel Golay independently discovered similar codes the same year.
+        </div>
+    </section>
+
+    <!-- Slide 4: The Key Idea -->
+    <section>
+        <h2>The Key Idea</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Instead of one parity bit checking <em>all</em> data bits, use <span class="accent">multiple parity bits</span>, each covering a specific <span class="accent">overlapping subset</span> of data bits.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Single Parity (review)</h3>
+                <p class="small">1 parity bit &rarr; 1 check &rarr; 2 outcomes:</p>
+                <ul class="tiny">
+                    <li>"No error detected" (might be wrong)</li>
+                    <li>"Error detected" (but WHERE?)</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Hamming's Approach</h3>
+                <p class="small">r parity bits &rarr; r checks &rarr; 2<sup>r</sup> outcomes:</p>
+                <ul class="tiny">
+                    <li>000...0 = "No error"</li>
+                    <li>Any other pattern = position of the error!</li>
+                </ul>
+            </div>
+        </div>
+        <div class="formula fragment">
+            With r parity bits, we can identify 2<sup>r</sup> &minus; 1 possible error positions<br>
+            <span class="small">Need: 2<sup>r</sup> &minus; 1 &ge; n = r + k &nbsp;&rarr;&nbsp; 2<sup>r</sup> &ge; k + r + 1</span>
+        </div>
+        <div class="key-point fragment">
+            <strong>The syndrome</strong> (the pattern of parity check results) directly encodes the binary position number of the erroneous bit. This is the genius of Hamming codes.
+        </div>
+    </section>
+
+    <!-- Slide 5: Hamming(7,4) Layout -->
+    <section>
+        <h2>Hamming(7,4): Bit Positions</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>In Hamming(7,4), we have 7 bit positions. Positions that are <span class="accent">powers of 2</span> (1, 2, 4) are parity bits. The remaining positions (3, 5, 6, 7) hold data.</p>
+        </div>
+        <table class="fragment">
+            <tr>
+                <th>Position</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
+            </tr>
+            <tr>
+                <td><strong>Binary</strong></td>
+                <td class="accent">001</td><td class="accent">010</td><td>011</td>
+                <td class="accent">100</td><td>101</td><td>110</td><td>111</td>
+            </tr>
+            <tr>
+                <td><strong>Role</strong></td>
+                <td class="accent">p<sub>1</sub></td><td class="accent">p<sub>2</sub></td><td>d<sub>1</sub></td>
+                <td class="accent">p<sub>3</sub></td><td>d<sub>2</sub></td><td>d<sub>3</sub></td><td>d<sub>4</sub></td>
+            </tr>
+        </table>
+        <div class="grid-3 fragment">
+            <div class="card">
+                <h3>p<sub>1</sub> (pos 1)</h3>
+                <p class="small">Checks positions with bit 0 set in binary:</p>
+                <p class="tiny accent">1, 3, 5, 7</p>
+            </div>
+            <div class="card">
+                <h3>p<sub>2</sub> (pos 2)</h3>
+                <p class="small">Checks positions with bit 1 set in binary:</p>
+                <p class="tiny accent">2, 3, 6, 7</p>
+            </div>
+            <div class="card">
+                <h3>p<sub>3</sub> (pos 4)</h3>
+                <p class="small">Checks positions with bit 2 set in binary:</p>
+                <p class="tiny accent">4, 5, 6, 7</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 6: Parity Check Coverage -->
+    <section>
+        <h2>Parity Check Coverage</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Each parity bit covers all positions whose binary representation has a <span class="accent">1</span> in the corresponding bit position:</p>
+        </div>
+        <table class="fragment">
+            <tr>
+                <th>Position</th><th>Binary</th><th>p<sub>1</sub> checks?</th><th>p<sub>2</sub> checks?</th><th>p<sub>3</sub> checks?</th>
+            </tr>
+            <tr><td>1 (p<sub>1</sub>)</td><td>001</td><td class="accent">Yes</td><td></td><td></td></tr>
+            <tr><td>2 (p<sub>2</sub>)</td><td>010</td><td></td><td class="accent">Yes</td><td></td></tr>
+            <tr><td>3 (d<sub>1</sub>)</td><td>011</td><td class="accent">Yes</td><td class="accent">Yes</td><td></td></tr>
+            <tr><td>4 (p<sub>3</sub>)</td><td>100</td><td></td><td></td><td class="accent">Yes</td></tr>
+            <tr><td>5 (d<sub>2</sub>)</td><td>101</td><td class="accent">Yes</td><td></td><td class="accent">Yes</td></tr>
+            <tr><td>6 (d<sub>3</sub>)</td><td>110</td><td></td><td class="accent">Yes</td><td class="accent">Yes</td></tr>
+            <tr><td>7 (d<sub>4</sub>)</td><td>111</td><td class="accent">Yes</td><td class="accent">Yes</td><td class="accent">Yes</td></tr>
+        </table>
+        <div class="key-point fragment">
+            <strong>Critical insight:</strong> Each position has a <em>unique</em> pattern of parity checks. If a single bit flips, the pattern of failing parity checks (the <span class="accent">syndrome</span>) gives the binary representation of the error position!
+        </div>
+    </section>
+
+    <!-- Slide 7: Encoding Worked Example -->
+    <section>
+        <h2>Encoding Example: Data = 1011</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-interactive">Interactive</span>
+        <div class="panel fragment">
+            <p>Encode data bits d<sub>1</sub>d<sub>2</sub>d<sub>3</sub>d<sub>4</sub> = <span class="accent">1011</span></p>
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Step 1:</strong> Place data bits in positions 3, 5, 6, 7:</p>
+            <div class="math-block" style="font-size: 0.9em;">
+                Position: &nbsp; 1 &nbsp; 2 &nbsp; 3 &nbsp; 4 &nbsp; 5 &nbsp; 6 &nbsp; 7<br>
+                Bits: &nbsp;&nbsp;&nbsp;&nbsp; <span class="accent3">?</span> &nbsp; <span class="accent3">?</span> &nbsp; <span class="accent">1</span> &nbsp; <span class="accent3">?</span> &nbsp; <span class="accent">0</span> &nbsp; <span class="accent">1</span> &nbsp; <span class="accent">1</span>
+            </div>
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Step 2:</strong> Compute parity bits:</p>
+            <div class="grid-3">
+                <div class="card">
+                    <p class="small"><span class="accent3">p<sub>1</sub></span>: XOR positions 1,3,5,7</p>
+                    <p class="tiny">p<sub>1</sub> &oplus; 1 &oplus; 0 &oplus; 1 = 0</p>
+                    <p class="tiny">p<sub>1</sub> = <span class="accent">0</span></p>
+                </div>
+                <div class="card">
+                    <p class="small"><span class="accent3">p<sub>2</sub></span>: XOR positions 2,3,6,7</p>
+                    <p class="tiny">p<sub>2</sub> &oplus; 1 &oplus; 1 &oplus; 1 = 0</p>
+                    <p class="tiny">p<sub>2</sub> = <span class="accent">1</span></p>
+                </div>
+                <div class="card">
+                    <p class="small"><span class="accent3">p<sub>3</sub></span>: XOR positions 4,5,6,7</p>
+                    <p class="tiny">p<sub>3</sub> &oplus; 0 &oplus; 1 &oplus; 1 = 0</p>
+                    <p class="tiny">p<sub>3</sub> = <span class="accent">0</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Result:</strong></p>
+            <div class="formula">
+                Codeword: <span class="accent3">0</span> <span class="accent3">1</span> 1 <span class="accent3">0</span> 0 1 1 &nbsp;&nbsp; (positions 1-7)
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 8: Syndrome Decoding -->
+    <section>
+        <h2>Syndrome Decoding</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>When we receive a (possibly corrupted) codeword, we recompute each parity check. The results form the <span class="accent">syndrome</span>.</p>
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Example:</strong> Sent <code>0110011</code>, received <code>011<span class="accent2">1</span>011</code> (error at position 4)</p>
+        </div>
+        <div class="grid-3 fragment">
+            <div class="card">
+                <p class="small"><span class="accent">s<sub>1</sub></span>: XOR pos 1,3,5,7</p>
+                <p class="tiny">0 &oplus; 1 &oplus; 0 &oplus; 1 = <span class="accent">0</span></p>
+            </div>
+            <div class="card">
+                <p class="small"><span class="accent">s<sub>2</sub></span>: XOR pos 2,3,6,7</p>
+                <p class="tiny">1 &oplus; 1 &oplus; 1 &oplus; 1 = <span class="accent">0</span></p>
+            </div>
+            <div class="card">
+                <p class="small"><span class="accent2">s<sub>3</sub></span>: XOR pos 4,5,6,7</p>
+                <p class="tiny">1 &oplus; 0 &oplus; 1 &oplus; 1 = <span class="accent2">1</span></p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            Syndrome = s<sub>3</sub>s<sub>2</sub>s<sub>1</sub> = <span class="accent2">1</span><span class="accent">0</span><span class="accent">0</span> = <span class="accent2">4</span> in binary &nbsp;&rarr;&nbsp; Error at position 4!
+        </div>
+        <div class="key-point fragment">
+            <strong>Correction:</strong> Flip bit at position 4: 011<span class="accent2">1</span>011 &rarr; 011<span class="accent">0</span>011. If syndrome = 000, no error detected.
+        </div>
+    </section>
+
+    <!-- Slide 9: Syndrome Table -->
+    <section>
+        <h2>Complete Syndrome Table</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <table class="fragment">
+            <tr><th>Syndrome (s<sub>3</sub>s<sub>2</sub>s<sub>1</sub>)</th><th>Decimal</th><th>Meaning</th><th>Action</th></tr>
+            <tr><td>000</td><td>0</td><td>No error</td><td class="accent">Accept as-is</td></tr>
+            <tr><td>001</td><td>1</td><td>Error at position 1</td><td>Flip bit 1 (p<sub>1</sub>)</td></tr>
+            <tr><td>010</td><td>2</td><td>Error at position 2</td><td>Flip bit 2 (p<sub>2</sub>)</td></tr>
+            <tr><td>011</td><td>3</td><td>Error at position 3</td><td>Flip bit 3 (d<sub>1</sub>)</td></tr>
+            <tr><td>100</td><td>4</td><td>Error at position 4</td><td>Flip bit 4 (p<sub>3</sub>)</td></tr>
+            <tr><td>101</td><td>5</td><td>Error at position 5</td><td>Flip bit 5 (d<sub>2</sub>)</td></tr>
+            <tr><td>110</td><td>6</td><td>Error at position 6</td><td>Flip bit 6 (d<sub>3</sub>)</td></tr>
+            <tr><td>111</td><td>7</td><td>Error at position 7</td><td>Flip bit 7 (d<sub>4</sub>)</td></tr>
+        </table>
+        <div class="warning fragment">
+            <strong>Limitation:</strong> If 2 or more bits are flipped, the syndrome will point to the <em>wrong</em> position, causing <span class="accent2">miscorrection</span>. Hamming(7,4) can only reliably correct single errors.
+        </div>
+    </section>
+
+    <!-- Slide 10: Generator Matrix -->
+    <section>
+        <h2>Generator Matrix G</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The encoding process can be expressed as matrix multiplication over GF(2):<br>
+            <span class="accent">c = m &middot; G</span>, where m is the 1&times;4 message vector and G is the 4&times;7 generator matrix.</p>
+        </div>
+        <div class="formula fragment" style="font-size: 0.85em;">
+            G = <br>
+            &nbsp; p<sub>1</sub> p<sub>2</sub> d<sub>1</sub> p<sub>3</sub> d<sub>2</sub> d<sub>3</sub> d<sub>4</sub><br>
+            [ 1 &nbsp; 1 &nbsp; 1 &nbsp; 0 &nbsp; 0 &nbsp; 0 &nbsp; 0 ] &nbsp; &larr; d<sub>1</sub> at pos 3<br>
+            [ 1 &nbsp; 0 &nbsp; 0 &nbsp; 1 &nbsp; 1 &nbsp; 0 &nbsp; 0 ] &nbsp; &larr; d<sub>2</sub> at pos 5<br>
+            [ 0 &nbsp; 1 &nbsp; 0 &nbsp; 1 &nbsp; 0 &nbsp; 1 &nbsp; 0 ] &nbsp; &larr; d<sub>3</sub> at pos 6<br>
+            [ 1 &nbsp; 1 &nbsp; 0 &nbsp; 1 &nbsp; 0 &nbsp; 0 &nbsp; 1 ] &nbsp; &larr; d<sub>4</sub> at pos 7
+        </div>
+        <div class="key-point fragment">
+            Each row of G is a codeword. The generator matrix encodes by selecting which rows to XOR together (the rows corresponding to 1-bits in the message).
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Systematic form:</strong> G = [P | I<sub>k</sub>] where P contains the parity-check coefficients and I<sub>k</sub> is the 4&times;4 identity matrix.</p>
+        </div>
+    </section>
+
+    <!-- Slide 11: Parity-Check Matrix -->
+    <section>
+        <h2>Parity-Check Matrix H</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">parity-check matrix</span> H is used for decoding. The syndrome is computed as <span class="accent">s = H &middot; r<sup>T</sup></span>, where r is the received vector.</p>
+        </div>
+        <div class="formula fragment" style="font-size: 0.9em;">
+            H = [ 1 &nbsp; 0 &nbsp; 1 &nbsp; 0 &nbsp; 1 &nbsp; 0 &nbsp; 1 ]<br>
+            &nbsp;&nbsp;&nbsp; [ 0 &nbsp; 1 &nbsp; 1 &nbsp; 0 &nbsp; 0 &nbsp; 1 &nbsp; 1 ]<br>
+            &nbsp;&nbsp;&nbsp; [ 0 &nbsp; 0 &nbsp; 0 &nbsp; 1 &nbsp; 1 &nbsp; 1 &nbsp; 1 ]
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Key Property</h3>
+                <p class="small">The columns of H are the <span class="accent">binary representations</span> of the numbers 1 through 7:</p>
+                <p class="tiny" style="font-family: 'JetBrains Mono', monospace;">
+                    Col 1: 001, Col 2: 010, Col 3: 011<br>
+                    Col 4: 100, Col 5: 101, Col 6: 110, Col 7: 111
+                </p>
+            </div>
+            <div class="card">
+                <h3>Syndrome = Error Position</h3>
+                <p class="small">If there's a single error at position j, the syndrome <span class="accent">s = H &middot; e<sub>j</sub><sup>T</sup></span> equals column j of H, which is the binary representation of j.</p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            G &middot; H<sup>T</sup> = 0 &nbsp;&nbsp; (fundamental relationship)
+        </div>
+    </section>
+
+    <!-- Slide 12: Matrix Encoding Example -->
+    <section>
+        <h2>Matrix Encoding Example</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <div class="panel fragment">
+            <p>Encode message <span class="accent">m = [1, 0, 1, 1]</span> using c = m &middot; G:</p>
+        </div>
+        <div class="math-block fragment" style="font-size: 0.8em;">
+            c = [1,0,1,1] &middot; G<br><br>
+            = 1&middot;[1,1,1,0,0,0,0] &oplus; 0&middot;[1,0,0,1,1,0,0] &oplus; 1&middot;[0,1,0,1,0,1,0] &oplus; 1&middot;[1,1,0,1,0,0,1]<br><br>
+            = [1,1,1,0,0,0,0] &oplus; [0,1,0,1,0,1,0] &oplus; [1,1,0,1,0,0,1]<br><br>
+            = [<span class="accent">0,1,1,0,0,1,1</span>]
+        </div>
+        <pre class="fragment"><code class="python">import numpy as np
+
+G = np.array([
+    [1, 1, 1, 0, 0, 0, 0],
+    [1, 0, 0, 1, 1, 0, 0],
+    [0, 1, 0, 1, 0, 1, 0],
+    [1, 1, 0, 1, 0, 0, 1]
+])
+
+message = np.array([1, 0, 1, 1])
+codeword = message @ G % 2
+print(f"Codeword: {codeword}")  # [0 1 1 0 0 1 1]</code></pre>
+    </section>
+
+    <!-- Slide 13: Matrix Decoding Example -->
+    <section>
+        <h2>Matrix Syndrome Decoding</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">H = np.array([
+    [1, 0, 1, 0, 1, 0, 1],
+    [0, 1, 1, 0, 0, 1, 1],
+    [0, 0, 0, 1, 1, 1, 1]
+])
+
+def decode_hamming74(received):
+    """Decode a Hamming(7,4) codeword using syndrome decoding."""
+    r = np.array(received)
+    syndrome = H @ r % 2
+    error_pos = syndrome[0] * 1 + syndrome[1] * 2 + syndrome[2] * 4
+
+    if error_pos == 0:
+        print("No error detected")
+    else:
+        print(f"Error at position {error_pos}, flipping bit")
+        r[error_pos - 1] ^= 1  # Fix the error (0-indexed)
+
+    # Extract data bits from positions 3, 5, 6, 7 (indices 2, 4, 5, 6)
+    data = [r[2], r[4], r[5], r[6]]
+    return data
+
+# Test: introduce error at position 5
+received = [0, 1, 1, 0, 1, 1, 1]  # bit 5 flipped (was 0)
+decoded = decode_hamming74(received)
+print(f"Decoded message: {decoded}")  # [1, 0, 1, 1]</code></pre>
+        <div class="key-point fragment">
+            The syndrome <span class="accent">directly gives the error position</span> in binary. No lookup table or search is needed &mdash; just a single matrix multiplication and a bit flip.
+        </div>
+    </section>
+
+    <!-- Slide 14: Full Hamming(7,4) Codebook -->
+    <section>
+        <h2>Complete Hamming(7,4) Codebook</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <table class="fragment" style="font-size: 0.6em;">
+            <tr><th>Message</th><th>Codeword</th><th>Weight</th><th></th><th>Message</th><th>Codeword</th><th>Weight</th></tr>
+            <tr><td>0000</td><td class="accent">0000000</td><td>0</td><td></td><td>1000</td><td class="accent">1110000</td><td>3</td></tr>
+            <tr><td>0001</td><td class="accent">1101001</td><td>4</td><td></td><td>1001</td><td class="accent">0011001</td><td>3</td></tr>
+            <tr><td>0010</td><td class="accent">0110010</td><td>3</td><td></td><td>1010</td><td class="accent">1000010</td><td>4</td></tr>
+            <tr><td>0011</td><td class="accent">1011011</td><td>4</td><td></td><td>1011</td><td class="accent">0101011</td><td>3</td></tr>
+            <tr><td>0100</td><td class="accent">1010100</td><td>3</td><td></td><td>1100</td><td class="accent">0100100</td><td>4</td></tr>
+            <tr><td>0101</td><td class="accent">0111101</td><td>4</td><td></td><td>1101</td><td class="accent">1001101</td><td>3</td></tr>
+            <tr><td>0110</td><td class="accent">1100110</td><td>4</td><td></td><td>1110</td><td class="accent">0010110</td><td>3</td></tr>
+            <tr><td>0111</td><td class="accent">0001111</td><td>3</td><td></td><td>1111</td><td class="accent">1111111</td><td>7</td></tr>
+        </table>
+        <div class="cols fragment">
+            <div class="card">
+                <p class="small"><strong>Weight distribution:</strong> 1 word of weight 0, 7 of weight 3, 7 of weight 4, 1 of weight 7</p>
+            </div>
+            <div class="card">
+                <p class="small"><strong>Minimum weight:</strong> 3 (confirming d<sub>min</sub> = 3 for this linear code)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 15: SECDED -->
+    <section>
+        <h2>SECDED: Extended Hamming Code</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p><span class="accent">SECDED</span> = Single Error Correction, Double Error Detection. Add one more parity bit (overall parity) to create an <span class="accent">[8, 4, 4]</span> code.</p>
+        </div>
+        <div class="flow-row fragment">
+            <div class="flow-node">Hamming(7,4)<br><span class="tiny">[7, 4, 3]</span></div>
+            <div class="flow-arrow">+ overall parity &rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent);">SECDED(8,4)<br><span class="tiny">[8, 4, 4]</span></div>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>How It Works</h3>
+                <ol class="small">
+                    <li>Encode with Hamming(7,4) as before</li>
+                    <li>Append bit p<sub>0</sub> = XOR of all 7 bits</li>
+                    <li>On decoding, compute syndrome AND overall parity</li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>Decision Table</h3>
+                <table style="font-size: 0.85em;">
+                    <tr><th>Syndrome</th><th>Overall P</th><th>Meaning</th></tr>
+                    <tr><td>= 0</td><td>OK</td><td class="accent">No error</td></tr>
+                    <tr><td>&ne; 0</td><td>Fail</td><td class="accent">1 error &rarr; correct it</td></tr>
+                    <tr><td>&ne; 0</td><td>OK</td><td class="accent2">2 errors &rarr; detected!</td></tr>
+                    <tr><td>= 0</td><td>Fail</td><td class="accent3">Error in p<sub>0</sub> only</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            SECDED is used in virtually all modern <span class="accent">ECC RAM</span> (Error-Correcting Code memory). It corrects single-bit errors transparently and detects double-bit errors.
+        </div>
+    </section>
+
+    <!-- Slide 16: General Hamming Codes -->
+    <section>
+        <h2>General Hamming Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Hamming(7,4) is just one member of a family. For any integer r &ge; 2, there is a <span class="accent">Hamming(2<sup>r</sup>&minus;1, 2<sup>r</sup>&minus;1&minus;r)</span> code.</p>
+        </div>
+        <div class="formula fragment">
+            n = 2<sup>r</sup> &minus; 1, &nbsp;&nbsp; k = 2<sup>r</sup> &minus; 1 &minus; r, &nbsp;&nbsp; d<sub>min</sub> = 3
+        </div>
+        <table class="fragment">
+            <tr><th>r</th><th>Code</th><th>[n, k, d]</th><th>Rate</th><th>Redundancy</th></tr>
+            <tr><td>2</td><td>Hamming(3,1)</td><td>[3, 1, 3]</td><td>0.333</td><td>2 bits</td></tr>
+            <tr><td>3</td><td>Hamming(7,4)</td><td>[7, 4, 3]</td><td>0.571</td><td>3 bits</td></tr>
+            <tr><td>4</td><td>Hamming(15,11)</td><td>[15, 11, 3]</td><td>0.733</td><td>4 bits</td></tr>
+            <tr><td>5</td><td>Hamming(31,26)</td><td>[31, 26, 3]</td><td>0.839</td><td>5 bits</td></tr>
+            <tr><td>6</td><td>Hamming(63,57)</td><td>[63, 57, 3]</td><td>0.905</td><td>6 bits</td></tr>
+            <tr><td>8</td><td>Hamming(255,247)</td><td>[255, 247, 3]</td><td>0.969</td><td>8 bits</td></tr>
+        </table>
+        <div class="key-point fragment">
+            As r grows, the rate R = (2<sup>r</sup>&minus;1&minus;r)/(2<sup>r</sup>&minus;1) &rarr; 1. Longer Hamming codes are more efficient, but still only correct 1 error per block.
+        </div>
+    </section>
+
+    <!-- Slide 17: Perfect Codes -->
+    <section>
+        <h2>Perfect Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>A code is <span class="accent">perfect</span> if it achieves the Hamming bound with equality &mdash; the Hamming spheres of radius t around each codeword tile the entire space with no overlaps or gaps.</p>
+        </div>
+        <div class="formula fragment">
+            2<sup>k</sup> &middot; &sum;<sub>i=0</sub><sup>t</sup> C(n, i) = 2<sup>n</sup> &nbsp;&nbsp; (exact equality)
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Hamming Codes Are Perfect!</h3>
+                <p class="small">For Hamming(2<sup>r</sup>&minus;1, 2<sup>r</sup>&minus;1&minus;r) with t = 1:</p>
+                <div class="formula" style="font-size: 0.75em;">
+                    2<sup>k</sup> &middot; (1 + n) = 2<sup>k</sup> &middot; 2<sup>r</sup> = 2<sup>k+r</sup> = 2<sup>n</sup> &check;
+                </div>
+                <p class="small">Every vector in {0,1}<sup>n</sup> is within distance 1 of exactly one codeword.</p>
+            </div>
+            <div class="card">
+                <h3>All Binary Perfect Codes</h3>
+                <ul class="small">
+                    <li class="fragment"><span class="accent">Hamming codes</span> [2<sup>r</sup>&minus;1, 2<sup>r</sup>&minus;1&minus;r, 3]</li>
+                    <li class="fragment"><span class="accent">Binary Golay code</span> [23, 12, 7]</li>
+                    <li class="fragment">Trivial: repetition codes [n, 1, n] for odd n</li>
+                    <li class="fragment">Trivial: whole space {0,1}<sup>n</sup></li>
+                    <li class="fragment accent2">That's it! No other binary perfect codes exist.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 18: Why Perfect Matters -->
+    <section>
+        <h2>Why Perfection Matters</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>For a perfect code, the nearest-codeword decoder is <span class="accent">unambiguous</span> for all error patterns of weight &le; t:</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>Perfect Code (Hamming)</h3>
+                <p class="small">Every received vector r is within distance 1 of <em>exactly one</em> codeword. The decoder always makes a definite decision.</p>
+                <ul class="tiny">
+                    <li>0 errors &rarr; correct decoding</li>
+                    <li>1 error &rarr; correct decoding</li>
+                    <li>2 errors &rarr; decodes to wrong codeword</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Non-Perfect Code</h3>
+                <p class="small">Some received vectors are NOT within distance t of any codeword. These are "uncorrectable" patterns that the decoder can <em>detect</em> but not fix.</p>
+                <ul class="tiny">
+                    <li>Can detect more errors than it corrects</li>
+                    <li>More flexible error-handling strategies</li>
+                    <li>Gap between spheres = detection region</li>
+                </ul>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>Surprising consequence:</strong> Hamming codes CANNOT detect 2 errors without miscorrecting. Because they're perfect, every received vector is decoded &mdash; a 2-error pattern is "corrected" to the wrong codeword. This is why SECDED adds the extra parity bit.
+        </div>
+    </section>
+
+    <!-- Slide 19: Hamming Distance and Correction -->
+    <section>
+        <h2>Distance &amp; Correction Capability</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The relationship between minimum distance and error correction/detection is fundamental:</p>
+        </div>
+        <div class="formula fragment">
+            t-error correcting: d<sub>min</sub> &ge; 2t + 1<br>
+            s-error detecting: d<sub>min</sub> &ge; s + 1<br>
+            t-correcting AND s-detecting (s &gt; t): d<sub>min</sub> &ge; t + s + 1
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Hamming(7,4): d<sub>min</sub> = 3</h3>
+                <ul class="small">
+                    <li>Corrects t = 1 error (2&middot;1+1 = 3 &le; 3)</li>
+                    <li>Detects s = 2 errors (2+1 = 3 &le; 3)</li>
+                    <li>But NOT both simultaneously!</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>SECDED(8,4): d<sub>min</sub> = 4</h3>
+                <ul class="small">
+                    <li>Corrects t = 1 AND detects s = 2</li>
+                    <li>Satisfies t + s + 1 = 1 + 2 + 1 = 4 &le; 4</li>
+                    <li>The extra bit enables simultaneous correction + detection</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 20: Python Implementation -->
+    <section>
+        <h2>Python: Complete Hamming(7,4)</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">class Hamming74:
+    """Complete Hamming(7,4) encoder and decoder."""
+
+    G = [[1,1,1,0,0,0,0], [1,0,0,1,1,0,0],
+         [0,1,0,1,0,1,0], [1,1,0,1,0,0,1]]
+
+    H = [[1,0,1,0,1,0,1], [0,1,1,0,0,1,1], [0,0,0,1,1,1,1]]
+
+    @staticmethod
+    def encode(message):
+        """Encode 4-bit message to 7-bit codeword."""
+        assert len(message) == 4
+        codeword = [0] * 7
+        for i in range(4):
+            if message[i]:
+                for j in range(7):
+                    codeword[j] ^= Hamming74.G[i][j]
+        return codeword
+
+    @staticmethod
+    def decode(received):
+        """Decode 7-bit received word, correcting single errors."""
+        r = list(received)
+        # Compute syndrome
+        syndrome = 0
+        for i in range(3):
+            s = 0
+            for j in range(7):
+                s ^= Hamming74.H[i][j] * r[j]
+            syndrome += s * (2 ** i)
+
+        if syndrome != 0:
+            r[syndrome - 1] ^= 1  # Correct the error
+
+        return [r[2], r[4], r[5], r[6]]  # Extract data bits</code></pre>
+    </section>
+
+    <!-- Slide 21: Testing the Implementation -->
+    <section>
+        <h2>Testing Hamming(7,4)</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">import random
+
+def test_hamming74():
+    """Test all possible messages and single-error patterns."""
+    errors_corrected = 0
+    total_tests = 0
+
+    # Test all 16 possible 4-bit messages
+    for msg_int in range(16):
+        message = [(msg_int >> i) & 1 for i in range(3, -1, -1)]
+        codeword = Hamming74.encode(message)
+
+        # Test no-error case
+        decoded = Hamming74.decode(codeword)
+        assert decoded == message, f"Failed for {message}"
+
+        # Test all 7 single-error patterns
+        for err_pos in range(7):
+            corrupted = list(codeword)
+            corrupted[err_pos] ^= 1  # Introduce single error
+            decoded = Hamming74.decode(corrupted)
+            assert decoded == message, \
+                f"Failed: msg={message}, err_pos={err_pos}"
+            errors_corrected += 1
+            total_tests += 1
+
+    print(f"All tests passed! {errors_corrected} errors corrected "
+          f"across {total_tests} test cases.")
+
+test_hamming74()  # All tests passed! 112 errors corrected</code></pre>
+        <div class="key-point fragment">
+            16 messages &times; 7 error positions = 112 single-error patterns, all correctly decoded. Plus 16 no-error cases = 128 total vectors = 2<sup>7</sup> = the entire space. This confirms <span class="accent">perfection</span>.
+        </div>
+    </section>
+
+    <!-- Slide 22: Applications: ECC Memory -->
+    <section>
+        <h2>Application: ECC Memory</h2>
+        <span class="badge badge-app">Applications</span>
+        <div class="panel fragment">
+            <p>Modern server RAM uses <span class="accent">SECDED Hamming codes</span> to protect against bit flips caused by cosmic rays, alpha particles, and electrical noise.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>How ECC RAM Works</h3>
+                <ol class="small">
+                    <li>Data is written in 64-bit blocks</li>
+                    <li>8 parity bits are computed (SECDED)</li>
+                    <li>72 bits total are stored (64 data + 8 check)</li>
+                    <li>On read, syndrome is computed</li>
+                    <li>Single-bit errors are silently corrected</li>
+                    <li>Double-bit errors trigger a machine check exception</li>
+                </ol>
+            </div>
+            <div class="card">
+                <h3>Why It Matters</h3>
+                <div class="grid-2">
+                    <div style="text-align: center;">
+                        <div class="stat" style="font-size: 1.5em;">~1/month</div>
+                        <div class="stat-label">Single-bit errors per GB of RAM</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div class="stat" style="font-size: 1.5em;">10<sup>9</sup>+</div>
+                        <div class="stat-label">Bytes in a server &mdash; errors are inevitable</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            Without ECC, a server with 128 GB of RAM could experience hundreds of silent data corruptions per year. ECC RAM is <em>mandatory</em> for servers, scientific computing, and financial systems.
+        </div>
+    </section>
+
+    <!-- Slide 23: Comparison with Simple Codes -->
+    <section>
+        <h2>Hamming vs. Simple Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <table class="fragment">
+            <tr><th>Property</th><th>Single Parity</th><th>Repetition-3</th><th>Hamming(7,4)</th><th>SECDED(8,4)</th></tr>
+            <tr><td>Parameters</td><td>[n+1, n, 2]</td><td>[3, 1, 3]</td><td>[7, 4, 3]</td><td>[8, 4, 4]</td></tr>
+            <tr><td>Rate</td><td>~1.0</td><td class="accent2">0.333</td><td class="accent">0.571</td><td>0.500</td></tr>
+            <tr><td>Errors detected</td><td>1</td><td>2</td><td>2</td><td class="accent">3</td></tr>
+            <tr><td>Errors corrected</td><td class="accent2">0</td><td>1</td><td>1</td><td>1</td></tr>
+            <tr><td>Perfect?</td><td>No</td><td>Yes (trivially)</td><td class="accent">Yes</td><td>No</td></tr>
+            <tr><td>Decode complexity</td><td>O(n)</td><td>O(n)</td><td>O(n)</td><td>O(n)</td></tr>
+        </table>
+        <div class="key-point fragment">
+            Hamming(7,4) achieves the <em>same</em> error correction as repetition-3 but transmits <span class="accent">4 data bits</span> instead of 1 &mdash; a 4&times; improvement in throughput.
+        </div>
+    </section>
+
+    <!-- Slide 24: Hamming Code Limitations -->
+    <section>
+        <h2>Limitations of Hamming Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="grid-2">
+            <div class="card fragment">
+                <h3 style="color: var(--accent);">Strengths</h3>
+                <ul class="small">
+                    <li>Elegant mathematical structure</li>
+                    <li>Simple encoding and decoding (XOR only)</li>
+                    <li>Perfect &mdash; optimal for single-error correction</li>
+                    <li>Efficient hardware implementation</li>
+                    <li>Well-suited for memory protection</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3 style="color: var(--accent2);">Limitations</h3>
+                <ul class="small">
+                    <li>Only corrects <span class="accent2">1 error</span> per block</li>
+                    <li>Not suitable for channels with burst errors</li>
+                    <li>d<sub>min</sub> = 3 is fixed (cannot be increased within the family)</li>
+                    <li>For stronger protection, need BCH, Reed-Solomon, or LDPC</li>
+                    <li>Perfect property means NO detection beyond correction capability</li>
+                </ul>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>When Hamming codes fail:</strong> On channels where errors come in bursts (e.g., wireless, disk storage), multiple bits in a block are corrupted simultaneously. Hamming codes miscorrect these patterns. For burst errors, <span class="accent">interleaving</span> or <span class="accent">Reed-Solomon codes</span> are needed.
+        </div>
+    </section>
+
+    <!-- Slide 25: Summary & What's Next -->
+    <section>
+        <h2>Summary &amp; What's Next</h2>
+        <div class="grid-2">
+            <div class="panel fragment">
+                <h3>Key Takeaways</h3>
+                <ul class="small">
+                    <li>Hamming codes use <span class="accent">overlapping parity checks</span> to locate single-bit errors</li>
+                    <li>Parity bits at positions 2<sup>0</sup>, 2<sup>1</sup>, ..., 2<sup>r-1</sup></li>
+                    <li>The <span class="accent">syndrome</span> directly gives the error position in binary</li>
+                    <li>Generator matrix G encodes; parity-check matrix H decodes</li>
+                    <li>SECDED extends Hamming for simultaneous correction + detection</li>
+                    <li>Hamming codes are <span class="accent">perfect</span> &mdash; they optimally tile Hamming space</li>
+                </ul>
+            </div>
+            <div class="panel fragment">
+                <h3>Coming Up: CRC &amp; Error Detection</h3>
+                <p class="small">Hamming codes are great for correction, but many applications only need fast, reliable <em>detection</em> of errors.</p>
+                <div class="card" style="margin-top: 0.5em;">
+                    <p class="small"><span class="accent">CRC</span> (Cyclic Redundancy Check) uses polynomial arithmetic to detect burst errors with extremely high probability.</p>
+                </div>
+                <div class="card" style="margin-top: 0.5em;">
+                    <p class="small">Used in Ethernet, USB, ZIP files, and virtually every network protocol.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        width: 1200,
+        height: 900,
+        margin: 0.02,
+        transition: 'slide',
+        slideNumber: 'c/t',
+        plugins: [RevealHighlight]
+    });
+
+    function fixSlides() {
+        document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+            if (slide.scrollHeight > 900) {
+                slide.style.fontSize = (900 / slide.scrollHeight * 100) + '%';
+            }
+        });
+    }
+    Reveal.on('ready', fixSlides);
+    Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

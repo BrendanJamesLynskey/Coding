@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRC &amp; Error Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --text: #e0e0e8;
+            --dim: #6a6a7a;
+            --accent: #64ffda;
+            --accent2: #ff6b9d;
+            --accent3: #ffd93d;
+            --accent4: #6c5ce7;
+            --panel: rgba(255,255,255,0.04);
+            --border: rgba(100,255,218,0.15);
+        }
+        .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+        .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        .reveal h1 { font-size: 2.4em; }
+        .reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+        .reveal h3 { font-size: 1.2em; color: var(--accent3); }
+        .reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+        .reveal code { font-family: 'JetBrains Mono', monospace; }
+        .reveal .slides section { text-align: left; }
+        .reveal .progress { color: var(--accent); height: 3px; }
+        .reveal .controls { color: var(--accent); }
+        .badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+        .badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+        .badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+        .badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+        .badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+        .cols { display: flex; gap: 1em; align-items: flex-start; }
+        .cols > * { flex: 1; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+        .formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+        .key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .dim { color: var(--dim); }
+        .small { font-size: 0.75em; }
+        .tiny { font-size: 0.6em; }
+        .accent { color: var(--accent); }
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .accent4 { color: var(--accent4); }
+        .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+        .flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+        .flow-arrow { color: var(--accent); font-size: 1.2em; }
+        .stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 0.7em; color: var(--dim); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+        th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+        td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+        .nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+        .math-block { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+    <!-- Slide 1: Title -->
+    <section>
+        <div class="series-tag">Coding Theory Series &mdash; 04</div>
+        <h1 class="title-gradient">CRC &amp; Error Detection</h1>
+        <p style="font-size: 0.7em; color: var(--dim); margin-top: 0.5em;">Polynomial arithmetic for fast, reliable error detection in every network packet</p>
+        <div style="margin-top: 1.5em;">
+            <span class="badge badge-math">Mathematics</span>
+            <span class="badge badge-code">Code</span>
+            <span class="badge badge-standards">Standards</span>
+            <span class="badge badge-app">Applications</span>
+        </div>
+        <div class="nav-hint">Use arrow keys or swipe to navigate &bull; Press ESC for overview</div>
+    </section>
+
+    <!-- Slide 2: Roadmap -->
+    <section>
+        <h2>Roadmap</h2>
+        <div class="grid-3">
+            <div class="card fragment">
+                <h3>History</h3>
+                <p class="small">Peterson's 1961 paper and the origins of CRC</p>
+            </div>
+            <div class="card fragment">
+                <h3>GF(2) Polynomials</h3>
+                <p class="small">The mathematical foundation: arithmetic mod 2</p>
+            </div>
+            <div class="card fragment">
+                <h3>CRC Computation</h3>
+                <p class="small">Polynomial long division step by step</p>
+            </div>
+            <div class="card fragment">
+                <h3>Standard CRCs</h3>
+                <p class="small">CRC-8, CRC-16, CRC-32, CRC-64 and their generators</p>
+            </div>
+            <div class="card fragment">
+                <h3>Hardware</h3>
+                <p class="small">Shift register implementation for blazing-fast CRC</p>
+            </div>
+            <div class="card fragment">
+                <h3>Applications</h3>
+                <p class="small">Ethernet, USB, ZIP, and beyond</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: History -->
+    <section>
+        <h2>History of CRC</h2>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>The Cyclic Redundancy Check was formalized by <span class="accent">W. Wesley Peterson</span> in his 1961 paper <em>"Cyclic Codes for Error Detection"</em>, published in the Proceedings of the IRE.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>The Innovation</h3>
+                <p class="small">Peterson showed that cyclic codes &mdash; codes where any cyclic shift of a codeword is also a codeword &mdash; could be efficiently computed using <span class="accent">polynomial division</span> and implemented with simple <span class="accent">shift register circuits</span>.</p>
+            </div>
+            <div class="card">
+                <h3>Why CRC Won</h3>
+                <ul class="small">
+                    <li class="fragment"><span class="accent">Speed:</span> computable with XOR and shift operations</li>
+                    <li class="fragment"><span class="accent">Hardware:</span> trivial to implement in circuits</li>
+                    <li class="fragment"><span class="accent">Burst detection:</span> excellent at catching burst errors</li>
+                    <li class="fragment"><span class="accent">Standardized:</span> widely adopted across all protocols</li>
+                </ul>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            CRC has been the <em>dominant</em> error detection mechanism in digital communications for over 60 years. Every Ethernet frame, USB packet, and ZIP file uses CRC.
+        </div>
+    </section>
+
+    <!-- Slide 4: Polynomial Arithmetic over GF(2) -->
+    <section>
+        <h2>Polynomial Arithmetic over GF(2)</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p><span class="accent">GF(2)</span> is the finite field with two elements: {0, 1}. Arithmetic is modular: addition and subtraction are both <span class="accent">XOR</span>. Multiplication is AND.</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>GF(2) Operations</h3>
+                <table style="font-size: 0.85em;">
+                    <tr><th>+</th><th>0</th><th>1</th><th></th><th>&times;</th><th>0</th><th>1</th></tr>
+                    <tr><td><strong>0</strong></td><td>0</td><td>1</td><td></td><td><strong>0</strong></td><td>0</td><td>0</td></tr>
+                    <tr><td><strong>1</strong></td><td>1</td><td>0</td><td></td><td><strong>1</strong></td><td>0</td><td>1</td></tr>
+                </table>
+                <p class="tiny dim" style="margin-top: 0.5em;">Key: 1 + 1 = 0 (no carry!), and subtraction = addition</p>
+            </div>
+            <div class="card">
+                <h3>Polynomials over GF(2)</h3>
+                <p class="small">Binary strings map to polynomials:</p>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7em;">
+                    <span class="accent">1011</span> &rarr; x<sup>3</sup> + x + 1<br>
+                    <span class="accent">11001</span> &rarr; x<sup>4</sup> + x<sup>3</sup> + 1<br>
+                    <span class="accent">10111</span> &rarr; x<sup>4</sup> + x<sup>2</sup> + x + 1
+                </p>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>Why GF(2)?</strong> Over GF(2), polynomial addition is XOR (bitwise), and polynomial division reduces to repeated XOR with shifts. No multiplication or division of integers &mdash; just bit operations.
+        </div>
+    </section>
+
+    <!-- Slide 5: Polynomial Addition and Multiplication -->
+    <section>
+        <h2>GF(2) Polynomial Operations</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="cols">
+            <div class="card fragment">
+                <h3>Addition (= XOR)</h3>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7em;">
+                    &nbsp; (x<sup>3</sup> + x + 1) + (x<sup>3</sup> + x<sup>2</sup> + 1)<br>
+                    = x<sup>2</sup> + x<br><br>
+                    Bitwise: 1011 &oplus; 1101 = <span class="accent">0110</span>
+                </p>
+                <p class="tiny dim">Note: x<sup>3</sup> + x<sup>3</sup> = 0 and 1 + 1 = 0 (they cancel!)</p>
+            </div>
+            <div class="card fragment">
+                <h3>Multiplication</h3>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7em;">
+                    &nbsp; (x<sup>2</sup> + 1) &times; (x + 1)<br>
+                    = x<sup>3</sup> + x<sup>2</sup> + x + 1<br><br>
+                    (101) &times; (11) = <span class="accent">1111</span>
+                </p>
+                <p class="tiny dim">Multiply like normal polynomials, then reduce coefficients mod 2</p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            Key identity: &nbsp; a + a = 0 &nbsp; for all a &in; GF(2)<br>
+            <span class="small">Therefore subtraction = addition = XOR</span>
+        </div>
+        <div class="warning fragment">
+            <strong>No carries, no borrows.</strong> This is what makes GF(2) arithmetic so hardware-friendly. Every operation reduces to shifts and XORs.
+        </div>
+    </section>
+
+    <!-- Slide 6: The CRC Concept -->
+    <section>
+        <h2>The CRC Concept</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>CRC treats the message as a polynomial M(x) and divides it by a fixed <span class="accent">generator polynomial</span> G(x). The <span class="accent2">remainder</span> is the CRC checksum.</p>
+        </div>
+        <div class="flow-row fragment">
+            <div class="flow-node"><strong>Message</strong><br><span class="tiny">M(x)</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node"><strong>Shift left</strong><br><span class="tiny">M(x) &middot; x<sup>r</sup></span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent);"><strong>Divide by G(x)</strong><br><span class="tiny">mod G(x)</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent2);"><strong>Remainder</strong><br><span class="tiny">R(x) = CRC</span></div>
+        </div>
+        <div class="formula fragment">
+            Transmitted: T(x) = M(x) &middot; x<sup>r</sup> + R(x)<br>
+            <span class="small">where R(x) = M(x) &middot; x<sup>r</sup> mod G(x) &nbsp; and &nbsp; r = deg(G)</span>
+        </div>
+        <div class="key-point fragment">
+            <strong>Verification:</strong> The receiver divides T(x) by G(x). If the remainder is 0, no error detected. If non-zero, an error occurred. This works because T(x) is constructed to be exactly divisible by G(x).
+        </div>
+    </section>
+
+    <!-- Slide 7: CRC Step by Step -->
+    <section>
+        <h2>CRC Computation: Step by Step</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-interactive">Interactive</span>
+        <div class="panel fragment">
+            <p><strong>Message:</strong> 1101011 &nbsp; <strong>Generator:</strong> G(x) = x<sup>3</sup> + x + 1 = <span class="accent">1011</span></p>
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Step 1:</strong> Append r = 3 zeros to message: 1101011<span class="accent3">000</span></p>
+        </div>
+        <div class="fragment">
+            <p class="small"><strong>Step 2:</strong> Perform polynomial long division (XOR division):</p>
+            <pre style="font-size: 0.5em; text-align: left;">
+  1101011000  &divide;  1011
+  1011
+  ----
+  0110011000
+   1011
+   ----
+   011111000
+    1011
+    ----
+    01001000
+     1011
+     ----
+     0010000
+      1011
+      ----
+      00110
+            </pre>
+        </div>
+        <div class="formula fragment">
+            Remainder R(x) = <span class="accent2">110</span> &nbsp;&rarr;&nbsp; Transmit: 1101011<span class="accent2">110</span>
+        </div>
+    </section>
+
+    <!-- Slide 8: CRC Verification -->
+    <section>
+        <h2>CRC Verification</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The receiver divides the received message (with CRC appended) by the same generator polynomial G(x).</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3 style="color: var(--accent);">No Error</h3>
+                <p class="small">Received: 1101011110</p>
+                <p class="small">Divide by 1011:</p>
+                <p class="small">Remainder = <span class="accent">000</span></p>
+                <p class="small accent">Result: PASS</p>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--accent2);">With Error</h3>
+                <p class="small">Received: 110<span class="accent2">0</span>011110 (bit 4 flipped)</p>
+                <p class="small">Divide by 1011:</p>
+                <p class="small">Remainder = <span class="accent2">non-zero</span></p>
+                <p class="small accent2">Result: FAIL &mdash; error detected!</p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            If received R(x) = T(x) + E(x), then:<br>
+            R(x) mod G(x) = E(x) mod G(x)<br>
+            <span class="small">Error undetected only if G(x) divides E(x)</span>
+        </div>
+        <div class="key-point fragment">
+            CRC fails to detect an error pattern E(x) only when E(x) is a multiple of G(x). By choosing G(x) carefully, we can make this extremely unlikely for common error patterns.
+        </div>
+    </section>
+
+    <!-- Slide 9: Generator Polynomial Properties -->
+    <section>
+        <h2>Generator Polynomial Properties</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The choice of generator polynomial G(x) determines which errors CRC can and cannot detect. Good generators have specific algebraic properties.</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>Must-Have Properties</h3>
+                <ul class="small">
+                    <li class="fragment"><span class="accent">G(x) has (x+1) as factor:</span><br>Detects all odd-weight errors</li>
+                    <li class="fragment"><span class="accent">G(x) is irreducible over GF(2):</span><br>Maximum-length sequence detection</li>
+                    <li class="fragment"><span class="accent">Degree r:</span> produces r-bit CRC value</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Detection Guarantees</h3>
+                <ul class="small">
+                    <li class="fragment">All single-bit errors (if x<sup>r</sup> + ... + 1)</li>
+                    <li class="fragment">All double-bit errors (if G has appropriate period)</li>
+                    <li class="fragment">All odd numbers of bit errors (if (x+1) | G(x))</li>
+                    <li class="fragment"><span class="accent">All burst errors of length &le; r</span></li>
+                    <li class="fragment">Fraction 1 &minus; 2<sup>&minus;r</sup> of longer bursts</li>
+                </ul>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>Choosing poorly:</strong> A generator like G(x) = x<sup>r</sup> (just a shift) would be useless &mdash; it only checks if the last r bits are zero. Real generators must be carefully selected for maximum error coverage.
+        </div>
+    </section>
+
+    <!-- Slide 10: Burst Error Detection -->
+    <section>
+        <h2>Burst Error Detection</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>A <span class="accent">burst error</span> of length b is an error pattern where the first and last erroneous bits are b positions apart: E(x) = x<sup>i</sup>(x<sup>b-1</sup> + ... + 1).</p>
+        </div>
+        <div class="formula fragment">
+            A CRC with generator G(x) of degree r detects:<br>
+            &bull; <span class="accent">ALL</span> burst errors of length &le; r<br>
+            &bull; Fraction (1 &minus; 2<sup>&minus;(r&minus;1)</sup>) of bursts of length r + 1<br>
+            &bull; Fraction (1 &minus; 2<sup>&minus;r</sup>) of bursts of length &gt; r + 1
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Why CRC Excels at Bursts</h3>
+                <p class="small">Burst errors are the most common type in practice (noise affects consecutive bits). CRC is specifically designed to catch them because:</p>
+                <p class="small" style="margin-top: 0.5em;">A burst of length &le; r corresponds to a polynomial of degree &lt; r. Since G(x) has degree r, it <em>cannot divide</em> any polynomial of degree &lt; r.</p>
+            </div>
+            <div class="card">
+                <h3>CRC-32 Example</h3>
+                <p class="small">With r = 32:</p>
+                <ul class="small">
+                    <li class="accent">Detects ALL bursts &le; 32 bits</li>
+                    <li>Misses only 1 in 2<sup>31</sup> bursts of length 33</li>
+                    <li>Misses only 1 in 2<sup>32</sup> bursts of length &gt; 33</li>
+                    <li class="tiny dim">That's a miss rate of ~0.00000005%</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 11: Standard CRC Polynomials -->
+    <section>
+        <h2>Standard CRC Polynomials</h2>
+        <span class="badge badge-standards">Standards</span>
+        <table class="fragment">
+            <tr><th>Name</th><th>Polynomial</th><th>Hex</th><th>Used In</th></tr>
+            <tr>
+                <td class="accent">CRC-8</td>
+                <td class="tiny">x<sup>8</sup> + x<sup>2</sup> + x + 1</td>
+                <td>0x07</td>
+                <td>ATM headers, I<sup>2</sup>C</td>
+            </tr>
+            <tr>
+                <td class="accent">CRC-16-CCITT</td>
+                <td class="tiny">x<sup>16</sup> + x<sup>12</sup> + x<sup>5</sup> + 1</td>
+                <td>0x1021</td>
+                <td>Bluetooth, HDLC, X.25</td>
+            </tr>
+            <tr>
+                <td class="accent">CRC-16-IBM</td>
+                <td class="tiny">x<sup>16</sup> + x<sup>15</sup> + x<sup>2</sup> + 1</td>
+                <td>0x8005</td>
+                <td>USB, Modbus</td>
+            </tr>
+            <tr>
+                <td class="accent">CRC-32</td>
+                <td class="tiny">x<sup>32</sup> + x<sup>26</sup> + x<sup>23</sup> + x<sup>22</sup> + x<sup>16</sup> + x<sup>12</sup> + x<sup>11</sup> + x<sup>10</sup> + x<sup>8</sup> + x<sup>7</sup> + x<sup>5</sup> + x<sup>4</sup> + x<sup>2</sup> + x + 1</td>
+                <td>0x04C11DB7</td>
+                <td>Ethernet, ZIP, PNG, MPEG-2</td>
+            </tr>
+            <tr>
+                <td class="accent">CRC-64-ECMA</td>
+                <td class="tiny">x<sup>64</sup> + x<sup>62</sup> + x<sup>57</sup> + x<sup>55</sup> + ...</td>
+                <td>0x42F0E1EBA9EA3693</td>
+                <td>XZ, HDFS</td>
+            </tr>
+        </table>
+        <div class="key-point fragment">
+            <strong>CRC-32</strong> is the most widely used. Its polynomial was carefully chosen by committee to maximize error detection for common frame sizes in networking (up to ~12,000 bits).
+        </div>
+    </section>
+
+    <!-- Slide 12: CRC-32 Deep Dive -->
+    <section>
+        <h2>CRC-32 in Detail</h2>
+        <span class="badge badge-standards">Standards</span>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>CRC-32 (IEEE 802.3 / ITU-T V.42) is defined by the generator polynomial:</p>
+        </div>
+        <div class="formula fragment" style="font-size: 0.8em;">
+            G(x) = x<sup>32</sup> + x<sup>26</sup> + x<sup>23</sup> + x<sup>22</sup> + x<sup>16</sup> + x<sup>12</sup> + x<sup>11</sup> + x<sup>10</sup> + x<sup>8</sup> + x<sup>7</sup> + x<sup>5</sup> + x<sup>4</sup> + x<sup>2</sup> + x + 1
+        </div>
+        <div class="grid-3 fragment">
+            <div class="card" style="text-align: center;">
+                <div class="stat" style="font-size: 1.5em;">32</div>
+                <div class="stat-label">Check bits<br>appended to data</div>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div class="stat" style="font-size: 1.5em;">15</div>
+                <div class="stat-label">Non-zero terms<br>in generator</div>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div class="stat" style="font-size: 1.5em;">2<sup>32</sup></div>
+                <div class="stat-label">Possible CRC values<br>(~4.3 billion)</div>
+            </div>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Detection Capabilities</h3>
+                <ul class="small">
+                    <li>All single-bit errors</li>
+                    <li>All double-bit errors (for messages up to 2<sup>31</sup>&minus;1 bits)</li>
+                    <li>All odd numbers of bit errors</li>
+                    <li>All burst errors up to 32 bits long</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Practical Note</h3>
+                <p class="small">In Ethernet, CRC-32 is computed with all bits complemented initially, and the final CRC is also complemented. This catches the edge case of inserted/deleted zeros.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 13: Python CRC Implementation (Bitwise) -->
+    <section>
+        <h2>Python: CRC from Scratch</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">def crc_remainder(data: str, generator: str) -> str:
+    """Compute CRC remainder using binary polynomial division.
+
+    Args:
+        data: Binary string of the message
+        generator: Binary string of the generator polynomial
+    Returns:
+        Binary string of the CRC remainder
+    """
+    gen_len = len(generator)
+    # Append zeros (degree of generator - 1)
+    padded = list(data + '0' * (gen_len - 1))
+
+    for i in range(len(data)):
+        if padded[i] == '1':  # Only XOR when leading bit is 1
+            for j in range(gen_len):
+                padded[i + j] = str(int(padded[i + j]) ^ int(generator[j]))
+
+    # Remainder is the last (gen_len - 1) bits
+    return ''.join(padded[-(gen_len - 1):])
+
+def crc_check(data_with_crc: str, generator: str) -> bool:
+    """Verify CRC by checking if remainder is zero."""
+    return all(b == '0' for b in crc_remainder(data_with_crc, generator))
+
+# Example
+message = "1101011"
+generator = "1011"  # x^3 + x + 1
+crc = crc_remainder(message, generator)
+print(f"CRC: {crc}")  # "110"
+transmitted = message + crc
+print(f"Check: {crc_check(transmitted, generator)}")  # True</code></pre>
+    </section>
+
+    <!-- Slide 14: Python CRC-32 Implementation -->
+    <section>
+        <h2>Python: CRC-32</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">def crc32(data: bytes) -> int:
+    """Compute CRC-32 (IEEE 802.3) from scratch."""
+    # CRC-32 polynomial (reversed/reflected representation)
+    POLY = 0xEDB88320
+    crc = 0xFFFFFFFF  # Initial value (all 1s)
+
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):  # Process each bit
+            if crc & 1:  # LSB is 1
+                crc = (crc >> 1) ^ POLY
+            else:
+                crc >>= 1
+
+    return crc ^ 0xFFFFFFFF  # Final XOR
+
+# Verify against Python's built-in
+import binascii
+
+message = b"Hello, World!"
+our_crc = crc32(message)
+lib_crc = binascii.crc32(message) & 0xFFFFFFFF
+
+print(f"Our CRC-32:  0x{our_crc:08X}")
+print(f"Lib CRC-32:  0x{lib_crc:08X}")
+print(f"Match: {our_crc == lib_crc}")  # True</code></pre>
+        <div class="key-point fragment">
+            The "reflected" form processes bits LSB-first, which matches hardware shift register behavior. The initial value 0xFFFFFFFF and final XOR catch edge cases like leading zeros.
+        </div>
+    </section>
+
+    <!-- Slide 15: Table-Driven CRC -->
+    <section>
+        <h2>Optimized: Table-Driven CRC</h2>
+        <span class="badge badge-code">Code</span>
+        <div class="panel fragment">
+            <p>Processing bit-by-bit is slow. A <span class="accent">lookup table</span> of 256 pre-computed CRC values lets us process a full byte at a time &mdash; an 8&times; speedup.</p>
+        </div>
+        <pre class="fragment"><code class="python">def make_crc32_table():
+    """Pre-compute CRC-32 lookup table (256 entries)."""
+    POLY = 0xEDB88320
+    table = []
+    for i in range(256):
+        crc = i
+        for _ in range(8):
+            if crc & 1:
+                crc = (crc >> 1) ^ POLY
+            else:
+                crc >>= 1
+        table.append(crc)
+    return table
+
+CRC32_TABLE = make_crc32_table()
+
+def crc32_fast(data: bytes) -> int:
+    """Table-driven CRC-32 (byte-at-a-time)."""
+    crc = 0xFFFFFFFF
+    for byte in data:
+        index = (crc ^ byte) & 0xFF
+        crc = (crc >> 8) ^ CRC32_TABLE[index]
+    return crc ^ 0xFFFFFFFF</code></pre>
+        <div class="panel fragment">
+            <p class="small"><span class="accent3">Further optimization:</span> Modern implementations use 4KB or 16KB "slicing-by-4" / "slicing-by-8" tables to process 4 or 8 bytes at once. Intel/AMD CPUs have dedicated <code>CRC32</code> instructions (SSE 4.2).</p>
+        </div>
+    </section>
+
+    <!-- Slide 16: Hardware Implementation -->
+    <section>
+        <h2>Hardware: Shift Register</h2>
+        <span class="badge badge-app">Applications</span>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>CRC can be computed in hardware using a <span class="accent">Linear Feedback Shift Register (LFSR)</span>. For a generator of degree r, you need r flip-flops and a few XOR gates.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>LFSR for G(x) = x<sup>3</sup> + x + 1</h3>
+            <div class="flow-row" style="margin-top: 0.5em;">
+                <div class="flow-node" style="border-color: var(--accent3);">Input<br>bit</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-node" style="border-color: var(--accent2);">&oplus;</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-node"><strong>R<sub>2</sub></strong></div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-node" style="border-color: var(--accent2);">&oplus;</div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-node"><strong>R<sub>1</sub></strong></div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-node"><strong>R<sub>0</sub></strong></div>
+                <div class="flow-arrow">&rarr; feedback</div>
+            </div>
+            <p class="tiny dim" style="text-align: center; margin-top: 0.5em;">XOR gates are placed where the generator polynomial has coefficient 1 (at x<sup>1</sup> and x<sup>0</sup>). Feedback from R<sub>0</sub> loops back to the XOR gates.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Advantages</h3>
+                <ul class="small">
+                    <li>Processes 1 bit per clock cycle</li>
+                    <li>Constant-time, no memory needed</li>
+                    <li>Trivial gate count: r flip-flops + wt(G)&minus;1 XOR gates</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>CRC-32 in Hardware</h3>
+                <ul class="small">
+                    <li>32 flip-flops</li>
+                    <li>14 XOR gates</li>
+                    <li>At 1 GHz: processes 1 Gbit/sec</li>
+                    <li>Parallel versions process multiple bits/clock</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 17: CRC in Ethernet -->
+    <section>
+        <h2>CRC in Ethernet (IEEE 802.3)</h2>
+        <span class="badge badge-standards">Standards</span>
+        <span class="badge badge-app">Applications</span>
+        <div class="flow-row fragment">
+            <div class="flow-node">Preamble<br><span class="tiny">7 bytes</span></div>
+            <div class="flow-node">SFD<br><span class="tiny">1 byte</span></div>
+            <div class="flow-node" style="border-color: var(--accent);">Dest MAC<br><span class="tiny">6 bytes</span></div>
+            <div class="flow-node" style="border-color: var(--accent);">Src MAC<br><span class="tiny">6 bytes</span></div>
+            <div class="flow-node" style="border-color: var(--accent);">Type/Len<br><span class="tiny">2 bytes</span></div>
+            <div class="flow-node" style="border-color: var(--accent);">Payload<br><span class="tiny">46-1500 B</span></div>
+            <div class="flow-node" style="border-color: var(--accent2);">FCS (CRC-32)<br><span class="tiny">4 bytes</span></div>
+        </div>
+        <div class="panel fragment">
+            <h3>Frame Check Sequence (FCS)</h3>
+            <ul class="small">
+                <li class="fragment">CRC-32 is computed over the <span class="accent">entire frame</span> (destination MAC through payload)</li>
+                <li class="fragment">Initial CRC register set to <span class="accent">0xFFFFFFFF</span> (not zero!)</li>
+                <li class="fragment">Final CRC is <span class="accent">complemented</span> before appending</li>
+                <li class="fragment">Receiver computes CRC over entire frame including FCS</li>
+                <li class="fragment">If result is the "magic" constant <span class="accent">0xC704DD7B</span>, frame is valid</li>
+            </ul>
+        </div>
+        <div class="key-point fragment">
+            Every Ethernet frame on the internet is protected by CRC-32. At 10 Gbps, a NIC computes CRC-32 on approximately <span class="accent">~800,000 frames per second</span>.
+        </div>
+    </section>
+
+    <!-- Slide 18: CRC in Other Protocols -->
+    <section>
+        <h2>CRC Across Protocols</h2>
+        <span class="badge badge-standards">Standards</span>
+        <span class="badge badge-app">Applications</span>
+        <table class="fragment">
+            <tr><th>Protocol / Format</th><th>CRC Type</th><th>Protected Data</th><th>Notes</th></tr>
+            <tr><td>Ethernet (802.3)</td><td>CRC-32</td><td>Frame data</td><td>4-byte FCS field</td></tr>
+            <tr><td>USB</td><td>CRC-5, CRC-16</td><td>Token/data packets</td><td>CRC-5 for tokens, CRC-16 for data</td></tr>
+            <tr><td>Bluetooth</td><td>CRC-24</td><td>PDU data</td><td>Adaptive frequency hopping</td></tr>
+            <tr><td>ZIP / gzip</td><td>CRC-32</td><td>Compressed data</td><td>Detects corruption during storage</td></tr>
+            <tr><td>PNG images</td><td>CRC-32</td><td>Each chunk</td><td>Per-chunk integrity</td></tr>
+            <tr><td>HDLC / PPP</td><td>CRC-16-CCITT</td><td>Frame contents</td><td>Used in serial links</td></tr>
+            <tr><td>SATA / PCIe</td><td>CRC-32</td><td>Data layer</td><td>High-speed bus integrity</td></tr>
+            <tr><td>iSCSI</td><td>CRC-32C</td><td>PDU data</td><td>Uses Castagnoli polynomial</td></tr>
+        </table>
+        <div class="key-point fragment">
+            CRC is so universal that modern CPUs include dedicated CRC instructions. Intel's SSE 4.2 added <code>CRC32</code> in 2008, computing CRC-32C at hardware speed.
+        </div>
+    </section>
+
+    <!-- Slide 19: CRC vs Checksums -->
+    <section>
+        <h2>CRC vs. Checksums</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Both CRC and checksums detect errors, but they have very different mathematical foundations and error detection capabilities.</p>
+        </div>
+        <table class="fragment">
+            <tr><th>Property</th><th>Internet Checksum</th><th>CRC-32</th></tr>
+            <tr><td>Algorithm</td><td>One's complement sum</td><td>Polynomial division (GF(2))</td></tr>
+            <tr><td>Check bits</td><td>16</td><td>32</td></tr>
+            <tr><td>Single-bit errors</td><td class="accent">All detected</td><td class="accent">All detected</td></tr>
+            <tr><td>Burst errors &le; 16</td><td class="accent2">Some missed</td><td class="accent">All detected</td></tr>
+            <tr><td>Byte swaps</td><td class="accent2">Undetected!</td><td class="accent">Detected</td></tr>
+            <tr><td>Speed</td><td class="accent">Very fast</td><td>Fast (with tables/HW)</td></tr>
+            <tr><td>Used in</td><td>IP, TCP, UDP headers</td><td>Ethernet, storage, protocols</td></tr>
+        </table>
+        <div class="warning fragment">
+            <strong>The Internet checksum is weak!</strong> It uses 1's complement addition, which means swapping two 16-bit words is undetectable. CRC provides far stronger guarantees but is computed at a lower layer (Ethernet) to compensate.
+        </div>
+    </section>
+
+    <!-- Slide 20: CRC vs Hash Functions -->
+    <section>
+        <h2>CRC vs. Cryptographic Hashes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="grid-2">
+            <div class="card fragment">
+                <h3 style="color: var(--accent);">CRC-32</h3>
+                <ul class="small">
+                    <li><strong>Purpose:</strong> Detect accidental errors</li>
+                    <li><strong>Speed:</strong> Extremely fast (hardware support)</li>
+                    <li><strong>Output:</strong> 32 bits</li>
+                    <li><strong>Security:</strong> None &mdash; trivially forgeable</li>
+                    <li><strong>Math:</strong> Linear (GF(2) polynomial)</li>
+                    <li class="accent2">CRC(A &oplus; B) = CRC(A) &oplus; CRC(B)</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3 style="color: var(--accent3);">SHA-256</h3>
+                <ul class="small">
+                    <li><strong>Purpose:</strong> Detect tampering (integrity)</li>
+                    <li><strong>Speed:</strong> Slower (~500 MB/s in SW)</li>
+                    <li><strong>Output:</strong> 256 bits</li>
+                    <li><strong>Security:</strong> Collision-resistant</li>
+                    <li><strong>Math:</strong> Non-linear (confusion/diffusion)</li>
+                    <li>No algebraic relationship between inputs/outputs</li>
+                </ul>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>CRC is NOT a security mechanism!</strong> Because CRC is <em>linear</em>, an attacker can compute exactly which bits to flip in the message to produce any desired CRC value. Always use cryptographic hashes (SHA-256, BLAKE3) or MACs (HMAC) for integrity against adversaries.
+        </div>
+    </section>
+
+    <!-- Slide 21: Why CRC Detects But Doesn't Correct -->
+    <section>
+        <h2>Why CRC Detects But Doesn't Correct</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>CRC <em>could</em> theoretically correct errors (the syndrome contains information about the error), but there are fundamental and practical reasons it's used only for detection.</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3 style="color: var(--accent2);">Why Not Correct?</h3>
+                <ul class="small">
+                    <li class="fragment"><strong>Ambiguity:</strong> Many different error patterns produce the same syndrome (remainder). CRC-32 has 2<sup>32</sup> syndromes but errors can occur in any of millions of bit positions.</li>
+                    <li class="fragment"><strong>Design goal:</strong> CRC is optimized for detection, not correction. The generator polynomial is chosen for maximum detection coverage.</li>
+                    <li class="fragment"><strong>Practical:</strong> In networking, retransmission (ARQ) is cheap. Correction adds complexity for little benefit.</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3 style="color: var(--accent);">When Correction Is Needed</h3>
+                <ul class="small">
+                    <li class="fragment"><strong>Deep space:</strong> Reed-Solomon + convolutional (round-trip time too long for ARQ)</li>
+                    <li class="fragment"><strong>Storage:</strong> Reed-Solomon in CDs, DVDs, QR codes</li>
+                    <li class="fragment"><strong>Memory:</strong> Hamming SECDED in ECC RAM</li>
+                    <li class="fragment"><strong>Wireless:</strong> LDPC / turbo codes in 4G/5G</li>
+                </ul>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            The layered approach: <span class="accent">CRC detects</span> at the link layer, and if an error is found, the <span class="accent2">protocol retransmits</span> (TCP, reliable transport). This separation of concerns is both simple and effective.
+        </div>
+    </section>
+
+    <!-- Slide 22: Summary & What's Next -->
+    <section>
+        <h2>Summary &amp; Series Recap</h2>
+        <div class="grid-2">
+            <div class="panel fragment">
+                <h3>CRC Key Takeaways</h3>
+                <ul class="small">
+                    <li><span class="accent">CRC</span> uses polynomial division over GF(2) for error detection</li>
+                    <li>The <span class="accent">generator polynomial</span> determines detection capabilities</li>
+                    <li>Detects ALL burst errors up to r bits and nearly all longer ones</li>
+                    <li>Efficiently implemented with shift registers or lookup tables</li>
+                    <li>Used in virtually every network protocol and storage format</li>
+                    <li>CRC is for <em>detection</em> only &mdash; not correction, not security</li>
+                </ul>
+            </div>
+            <div class="panel fragment">
+                <h3>Series Summary</h3>
+                <div class="card" style="margin-bottom: 0.4em;">
+                    <p class="small"><span class="accent">01:</span> Foundations &mdash; Shannon, capacity, distance, bounds</p>
+                </div>
+                <div class="card" style="margin-bottom: 0.4em;">
+                    <p class="small"><span class="accent">02:</span> Parity &amp; Simple Codes &mdash; detection basics</p>
+                </div>
+                <div class="card" style="margin-bottom: 0.4em;">
+                    <p class="small"><span class="accent">03:</span> Hamming Codes &mdash; first practical FEC</p>
+                </div>
+                <div class="card">
+                    <p class="small"><span class="accent">04:</span> CRC &mdash; polynomial error detection</p>
+                </div>
+            </div>
+        </div>
+        <div class="flow-row fragment">
+            <div class="flow-node">Foundations</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Simple Codes</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Hamming FEC</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent);">CRC Detection</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent3);">BCH, RS, LDPC...</div>
+        </div>
+    </section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        width: 1200,
+        height: 900,
+        margin: 0.02,
+        transition: 'slide',
+        slideNumber: 'c/t',
+        plugins: [RevealHighlight]
+    });
+
+    function fixSlides() {
+        document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+            if (slide.scrollHeight > 900) {
+                slide.style.fontSize = (900 / slide.scrollHeight * 100) + '%';
+            }
+        });
+    }
+    Reveal.on('ready', fixSlides);
+    Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

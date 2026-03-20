@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parity Checks &amp; Simple Codes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --text: #e0e0e8;
+            --dim: #6a6a7a;
+            --accent: #64ffda;
+            --accent2: #ff6b9d;
+            --accent3: #ffd93d;
+            --accent4: #6c5ce7;
+            --panel: rgba(255,255,255,0.04);
+            --border: rgba(100,255,218,0.15);
+        }
+        .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+        .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        .reveal h1 { font-size: 2.4em; }
+        .reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+        .reveal h3 { font-size: 1.2em; color: var(--accent3); }
+        .reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+        .reveal code { font-family: 'JetBrains Mono', monospace; }
+        .reveal .slides section { text-align: left; }
+        .reveal .progress { color: var(--accent); height: 3px; }
+        .reveal .controls { color: var(--accent); }
+        .badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+        .badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+        .badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+        .badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+        .badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+        .cols { display: flex; gap: 1em; align-items: flex-start; }
+        .cols > * { flex: 1; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+        .formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+        .key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .dim { color: var(--dim); }
+        .small { font-size: 0.75em; }
+        .tiny { font-size: 0.6em; }
+        .accent { color: var(--accent); }
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .accent4 { color: var(--accent4); }
+        .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+        .flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+        .flow-arrow { color: var(--accent); font-size: 1.2em; }
+        .stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 0.7em; color: var(--dim); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+        th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+        td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+        .nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+        .math-block { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+    <!-- Slide 1: Title -->
+    <section>
+        <div class="series-tag">Coding Theory Series &mdash; 02</div>
+        <h1 class="title-gradient">Parity Checks &amp; Simple Codes</h1>
+        <p style="font-size: 0.7em; color: var(--dim); margin-top: 0.5em;">The simplest error-detecting and error-correcting schemes</p>
+        <div style="margin-top: 1.5em;">
+            <span class="badge badge-math">Mathematics</span>
+            <span class="badge badge-code">Code</span>
+            <span class="badge badge-history">History</span>
+            <span class="badge badge-app">Applications</span>
+        </div>
+        <div class="nav-hint">Use arrow keys or swipe to navigate &bull; Press ESC for overview</div>
+    </section>
+
+    <!-- Slide 2: Roadmap -->
+    <section>
+        <h2>Roadmap</h2>
+        <div class="grid-3">
+            <div class="card fragment">
+                <h3>History</h3>
+                <p class="small">Early telegraph and telephone error checking methods</p>
+            </div>
+            <div class="card fragment">
+                <h3>Parity Bits</h3>
+                <p class="small">Even parity, odd parity, and single parity check codes</p>
+            </div>
+            <div class="card fragment">
+                <h3>Repetition</h3>
+                <p class="small">Triple repetition codes and majority voting</p>
+            </div>
+            <div class="card fragment">
+                <h3>2D Parity</h3>
+                <p class="small">Rectangular codes for stronger error detection</p>
+            </div>
+            <div class="card fragment">
+                <h3>Real-World</h3>
+                <p class="small">ISBN check digits and the Luhn algorithm</p>
+            </div>
+            <div class="card fragment">
+                <h3>Tradeoffs</h3>
+                <p class="small">Rate vs. error correction capability</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: Historical Context -->
+    <section>
+        <h2>Historical Context</h2>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>Error checking is as old as communication itself. Long before Shannon's formal theory, engineers devised ad-hoc methods to detect transmission errors.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Telegraph (1840s&ndash;1900s)</h3>
+                <ul class="small">
+                    <li>Operators used "check sums" &mdash; adding up character values and transmitting the total</li>
+                    <li>Baudot code (1870) included error-checking conventions</li>
+                    <li>Vernam cipher (1917) used XOR &mdash; same operation underlying parity</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Early Computing (1940s)</h3>
+                <ul class="small">
+                    <li>Punched card machines used parity rows for verification</li>
+                    <li>Bell Labs relay computers checked parity after each operation</li>
+                    <li>Hamming's frustration: machines could <em>detect</em> errors but not <em>fix</em> them</li>
+                </ul>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            The parity bit is arguably the oldest and most ubiquitous error-detection mechanism in digital systems.
+        </div>
+    </section>
+
+    <!-- Slide 4: The Parity Bit Concept -->
+    <section>
+        <h2>The Parity Bit</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>A <span class="accent">parity bit</span> is a single bit appended to a data word to make the total number of 1-bits either even or odd.</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>Even Parity</h3>
+                <p class="small">The parity bit is set so the total number of 1s (data + parity) is <span class="accent">even</span>.</p>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7em; margin-top: 0.5em;">
+                    1011001 &rarr; 1011001<span class="accent">0</span> (four 1s)<br>
+                    1010001 &rarr; 1010001<span class="accent">1</span> (four 1s)
+                </p>
+            </div>
+            <div class="card">
+                <h3>Odd Parity</h3>
+                <p class="small">The parity bit is set so the total number of 1s is <span class="accent2">odd</span>.</p>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7em; margin-top: 0.5em;">
+                    1011001 &rarr; 1011001<span class="accent2">1</span> (five 1s)<br>
+                    1010001 &rarr; 1010001<span class="accent2">0</span> (three 1s)
+                </p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            Even parity: p = d<sub>1</sub> &oplus; d<sub>2</sub> &oplus; d<sub>3</sub> &oplus; ... &oplus; d<sub>k</sub>
+        </div>
+        <div class="key-point fragment">
+            Parity is simply the XOR of all data bits. This operation is both computationally trivial and implementable with a single XOR gate chain.
+        </div>
+    </section>
+
+    <!-- Slide 5: Single Parity Check Code -->
+    <section>
+        <h2>Single Parity Check Code</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The single parity check (SPC) code is a <span class="accent">[n, n&minus;1, 2]</span> code. It appends one parity bit to n&minus;1 data bits.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Properties</h3>
+                <ul class="small">
+                    <li><strong>Rate:</strong> R = (n&minus;1)/n (very high)</li>
+                    <li><strong>d<sub>min</sub> = 2:</strong> detects 1 error</li>
+                    <li><strong>Cannot correct</strong> any errors</li>
+                    <li>All codewords have even weight</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Example: [8, 7, 2]</h3>
+                <table>
+                    <tr><th>Data (7 bits)</th><th>Parity</th><th>Codeword</th></tr>
+                    <tr><td>0000000</td><td>0</td><td class="accent">00000000</td></tr>
+                    <tr><td>1010101</td><td>0</td><td class="accent">10101010</td></tr>
+                    <tr><td>1100110</td><td>0</td><td class="accent">11001100</td></tr>
+                    <tr><td>1111111</td><td>1</td><td class="accent">11111111</td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>Critical limitation:</strong> SPC cannot detect an even number of errors. If 2 bits flip, parity still checks out and the error goes undetected!
+        </div>
+    </section>
+
+    <!-- Slide 6: Parity Check in Python -->
+    <section>
+        <h2>Python: Parity Encoding</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">def encode_even_parity(data: str) -> str:
+    """Append an even parity bit to a binary string."""
+    parity = sum(int(b) for b in data) % 2
+    return data + str(parity)
+
+def check_even_parity(codeword: str) -> bool:
+    """Check if a codeword has valid even parity."""
+    return sum(int(b) for b in codeword) % 2 == 0
+
+# Encoding examples
+print(encode_even_parity("1011001"))  # "10110010" (4 ones, parity=0)
+print(encode_even_parity("1010001"))  # "10100011" (4 ones, parity=1)
+
+# Detection examples
+print(check_even_parity("10110010"))  # True  - no error
+print(check_even_parity("10110011"))  # False - 1 bit flipped!
+print(check_even_parity("10110001"))  # True  - 2 bits flipped, UNDETECTED!</code></pre>
+        <div class="warning fragment">
+            <strong>Line 11:</strong> When 2 bits flip simultaneously, parity cannot detect the error. This is the fundamental weakness of single parity check codes.
+        </div>
+    </section>
+
+    <!-- Slide 7: Visualizing Parity Failure -->
+    <section>
+        <h2>When Parity Fails</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-interactive">Interactive</span>
+        <div class="panel fragment">
+            <h3>Single Error &mdash; Detected</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8em;">
+                Sent: &nbsp;&nbsp;&nbsp; 1 0 1 1 0 0 1 <span class="accent">0</span> &nbsp; (parity = 0, sum = 4)<br>
+                Received: 1 0 <span class="accent2">0</span> 1 0 0 1 <span class="accent">0</span> &nbsp; (parity check: sum = 3 &ne; even) <span class="accent2">ERROR!</span>
+            </p>
+        </div>
+        <div class="panel fragment">
+            <h3>Double Error &mdash; Undetected!</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8em;">
+                Sent: &nbsp;&nbsp;&nbsp; 1 0 1 1 0 0 1 <span class="accent">0</span> &nbsp; (parity = 0, sum = 4)<br>
+                Received: 1 0 <span class="accent2">0</span> 1 0 <span class="accent2">1</span> 1 <span class="accent">0</span> &nbsp; (parity check: sum = 4 = even) <span class="accent3">Looks OK!</span>
+            </p>
+        </div>
+        <div class="panel fragment">
+            <h3>Triple Error &mdash; Detected</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8em;">
+                Sent: &nbsp;&nbsp;&nbsp; 1 0 1 1 0 0 1 <span class="accent">0</span> &nbsp; (parity = 0, sum = 4)<br>
+                Received: <span class="accent2">0</span> 0 <span class="accent2">0</span> 1 0 <span class="accent2">1</span> 1 <span class="accent">0</span> &nbsp; (parity check: sum = 3 &ne; even) <span class="accent2">ERROR!</span>
+            </p>
+        </div>
+        <div class="key-point fragment">
+            <strong>Pattern:</strong> SPC detects odd numbers of errors but misses even numbers. In general, it detects all error patterns of weight 1, 3, 5, ... but misses all patterns of weight 2, 4, 6, ...
+        </div>
+    </section>
+
+    <!-- Slide 8: Repetition Codes -->
+    <section>
+        <h2>Repetition Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The simplest error-<em>correcting</em> code: repeat each bit <span class="accent">n times</span>. The resulting [n, 1, n] code can correct up to &lfloor;(n&minus;1)/2&rfloor; errors.</p>
+        </div>
+        <div class="grid-3 fragment">
+            <div class="card" style="text-align: center;">
+                <h3>[3, 1, 3]</h3>
+                <p class="small">Triple repetition</p>
+                <p style="font-family: 'JetBrains Mono', monospace;">0 &rarr; 000<br>1 &rarr; 111</p>
+                <p class="tiny dim">Corrects 1 error</p>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3>[5, 1, 5]</h3>
+                <p class="small">Quintuple repetition</p>
+                <p style="font-family: 'JetBrains Mono', monospace;">0 &rarr; 00000<br>1 &rarr; 11111</p>
+                <p class="tiny dim">Corrects 2 errors</p>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3>[7, 1, 7]</h3>
+                <p class="small">Septuple repetition</p>
+                <p style="font-family: 'JetBrains Mono', monospace;">0 &rarr; 0000000<br>1 &rarr; 1111111</p>
+                <p class="tiny dim">Corrects 3 errors</p>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>Terrible rate:</strong> R = 1/n. The triple repetition code wastes 2/3 of bandwidth! This is the brute-force approach &mdash; effective but extremely inefficient.
+        </div>
+    </section>
+
+    <!-- Slide 9: Majority Voting Decoder -->
+    <section>
+        <h2>Majority Voting Decoder</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <div class="panel fragment">
+            <p>For repetition codes, decoding is simple: take the <span class="accent">majority vote</span> of the received bits.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Triple Repetition Examples</h3>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.75em;">
+                    Received <span class="accent">000</span> &rarr; decode as <span class="accent">0</span> (unanimous)<br>
+                    Received <span class="accent">001</span> &rarr; decode as <span class="accent">0</span> (2 vs 1)<br>
+                    Received <span class="accent">010</span> &rarr; decode as <span class="accent">0</span> (2 vs 1)<br>
+                    Received <span class="accent2">011</span> &rarr; decode as <span class="accent2">1</span> (1 vs 2)<br>
+                    Received <span class="accent2">111</span> &rarr; decode as <span class="accent2">1</span> (unanimous)
+                </p>
+            </div>
+            <div class="card">
+                <h3>Error Analysis</h3>
+                <p class="small">For BSC with crossover probability p:</p>
+                <div class="formula" style="font-size: 0.75em;">
+                    P<sub>error</sub> = 3p<sup>2</sup>(1&minus;p) + p<sup>3</sup> = 3p<sup>2</sup> &minus; 2p<sup>3</sup>
+                </div>
+                <p class="tiny dim">For p = 0.01: P<sub>error</sub> &asymp; 0.000298 (much better than raw p!)</p>
+            </div>
+        </div>
+        <pre class="fragment"><code class="python">def repetition_encode(bit: str, n: int = 3) -> str:
+    """Encode a single bit using n-fold repetition."""
+    return bit * n
+
+def majority_vote_decode(received: str) -> str:
+    """Decode using majority voting."""
+    ones = received.count('1')
+    return '1' if ones > len(received) // 2 else '0'
+
+# Encode and simulate error
+encoded = repetition_encode('1', 3)  # "111"
+received = "110"  # one bit flipped
+decoded = majority_vote_decode(received)  # "1" - correct!</code></pre>
+    </section>
+
+    <!-- Slide 10: Repetition Code Analysis -->
+    <section>
+        <h2>Repetition Code Performance</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <div class="panel fragment">
+            <p>How does error probability decrease as we increase repetition factor n?</p>
+        </div>
+        <pre class="fragment"><code class="python">from math import comb
+
+def repetition_error_prob(p, n):
+    """Probability of decoding error for [n,1,n] repetition code.
+    Error occurs when more than n//2 bits are flipped."""
+    t = n // 2  # correction capability
+    p_error = sum(comb(n, i) * p**i * (1-p)**(n-i)
+                  for i in range(t + 1, n + 1))
+    return p_error
+
+# Compare for p = 0.01
+for n in [1, 3, 5, 7, 9]:
+    pe = repetition_error_prob(0.01, n)
+    rate = 1/n
+    print(f"[{n},1,{n}]: P_error = {pe:.2e}, Rate = {rate:.3f}")</code></pre>
+        <table class="fragment">
+            <tr><th>Code</th><th>Rate</th><th>P<sub>error</sub> (p=0.01)</th><th>Improvement</th></tr>
+            <tr><td>Uncoded</td><td>1.000</td><td>1.00 &times; 10<sup>-2</sup></td><td>&mdash;</td></tr>
+            <tr><td>[3,1,3]</td><td>0.333</td><td>2.98 &times; 10<sup>-4</sup></td><td>33&times;</td></tr>
+            <tr><td>[5,1,5]</td><td>0.200</td><td>9.80 &times; 10<sup>-7</sup></td><td>10,200&times;</td></tr>
+            <tr><td>[7,1,7]</td><td>0.143</td><td>3.40 &times; 10<sup>-10</sup></td><td>29M&times;</td></tr>
+        </table>
+        <div class="key-point fragment">
+            Error probability drops <em>exponentially</em> with n, but so does the code rate. This is the fundamental tradeoff.
+        </div>
+    </section>
+
+    <!-- Slide 11: Two-Dimensional Parity -->
+    <section>
+        <h2>Two-Dimensional Parity</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Arrange data in a <span class="accent">rectangular grid</span> and compute parity for each row AND each column. This creates a 2D parity check code.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card" style="text-align: center;">
+                <h3>Layout</h3>
+                <pre style="font-size: 0.55em; text-align: center;">
+  Data bits   | Row
+  -----------+-----
+  1 0 1 1    |  1
+  0 1 1 0    |  0
+  1 1 0 1    |  1
+  -----------+-----
+  0 0 0 0    | Col parity
+                </pre>
+            </div>
+            <div class="card">
+                <h3>Properties</h3>
+                <ul class="small">
+                    <li class="fragment"><span class="accent">Detects</span> all 1, 2, and 3-bit errors</li>
+                    <li class="fragment"><span class="accent">Corrects</span> all single-bit errors</li>
+                    <li class="fragment">Can locate the error at the intersection of the failed row and column checks</li>
+                    <li class="fragment">Some 4-bit error patterns go undetected</li>
+                </ul>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>Single error correction:</strong> If row i and column j both fail parity, the error is at position (i, j). Flip that bit to correct it!
+        </div>
+    </section>
+
+    <!-- Slide 12: 2D Parity Worked Example -->
+    <section>
+        <h2>2D Parity: Worked Example</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-interactive">Interactive</span>
+        <div class="cols">
+            <div class="card fragment">
+                <h3>Original (with parity)</h3>
+                <pre style="font-size: 0.6em; text-align: center;">
+  1 0 1 1 | <span class="accent">1</span>
+  0 1 1 0 | <span class="accent">0</span>
+  1 1 0 1 | <span class="accent">1</span>
+  ---------+--
+  <span class="accent">0 0 0 0</span> | <span class="accent3">0</span>
+                </pre>
+                <p class="tiny dim">All row/column parities correct</p>
+            </div>
+            <div class="card fragment">
+                <h3>Error at position (1,2)</h3>
+                <pre style="font-size: 0.6em; text-align: center;">
+  1 0 1 1 | <span class="accent">1</span> &check;
+  0 <span class="accent2">0</span> 1 0 | <span class="accent">0</span> <span class="accent2">&cross;</span>
+  1 1 0 1 | <span class="accent">1</span> &check;
+  ---------+--
+  <span class="accent">0</span> <span class="accent2">0</span> <span class="accent">0 0</span> | <span class="accent3">0</span>
+     <span class="accent2">&cross;</span>
+                </pre>
+                <p class="tiny">Row 1 fails, Col 1 fails &rarr; error at <span class="accent2">(1,1)</span></p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            Rate = (r &middot; c) / ((r+1) &middot; (c+1)) &nbsp;&nbsp; For 4&times;3: R = 12/20 = 0.60
+        </div>
+        <div class="warning fragment">
+            <strong>Limitation:</strong> A rectangular pattern of 4 errors (forming a rectangle in the grid) is undetectable &mdash; each row and column parity still checks out.
+        </div>
+    </section>
+
+    <!-- Slide 13: 2D Parity in Python -->
+    <section>
+        <h2>Python: 2D Parity</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">def encode_2d_parity(data, rows, cols):
+    """Encode data with 2D parity (row + column + corner)."""
+    grid = [data[i*cols:(i+1)*cols] for i in range(rows)]
+    # Add row parity
+    for row in grid:
+        row.append(sum(row) % 2)
+    # Add column parity row
+    col_parity = [sum(grid[r][c] for r in range(rows)) % 2
+                  for c in range(cols + 1)]
+    grid.append(col_parity)
+    return grid
+
+def check_2d_parity(grid):
+    """Check 2D parity; return error position or None."""
+    rows, cols = len(grid), len(grid[0])
+    bad_rows = [r for r in range(rows) if sum(grid[r]) % 2 != 0]
+    bad_cols = [c for c in range(cols)
+                if sum(grid[r][c] for r in range(rows)) % 2 != 0]
+    if not bad_rows and not bad_cols:
+        return None  # No error detected
+    if len(bad_rows) == 1 and len(bad_cols) == 1:
+        return (bad_rows[0], bad_cols[0])  # Single error located!
+    return "Multiple errors detected"
+
+# Example
+data = [1,0,1,1, 0,1,1,0, 1,1,0,1]
+grid = encode_2d_parity(data, 3, 4)
+grid[1][1] ^= 1  # Flip bit at (1,1)
+print(check_2d_parity(grid))  # (1, 1)</code></pre>
+    </section>
+
+    <!-- Slide 14: ISBN Check Digits -->
+    <section>
+        <h2>ISBN Check Digits</h2>
+        <span class="badge badge-app">Applications</span>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">International Standard Book Number</span> (ISBN) uses a check digit system to catch transcription errors when book numbers are typed or spoken.</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>ISBN-10 (pre-2007)</h3>
+                <p class="small">10 digits: d<sub>1</sub>d<sub>2</sub>...d<sub>10</sub></p>
+                <div class="formula" style="font-size: 0.75em;">
+                    &sum;<sub>i=1</sub><sup>10</sup> i &middot; d<sub>i</sub> &equiv; 0 (mod 11)
+                </div>
+                <p class="tiny dim">Last digit can be 'X' (representing 10)</p>
+                <p class="small fragment" style="margin-top: 0.5em;">Detects: all single-digit errors AND all transpositions of adjacent digits!</p>
+            </div>
+            <div class="card">
+                <h3>ISBN-13 (current)</h3>
+                <p class="small">13 digits: d<sub>1</sub>d<sub>2</sub>...d<sub>13</sub></p>
+                <div class="formula" style="font-size: 0.75em;">
+                    &sum;<sub>i=1</sub><sup>13</sup> w<sub>i</sub> &middot; d<sub>i</sub> &equiv; 0 (mod 10)
+                </div>
+                <p class="tiny dim">Weights alternate: 1, 3, 1, 3, ...</p>
+                <p class="small fragment" style="margin-top: 0.5em;">Detects: all single-digit errors but NOT all transpositions.</p>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>Why modular arithmetic?</strong> Using mod 11 (a prime) for ISBN-10 ensures that <em>all</em> single-digit substitutions and adjacent transpositions are caught &mdash; a property mod 10 cannot guarantee.
+        </div>
+    </section>
+
+    <!-- Slide 15: ISBN Python Implementation -->
+    <section>
+        <h2>Python: ISBN Validation</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">def validate_isbn10(isbn: str) -> bool:
+    """Validate an ISBN-10 check digit."""
+    isbn = isbn.replace('-', '')
+    if len(isbn) != 10:
+        return False
+    total = 0
+    for i, ch in enumerate(isbn):
+        if ch == 'X' and i == 9:
+            val = 10
+        elif ch.isdigit():
+            val = int(ch)
+        else:
+            return False
+        total += (i + 1) * val
+    return total % 11 == 0
+
+def validate_isbn13(isbn: str) -> bool:
+    """Validate an ISBN-13 check digit."""
+    isbn = isbn.replace('-', '')
+    if len(isbn) != 13 or not isbn.isdigit():
+        return False
+    weights = [1, 3] * 6 + [1]
+    total = sum(int(d) * w for d, w in zip(isbn, weights))
+    return total % 10 == 0
+
+# Examples
+print(validate_isbn10("0-306-40615-2"))  # True
+print(validate_isbn13("978-0-306-40615-7"))  # True
+print(validate_isbn10("0-306-40615-3"))  # False (wrong check digit)</code></pre>
+    </section>
+
+    <!-- Slide 16: Why ISBN-10 Catches Transpositions -->
+    <section>
+        <h2>ISBN-10: Transposition Detection</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Why does ISBN-10 detect <em>all</em> adjacent transpositions? Consider swapping digits at positions j and j+1:</p>
+        </div>
+        <div class="formula fragment">
+            Original: &sum; = ... + j&middot;a + (j+1)&middot;b + ...<br>
+            Swapped: &nbsp;&sum;' = ... + j&middot;b + (j+1)&middot;a + ...
+        </div>
+        <div class="panel fragment">
+            <div class="formula" style="font-size: 0.9em;">
+                &sum;' &minus; &sum; = j(b&minus;a) + (j+1)(a&minus;b) = (a&minus;b)(j+1&minus;j) = (a&minus;b)
+            </div>
+            <p class="small">For this to go undetected: (a &minus; b) &equiv; 0 (mod 11)</p>
+            <p class="small">Since 0 &le; a, b &le; 10 and a &ne; b: |a &minus; b| ranges from 1 to 10, none of which are divisible by 11.</p>
+        </div>
+        <div class="key-point fragment">
+            <strong>The magic of mod 11:</strong> Because 11 is prime and larger than all digit values, no non-trivial digit difference is zero mod 11. This algebraic property is why ISBN-10 is mathematically superior to ISBN-13 for transposition detection.
+        </div>
+    </section>
+
+    <!-- Slide 17: The Luhn Algorithm -->
+    <section>
+        <h2>The Luhn Algorithm</h2>
+        <span class="badge badge-app">Applications</span>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>Invented by Hans Peter Luhn at IBM in 1954, the <span class="accent">Luhn algorithm</span> is used to validate credit card numbers, IMEI numbers, and various ID systems.</p>
+        </div>
+        <div class="card fragment">
+            <h3>Algorithm Steps</h3>
+            <ol class="small">
+                <li class="fragment">Starting from the rightmost digit, double every second digit</li>
+                <li class="fragment">If doubling produces a number &gt; 9, subtract 9</li>
+                <li class="fragment">Sum all digits</li>
+                <li class="fragment">If total mod 10 = 0, the number is valid</li>
+            </ol>
+        </div>
+        <div class="panel fragment">
+            <h3>Example: 4539 1488 0343 6467</h3>
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.65em;">
+                Original: &nbsp; 4 5 3 9 1 4 8 8 0 3 4 3 6 4 6 7<br>
+                Doubled: &nbsp; <span class="accent">8</span> 5 <span class="accent">6</span> 9 <span class="accent">2</span> 4 <span class="accent">7</span> 8 <span class="accent">0</span> 3 <span class="accent">8</span> 3 <span class="accent">3</span> 4 <span class="accent">3</span> 7<br>
+                Sum: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 8+5+6+9+2+4+7+8+0+3+8+3+3+4+3+7 = <span class="accent">80</span><br>
+                80 mod 10 = <span class="accent">0</span> &check; Valid!
+            </p>
+        </div>
+    </section>
+
+    <!-- Slide 18: Luhn Algorithm in Python -->
+    <section>
+        <h2>Python: Luhn Algorithm</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">def luhn_validate(number: str) -> bool:
+    """Validate a number using the Luhn algorithm."""
+    digits = [int(d) for d in number if d.isdigit()]
+    # Process from right to left, doubling every second digit
+    checksum = 0
+    for i, d in enumerate(reversed(digits)):
+        if i % 2 == 1:  # Every second digit from right
+            d *= 2
+            if d > 9:
+                d -= 9
+        checksum += d
+    return checksum % 10 == 0
+
+def luhn_generate_check_digit(partial: str) -> int:
+    """Generate the Luhn check digit for a partial number."""
+    for check in range(10):
+        if luhn_validate(partial + str(check)):
+            return check
+    return -1  # Should never reach here
+
+# Examples
+print(luhn_validate("4539148803436467"))  # True
+print(luhn_validate("4539148803436468"))  # False
+print(luhn_generate_check_digit("453914880343646"))  # 7</code></pre>
+        <div class="key-point fragment">
+            <strong>Luhn detects:</strong> all single-digit errors and most (but not all) transpositions of adjacent digits. It fails for transpositions of 0&harr;9.
+        </div>
+    </section>
+
+    <!-- Slide 19: Luhn Limitations -->
+    <section>
+        <h2>Luhn: Strengths &amp; Limitations</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="grid-2">
+            <div class="card fragment">
+                <h3 style="color: var(--accent);">Detects</h3>
+                <ul class="small">
+                    <li>All single-digit substitution errors</li>
+                    <li>Most adjacent transpositions</li>
+                    <li>Simple to implement (no division)</li>
+                    <li>Works with standard decimal digits</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3 style="color: var(--accent2);">Misses</h3>
+                <ul class="small">
+                    <li>Transposition of 0 &harr; 9 (09 &harr; 90)</li>
+                    <li>Some twin errors (e.g., 22 &harr; 55)</li>
+                    <li>Any error pattern that preserves the checksum</li>
+                    <li>NOT a security measure &mdash; easily forged</li>
+                </ul>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>Important:</strong> The Luhn algorithm is a <em>sanity check</em>, not a security feature. It catches accidental typos but provides zero protection against intentional fraud. Never confuse error detection with authentication!
+        </div>
+        <div class="panel fragment">
+            <p class="small"><span class="accent3">Better alternative:</span> The Verhoeff algorithm (1969) uses the dihedral group D<sub>5</sub> to catch ALL single errors and ALL adjacent transpositions, but is more complex to implement.</p>
+        </div>
+    </section>
+
+    <!-- Slide 20: Code Rate vs Error Correction -->
+    <section>
+        <h2>Rate vs. Correction Tradeoff</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Every error-control code faces a fundamental tradeoff: more redundancy means better error protection but lower throughput.</p>
+        </div>
+        <table class="fragment">
+            <tr><th>Code</th><th>[n, k, d]</th><th>Rate</th><th>Detects</th><th>Corrects</th></tr>
+            <tr><td>Uncoded</td><td>[n, n, 1]</td><td>1.000</td><td>0</td><td>0</td></tr>
+            <tr><td>Single parity</td><td>[8, 7, 2]</td><td>0.875</td><td>1</td><td>0</td></tr>
+            <tr><td>2D parity (4&times;3)</td><td>[20, 12, 4]</td><td>0.600</td><td>3</td><td>1</td></tr>
+            <tr><td>Repetition-3</td><td>[3, 1, 3]</td><td>0.333</td><td>2</td><td>1</td></tr>
+            <tr><td>Repetition-5</td><td>[5, 1, 5]</td><td>0.200</td><td>4</td><td>2</td></tr>
+            <tr><td>Hamming(7,4)</td><td>[7, 4, 3]</td><td>0.571</td><td>2</td><td>1</td></tr>
+        </table>
+        <div class="key-point fragment">
+            <strong>Notice:</strong> Hamming(7,4) corrects 1 error just like repetition-3, but at rate 0.571 vs 0.333. Better codes achieve more correction with less redundancy. This is what coding theory optimization is all about.
+        </div>
+    </section>
+
+    <!-- Slide 21: Limitations of Simple Codes -->
+    <section>
+        <h2>Limitations of Simple Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="grid-2">
+            <div class="card fragment">
+                <h3 style="color: var(--accent2);">Single Parity Check</h3>
+                <ul class="small">
+                    <li>Cannot correct errors, only detect</li>
+                    <li>Misses all even-weight error patterns</li>
+                    <li>No information about error location</li>
+                    <li>Requires ARQ (retransmission) protocol</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3 style="color: var(--accent2);">Repetition Codes</h3>
+                <ul class="small">
+                    <li>Catastrophically low code rate</li>
+                    <li>Only encodes 1 bit at a time</li>
+                    <li>Bandwidth cost grows linearly with protection</li>
+                    <li>Far from any theoretical bound</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3 style="color: var(--accent2);">2D Parity</h3>
+                <ul class="small">
+                    <li>Misses rectangular error patterns</li>
+                    <li>Limited to single-error correction</li>
+                    <li>Overhead grows with grid size</li>
+                    <li>Not algebraically elegant</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3 style="color: var(--accent2);">Check Digit Schemes</h3>
+                <ul class="small">
+                    <li>Application-specific, not general-purpose</li>
+                    <li>Detect only, cannot correct</li>
+                    <li>Limited error pattern coverage</li>
+                    <li>Not suitable for binary channels</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 22: Summary & What's Next -->
+    <section>
+        <h2>Summary &amp; What's Next</h2>
+        <div class="grid-2">
+            <div class="panel fragment">
+                <h3>Key Takeaways</h3>
+                <ul class="small">
+                    <li><span class="accent">Parity bits</span> are the simplest error detection &mdash; XOR of all data bits</li>
+                    <li><span class="accent">Repetition codes</span> can correct errors but at terrible rates</li>
+                    <li><span class="accent">2D parity</span> improves on both by combining row and column checks</li>
+                    <li>Real-world check digits (ISBN, Luhn) use modular arithmetic for human-facing validation</li>
+                    <li>All simple codes fall far short of Shannon's channel capacity</li>
+                </ul>
+            </div>
+            <div class="panel fragment">
+                <h3>Coming Up: Hamming Codes</h3>
+                <p class="small">Richard Hamming asked: can we do <em>much</em> better? His answer was a resounding yes.</p>
+                <div class="card" style="margin-top: 0.5em;">
+                    <p class="small"><span class="accent">Hamming(7,4):</span> Corrects 1 error with rate 4/7 &asymp; 0.57, compared to repetition-3's rate of 0.33 for the same correction capability.</p>
+                </div>
+                <div class="card" style="margin-top: 0.5em;">
+                    <p class="small">We'll see how clever placement of parity bits enables not just <em>detection</em> but <em>location</em> of errors.</p>
+                </div>
+            </div>
+        </div>
+        <div class="flow-row fragment">
+            <div class="flow-node">Simple Codes</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent);"><strong>Hamming Codes</strong></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">CRC</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">Advanced Codes</div>
+        </div>
+    </section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        width: 1200,
+        height: 900,
+        margin: 0.02,
+        transition: 'slide',
+        slideNumber: 'c/t',
+        plugins: [RevealHighlight]
+    });
+
+    function fixSlides() {
+        document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+            if (slide.scrollHeight > 900) {
+                slide.style.fontSize = (900 / slide.scrollHeight * 100) + '%';
+            }
+        });
+    }
+    Reveal.on('ready', fixSlides);
+    Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

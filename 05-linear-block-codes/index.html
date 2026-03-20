@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Block Codes — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reset.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+.math-block { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+    <div class="series-tag">Coding Theory Series — 05</div>
+    <h1 class="title-gradient">Linear Block Codes</h1>
+    <p style="font-size:0.7em; color: var(--dim); margin-top:0.5em;">The algebraic backbone of error correction — generator matrices, syndrome decoding, and the geometry of codewords</p>
+    <div style="margin-top:1.5em;">
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+    </div>
+    <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+    <h2>Roadmap</h2>
+    <div class="grid-3">
+        <div class="panel fragment">
+            <h3>Foundations</h3>
+            <p class="small">Vector spaces over GF(2), linear code definition, [n,k,d] notation</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Matrices</h3>
+            <p class="small">Generator matrix G, parity-check matrix H, systematic form</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Encoding</h3>
+            <p class="small">Matrix multiplication over GF(2), systematic encoding</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Decoding</h3>
+            <p class="small">Syndrome decoding, standard arrays, coset leaders, ML decoding</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Theory</h3>
+            <p class="small">Dual codes, weight distributions, MacWilliams identity</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Bounds &amp; Examples</h3>
+            <p class="small">Singleton, Hamming, Plotkin bounds; classic linear codes</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 3: Vector Spaces over GF(2) -->
+<section>
+    <h2>Vector Spaces over GF(2)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel">
+            <h3>The Binary Field GF(2)</h3>
+            <p class="small fragment">GF(2) = {0, 1} with arithmetic modulo 2:</p>
+            <div class="formula fragment">
+                0 + 0 = 0 &nbsp;&nbsp; 0 + 1 = 1 &nbsp;&nbsp; 1 + 1 = 0<br>
+                0 &times; 0 = 0 &nbsp;&nbsp; 0 &times; 1 = 0 &nbsp;&nbsp; 1 &times; 1 = 1
+            </div>
+            <p class="small fragment">Addition = XOR, Multiplication = AND</p>
+            <p class="small fragment dim">Note: subtraction is the same as addition in GF(2), since -1 = 1</p>
+        </div>
+        <div class="panel">
+            <h3>GF(2)<sup>n</sup> as a Vector Space</h3>
+            <p class="small fragment">The set of all binary n-tuples forms a vector space over GF(2):</p>
+            <ul class="small">
+                <li class="fragment"><span class="accent">Dimension:</span> n</li>
+                <li class="fragment"><span class="accent">Size:</span> 2<sup>n</sup> vectors</li>
+                <li class="fragment"><span class="accent">Addition:</span> componentwise XOR</li>
+                <li class="fragment"><span class="accent">Scalar mult:</span> trivial (0 or 1)</li>
+            </ul>
+            <p class="small fragment">Example: GF(2)<sup>3</sup> = {000, 001, 010, 011, 100, 101, 110, 111}</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 4: Subspaces and Linear Codes -->
+<section>
+    <h2>Subspaces &amp; Linear Codes</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>A Linear Code is a Subspace</h3>
+        <p class="small fragment">A <span class="accent">linear code</span> C is a k-dimensional subspace of GF(2)<sup>n</sup>.</p>
+        <p class="small fragment">This means C is closed under:</p>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <p class="small"><span class="accent">Vector addition:</span> If <strong>c₁, c₂ ∈ C</strong>, then <strong>c₁ + c₂ ∈ C</strong></p>
+            </div>
+            <div class="card">
+                <p class="small"><span class="accent">Scalar multiplication:</span> If <strong>c ∈ C</strong> and <strong>a ∈ GF(2)</strong>, then <strong>a·c ∈ C</strong></p>
+            </div>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>Key consequence:</strong> The zero vector <strong>0</strong> is always a codeword in a linear code. The sum of any two codewords is also a codeword.
+    </div>
+    <div class="warning fragment">
+        <strong>Why linearity matters:</strong> We only need to store k basis vectors (the rows of G) instead of all 2<sup>k</sup> codewords!
+    </div>
+</section>
+
+<!-- Slide 5: [n, k, d] Notation -->
+<section>
+    <h2>The [n, k, d] Code</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <div class="grid-3">
+            <div class="card fragment" style="text-align:center;">
+                <div class="stat">n</div>
+                <div class="stat-label">Block length<br><span class="tiny">Codeword length in bits</span></div>
+            </div>
+            <div class="card fragment" style="text-align:center;">
+                <div class="stat" style="color:var(--accent3);">k</div>
+                <div class="stat-label">Dimension<br><span class="tiny">Message length in bits</span></div>
+            </div>
+            <div class="card fragment" style="text-align:center;">
+                <div class="stat" style="color:var(--accent2);">d</div>
+                <div class="stat-label">Min distance<br><span class="tiny">Min weight of nonzero codeword</span></div>
+            </div>
+        </div>
+    </div>
+    <div class="formula fragment">
+        Code rate: R = k/n &nbsp;&nbsp;&nbsp; Redundancy: r = n - k &nbsp;&nbsp;&nbsp; |C| = 2<sup>k</sup>
+    </div>
+    <div class="key-point fragment">
+        <strong>For linear codes:</strong> d<sub>min</sub> = min{wt(c) : c ∈ C, c ≠ 0}. The minimum distance equals the minimum weight because wt(c₁ + c₂) = d(c₁, c₂).
+    </div>
+    <p class="small fragment dim">Error correction capability: t = ⌊(d-1)/2⌋ &nbsp;&nbsp; Error detection: d-1 errors</p>
+</section>
+
+<!-- Slide 6: Generator Matrix -->
+<section>
+    <h2>Generator Matrix G</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="cols" style="margin-top:0.8em;">
+        <div class="panel">
+            <h3>Definition</h3>
+            <p class="small fragment">The <span class="accent">generator matrix</span> G is a k × n matrix whose rows form a basis for the code C.</p>
+            <div class="formula fragment">
+                c = m · G
+            </div>
+            <p class="small fragment">where <strong>m</strong> is a 1 × k message vector and <strong>c</strong> is a 1 × n codeword.</p>
+            <p class="small fragment dim">Any k linearly independent codewords can serve as rows of G.</p>
+        </div>
+        <div class="panel">
+            <h3>Systematic Form</h3>
+            <p class="small fragment">G is in <span class="accent">systematic form</span> when:</p>
+            <div class="formula fragment">
+                G = [ I<sub>k</sub> | P ]
+            </div>
+            <p class="small fragment">where I<sub>k</sub> is the k×k identity and P is a k×(n-k) parity matrix.</p>
+            <p class="small fragment fragment">Codeword = [message | parity]</p>
+            <div class="key-point fragment">
+                <p class="small">Any linear code can be put in systematic form via row reduction (Gaussian elimination over GF(2)).</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 7: Generator Matrix Example -->
+<section>
+    <h2>Generator Matrix Example</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Hamming [7, 4, 3] Code</h3>
+        <div class="formula fragment">
+            G = <br>
+            ⎡ 1 0 0 0 | 1 1 0 ⎤<br>
+            ⎢ 0 1 0 0 | 0 1 1 ⎥<br>
+            ⎢ 0 0 1 0 | 1 1 1 ⎥<br>
+            ⎣ 0 0 0 1 | 1 0 1 ⎦
+        </div>
+    </div>
+    <div class="card fragment" style="margin-top:0.5em;">
+        <p class="small"><span class="accent">Example encoding:</span> Message m = [1 0 1 1]</p>
+        <div class="math-block fragment">
+            c = m · G = [1 0 1 1] · G = [1 0 1 1 | 1 0 0]
+        </div>
+        <p class="small fragment dim">First 4 bits = message (systematic), last 3 bits = parity</p>
+    </div>
+    <p class="small fragment">The code has 2<sup>4</sup> = 16 codewords, can correct 1 error (t = ⌊(3-1)/2⌋ = 1).</p>
+</section>
+
+<!-- Slide 8: Parity-Check Matrix H -->
+<section>
+    <h2>Parity-Check Matrix H</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Definition &amp; Relationship to G</h3>
+        <p class="small fragment">The <span class="accent">parity-check matrix</span> H is an (n-k) × n matrix such that:</p>
+        <div class="formula fragment">
+            C = { c ∈ GF(2)<sup>n</sup> : H · c<sup>T</sup> = 0 }
+        </div>
+        <p class="small fragment">A vector <strong>v</strong> is a valid codeword if and only if <strong>H · v<sup>T</sup> = 0</strong>.</p>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Fundamental Relationship</h3>
+            <div class="formula">G · H<sup>T</sup> = 0</div>
+            <p class="small dim">The rows of G are orthogonal to the rows of H</p>
+        </div>
+        <div class="card">
+            <h3>From Systematic G</h3>
+            <p class="small">If G = [I<sub>k</sub> | P], then:</p>
+            <div class="formula">H = [ -P<sup>T</sup> | I<sub>n-k</sub> ]</div>
+            <p class="small dim">In GF(2), -P<sup>T</sup> = P<sup>T</sup></p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 9: H Matrix and Minimum Distance -->
+<section>
+    <h2>H and Minimum Distance</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Connecting H to d<sub>min</sub></h3>
+        <div class="key-point fragment">
+            <strong>Theorem:</strong> The minimum distance d of a linear code equals the minimum number of linearly dependent columns of H.
+        </div>
+        <p class="small fragment">Proof sketch: If c is a codeword of weight w, then Hc<sup>T</sup> = 0, which means w columns of H sum to zero.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Hamming Code H Matrix</h3>
+        <div class="formula">
+            H = <br>
+            ⎡ 1 0 1 1 | 1 0 0 ⎤<br>
+            ⎢ 1 1 1 0 | 0 1 0 ⎥<br>
+            ⎣ 0 1 1 1 | 0 0 1 ⎦
+        </div>
+        <p class="small fragment">Every column is distinct and nonzero. Any 2 columns are linearly independent, but there exist 3 dependent columns. Therefore d = 3.</p>
+    </div>
+</section>
+
+<!-- Slide 10: Encoding with G -->
+<section>
+    <h2>Encoding Process</h2>
+    <span class="badge badge-code">Code</span>
+    <div class="flow-row" style="margin-top:1em;">
+        <div class="flow-node">Message<br><span class="accent">m (1×k)</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Multiply<br><span class="accent">c = m · G</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Codeword<br><span class="accent">c (1×n)</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Channel<br><span class="accent2">+ noise</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">Received<br><span class="accent2">r = c + e</span></div>
+    </div>
+    <pre class="fragment"><code class="language-python">import numpy as np
+
+def encode_linear(message, G):
+    """Encode message using generator matrix over GF(2)."""
+    return np.dot(message, G) % 2
+
+# Hamming [7,4,3] generator matrix (systematic)
+G = np.array([
+    [1, 0, 0, 0, 1, 1, 0],
+    [0, 1, 0, 0, 0, 1, 1],
+    [0, 0, 1, 0, 1, 1, 1],
+    [0, 0, 0, 1, 1, 0, 1]
+])
+
+# Encode all 16 messages
+for i in range(16):
+    m = np.array([(i >> 3)&1, (i >> 2)&1, (i >> 1)&1, i&1])
+    c = encode_linear(m, G)
+    print(f"m={m} -> c={c}, weight={sum(c)}")</code></pre>
+</section>
+
+<!-- Slide 11: Syndrome Decoding Introduction -->
+<section>
+    <h2>Syndrome Decoding</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Syndrome</h3>
+        <p class="small fragment">When we receive <strong>r = c + e</strong> (codeword + error), compute:</p>
+        <div class="formula fragment">
+            s = H · r<sup>T</sup> = H · (c + e)<sup>T</sup> = H · c<sup>T</sup> + H · e<sup>T</sup> = H · e<sup>T</sup>
+        </div>
+        <p class="small fragment">The syndrome <strong>depends only on the error pattern</strong>, not on the transmitted codeword!</p>
+    </div>
+    <div class="grid-2 fragment">
+        <div class="card">
+            <h3>s = 0</h3>
+            <p class="small">Either no errors occurred, or the error pattern is itself a codeword (undetectable).</p>
+        </div>
+        <div class="card">
+            <h3>s ≠ 0</h3>
+            <p class="small">Errors detected! The syndrome identifies the <span class="accent">coset</span> containing the error pattern.</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>For single-error correction:</strong> The syndrome s equals the column of H corresponding to the error position!
+    </div>
+</section>
+
+<!-- Slide 12: Syndrome Decoding Step by Step -->
+<section>
+    <h2>Syndrome Decoding: Step by Step</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.5em;">
+        <h3>Worked Example — Hamming [7,4,3]</h3>
+        <p class="small fragment"><span class="accent">Sent:</span> c = [1 0 1 1 1 0 0]</p>
+        <p class="small fragment"><span class="accent2">Error:</span> e = [0 0 0 0 0 1 0] (bit 5 flipped)</p>
+        <p class="small fragment"><span class="accent3">Received:</span> r = [1 0 1 1 1 1 0]</p>
+    </div>
+    <div class="panel fragment">
+        <p class="small"><strong>Step 1:</strong> Compute syndrome s = H · r<sup>T</sup></p>
+        <div class="math-block fragment">s = [1, 1, 0]<sup>T</sup></div>
+        <p class="small fragment"><strong>Step 2:</strong> Look up syndrome in table — matches column 5 of H</p>
+        <p class="small fragment"><strong>Step 3:</strong> Flip bit 5: ĉ = r + e₅ = [1 0 1 1 1 <span class="accent">0</span> 0]</p>
+        <p class="small fragment"><strong>Step 4:</strong> Extract message: m̂ = [1 0 1 1] ✓</p>
+    </div>
+</section>
+
+<!-- Slide 13: Standard Array -->
+<section>
+    <h2>Standard Array &amp; Coset Leaders</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <p class="small">The standard array partitions GF(2)<sup>n</sup> into <span class="accent">cosets</span> of the code C:</p>
+        <table class="fragment">
+            <tr>
+                <th>Coset Leader</th>
+                <th colspan="4">Coset Members (leader + each codeword)</th>
+            </tr>
+            <tr>
+                <td><span class="accent">0000000</span></td>
+                <td>c₁</td><td>c₂</td><td>...</td><td>c₁₆</td>
+            </tr>
+            <tr class="fragment">
+                <td><span class="accent2">0000001</span></td>
+                <td>c₁+e</td><td>c₂+e</td><td>...</td><td>c₁₆+e</td>
+            </tr>
+            <tr class="fragment">
+                <td><span class="accent2">0000010</span></td>
+                <td>...</td><td>...</td><td>...</td><td>...</td>
+            </tr>
+            <tr class="fragment">
+                <td colspan="5" class="dim">... (2<sup>n-k</sup> = 2<sup>3</sup> = 8 cosets total)</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-point fragment">
+        <strong>Coset leader</strong> = the minimum weight vector in each coset. Syndrome decoding maps syndrome → coset leader → error correction.
+    </div>
+    <div class="warning fragment">
+        <strong>Storage cost:</strong> For large codes, the standard array has 2<sup>n</sup> entries — impractical! Use syndrome lookup table (only 2<sup>n-k</sup> entries).
+    </div>
+</section>
+
+<!-- Slide 14: Syndrome Lookup Table -->
+<section>
+    <h2>Syndrome Lookup Table</h2>
+    <span class="badge badge-code">Code</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Hamming [7,4,3] Syndrome Table</h3>
+        <table class="fragment">
+            <tr><th>Syndrome s</th><th>Error Pattern e</th><th>Error Position</th></tr>
+            <tr><td>[0 0 0]</td><td>0000000</td><td>No error</td></tr>
+            <tr class="fragment"><td>[1 0 0]</td><td>0001000</td><td>Position 3</td></tr>
+            <tr class="fragment"><td>[0 1 0]</td><td>0100000</td><td>Position 1</td></tr>
+            <tr class="fragment"><td>[0 0 1]</td><td>0000001</td><td>Position 6</td></tr>
+            <tr class="fragment"><td>[1 1 0]</td><td>1000000</td><td>Position 0</td></tr>
+            <tr class="fragment"><td>[0 1 1]</td><td>0010000</td><td>Position 2</td></tr>
+            <tr class="fragment"><td>[1 0 1]</td><td>0000010</td><td>Position 4</td></tr>
+            <tr class="fragment"><td>[1 1 1]</td><td>0000100</td><td>Position 5</td></tr>
+        </table>
+    </div>
+    <p class="small fragment dim">Only 2<sup>n-k</sup> = 8 entries needed vs. 2<sup>n</sup> = 128 for full standard array</p>
+</section>
+
+<!-- Slide 15: Dual Codes -->
+<section>
+    <h2>Dual Codes</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Definition</h3>
+        <p class="small fragment">The <span class="accent">dual code</span> C<sup>⊥</sup> of an [n, k] code C is:</p>
+        <div class="formula fragment">
+            C<sup>⊥</sup> = { v ∈ GF(2)<sup>n</sup> : v · c<sup>T</sup> = 0 for all c ∈ C }
+        </div>
+    </div>
+    <div class="grid-2 fragment">
+        <div class="card">
+            <h3>Properties</h3>
+            <ul class="small">
+                <li class="fragment">C<sup>⊥</sup> is an [n, n-k] code</li>
+                <li class="fragment">G of C = H of C<sup>⊥</sup></li>
+                <li class="fragment">H of C = G of C<sup>⊥</sup></li>
+                <li class="fragment">(C<sup>⊥</sup>)<sup>⊥</sup> = C</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Self-Dual Codes</h3>
+            <p class="small fragment">A code is <span class="accent3">self-dual</span> if C = C<sup>⊥</sup>.</p>
+            <p class="small fragment">Requires n = 2k (rate = 1/2).</p>
+            <p class="small fragment">Example: Extended [8,4,4] Hamming code is self-dual.</p>
+            <p class="small fragment dim">Self-dual codes have elegant mathematical properties and connections to lattices.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 16: Weight Distribution -->
+<section>
+    <h2>Weight Distribution</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Weight Enumerator</h3>
+        <p class="small fragment">The <span class="accent">weight enumerator polynomial</span> of code C:</p>
+        <div class="formula fragment">
+            W<sub>C</sub>(x, y) = Σ<sub>c∈C</sub> x<sup>n-wt(c)</sup> · y<sup>wt(c)</sup> = Σ<sub>i=0</sub><sup>n</sup> A<sub>i</sub> · x<sup>n-i</sup> · y<sup>i</sup>
+        </div>
+        <p class="small fragment">where A<sub>i</sub> = number of codewords of weight i.</p>
+    </div>
+    <div class="panel fragment">
+        <h3>Example: Hamming [7,4,3]</h3>
+        <table>
+            <tr><th>Weight</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th></tr>
+            <tr><td>Count A<sub>i</sub></td><td>1</td><td>0</td><td>0</td><td>7</td><td>7</td><td>0</td><td>0</td><td>1</td></tr>
+        </table>
+        <p class="small fragment">W(x,y) = x<sup>7</sup> + 7x<sup>4</sup>y<sup>3</sup> + 7x<sup>3</sup>y<sup>4</sup> + y<sup>7</sup></p>
+        <p class="small fragment dim">Total: 1 + 7 + 7 + 1 = 16 = 2<sup>4</sup> ✓</p>
+    </div>
+</section>
+
+<!-- Slide 17: MacWilliams Identity -->
+<section>
+    <h2>MacWilliams Identity</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Connecting C and C<sup>⊥</sup></h3>
+        <div class="key-point fragment">
+            <strong>MacWilliams Identity (1963):</strong> The weight distribution of C<sup>⊥</sup> is determined by the weight distribution of C:
+        </div>
+        <div class="formula fragment">
+            W<sub>C<sup>⊥</sup></sub>(x, y) = (1/|C|) · W<sub>C</sub>(x + y, x - y)
+        </div>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Significance</h3>
+            <ul class="small">
+                <li class="fragment">Knowing the weight distribution of C gives you the weight distribution of C<sup>⊥</sup> for free</li>
+                <li class="fragment">Powerful tool for proving properties of codes</li>
+                <li class="fragment">Constrains what weight distributions are possible</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h3>Applications</h3>
+            <ul class="small">
+                <li class="fragment">Computing undetected error probability</li>
+                <li class="fragment">Bounding code performance</li>
+                <li class="fragment">Proving non-existence of certain codes</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- Slide 18: Maximum Likelihood Decoding -->
+<section>
+    <h2>Maximum Likelihood Decoding</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>Optimal but Expensive</h3>
+        <p class="small fragment">Given received vector <strong>r</strong>, find the codeword <strong>ĉ</strong> that maximizes:</p>
+        <div class="formula fragment">
+            ĉ = argmax<sub>c∈C</sub> P(r | c was sent)
+        </div>
+        <p class="small fragment">For BSC with error probability p &lt; 1/2, this is equivalent to:</p>
+        <div class="formula fragment">
+            ĉ = argmin<sub>c∈C</sub> d(r, c) &nbsp;&nbsp;&nbsp; (minimum distance decoding)
+        </div>
+    </div>
+    <div class="warning fragment">
+        <strong>Complexity:</strong> Requires comparing r against all 2<sup>k</sup> codewords. For k = 100, that's 2<sup>100</sup> ≈ 10<sup>30</sup> comparisons — completely infeasible!
+    </div>
+    <div class="key-point fragment">
+        <strong>Syndrome decoding is ML decoding</strong> when the coset leader is the most probable error pattern — which is guaranteed for BSC when t ≤ ⌊(d-1)/2⌋ errors.
+    </div>
+</section>
+
+<!-- Slide 19: Singleton Bound -->
+<section>
+    <h2>Singleton Bound</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <h3>The Simplest Upper Bound</h3>
+        <div class="formula fragment">
+            d ≤ n - k + 1
+        </div>
+        <p class="small fragment"><span class="accent">Proof:</span> Delete any d-1 coordinate positions from all codewords. The resulting shortened words have length n-d+1. Since they must all be distinct (otherwise two codewords would differ in fewer than d positions), we need:</p>
+        <div class="math-block fragment">
+            2<sup>k</sup> ≤ 2<sup>n-d+1</sup> &nbsp; ⟹ &nbsp; k ≤ n - d + 1 &nbsp; ⟹ &nbsp; d ≤ n - k + 1
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>MDS Codes:</strong> Codes achieving d = n - k + 1 are called <span class="accent">Maximum Distance Separable</span>. Reed-Solomon codes are MDS! Binary MDS codes are trivial (repetition, SPC, or trivial).
+    </div>
+</section>
+
+<!-- Slide 20: Hamming Bound -->
+<section>
+    <h2>Hamming Bound (Sphere-Packing)</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <div class="formula fragment">
+            Σ<sub>i=0</sub><sup>t</sup> C(n, i) ≤ 2<sup>n-k</sup>
+        </div>
+        <p class="small fragment">where t = ⌊(d-1)/2⌋ and C(n,i) = "n choose i".</p>
+    </div>
+    <div class="cols fragment">
+        <div class="card">
+            <h3>Geometric Intuition</h3>
+            <p class="small">Place a sphere of radius t around each of the 2<sup>k</sup> codewords. These spheres must not overlap. The total volume of all spheres cannot exceed the total space 2<sup>n</sup>.</p>
+        </div>
+        <div class="card">
+            <h3>Perfect Codes</h3>
+            <p class="small">Codes achieving equality are <span class="accent">perfect codes</span>. The spheres tile the entire space!</p>
+            <ul class="small fragment">
+                <li>Hamming codes: [2<sup>r</sup>-1, 2<sup>r</sup>-r-1, 3]</li>
+                <li>Golay code: [23, 12, 7]</li>
+                <li>Trivial: repetition codes, GF(2)<sup>n</sup></li>
+            </ul>
+        </div>
+    </div>
+    <p class="small fragment dim">Proved in 1973 (Tietäväinen, van Lint): these are the ONLY binary perfect codes!</p>
+</section>
+
+<!-- Slide 21: Plotkin Bound -->
+<section>
+    <h2>Plotkin Bound</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="panel" style="margin-top:0.8em;">
+        <div class="formula fragment">
+            If d is even and 2d &gt; n: &nbsp;&nbsp; |C| ≤ 2d / (2d - n)
+        </div>
+        <div class="formula fragment">
+            If d is odd: &nbsp;&nbsp; |C| ≤ 2(d+1) / (2d + 1 - n) &nbsp; when 2d + 1 &gt; n
+        </div>
+    </div>
+    <div class="panel fragment">
+        <h3>Proof Idea (Double Counting)</h3>
+        <p class="small">Count the total Hamming distance summed over all pairs:</p>
+        <div class="math-block fragment">
+            S = Σ<sub>i≠j</sub> d(c<sub>i</sub>, c<sub>j</sub>) ≥ |C|(|C|-1) · d
+        </div>
+        <p class="small fragment">By counting column-by-column, we can show S ≤ |C|<sup>2</sup> · n/2.</p>
+        <p class="small fragment">Combining: |C|(|C|-1)d ≤ |C|<sup>2</sup>n/2 → solve for |C|.</p>
+    </div>
+    <div class="key-point fragment">
+        <strong>Plotkin bound is tightest when d ≈ n/2</strong> (high redundancy regime). For codes with d much smaller than n, Hamming bound is tighter.
+    </div>
+</section>
+
+<!-- Slide 22: Classic Linear Code Examples -->
+<section>
+    <h2>Classic Linear Codes</h2>
+    <span class="badge badge-math">Mathematics</span>
+    <div class="grid-3" style="margin-top:1em;">
+        <div class="panel fragment">
+            <h3>Repetition Code</h3>
+            <p class="small">[n, 1, n]</p>
+            <p class="small">G = [1 1 ... 1]</p>
+            <p class="small">Just two codewords: all-zeros and all-ones.</p>
+            <p class="small dim">Rate = 1/n → 0 as n grows. Maximum error correction for given n.</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Single Parity Check</h3>
+            <p class="small">[n, n-1, 2]</p>
+            <p class="small">H = [1 1 ... 1]</p>
+            <p class="small">Append one parity bit. Detects all single errors but corrects none.</p>
+            <p class="small dim">Rate = (n-1)/n → 1. Dual of repetition code!</p>
+        </div>
+        <div class="panel fragment">
+            <h3>Hamming Code</h3>
+            <p class="small">[2<sup>r</sup>-1, 2<sup>r</sup>-r-1, 3]</p>
+            <p class="small">H has all nonzero r-bit columns.</p>
+            <p class="small">The unique perfect 1-error correcting code family.</p>
+            <p class="small dim">Examples: [7,4,3], [15,11,3], [31,26,3]</p>
+        </div>
+    </div>
+    <div class="key-point fragment">
+        <strong>The repetition code and SPC code are duals of each other.</strong> The Hamming code is the dual of the simplex code.
+    </div>
+</section>
+
+<!-- Slide 23: Python Implementation -->
+<section>
+    <h2>Python: Linear Code Toolkit</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python">import numpy as np
+
+class LinearCode:
+    def __init__(self, G):
+        """Initialize linear code from generator matrix G over GF(2)."""
+        self.G = np.array(G) % 2
+        self.k, self.n = self.G.shape
+        self.H = self._compute_parity_check()
+
+    def _compute_parity_check(self):
+        """Compute H from systematic G = [I_k | P] -> H = [P^T | I_{n-k}]."""
+        P = self.G[:, self.k:]       # extract parity part
+        r = self.n - self.k
+        return np.hstack([P.T, np.eye(r, dtype=int)]) % 2
+
+    def encode(self, message):
+        """Encode k-bit message to n-bit codeword."""
+        return np.dot(message, self.G) % 2
+
+    def syndrome(self, received):
+        """Compute syndrome s = H @ r^T."""
+        return np.dot(self.H, received) % 2
+
+    def decode(self, received):
+        """Syndrome decode: correct single errors."""
+        s = self.syndrome(received)
+        if not np.any(s):
+            return received[:self.k]  # no error
+        # Find matching column in H
+        for i in range(self.n):
+            if np.array_equal(s, self.H[:, i]):
+                corrected = received.copy()
+                corrected[i] ^= 1
+                return corrected[:self.k]
+        return None  # uncorrectable</code></pre>
+</section>
+
+<!-- Slide 24: Python Demo -->
+<section>
+    <h2>Python: Encode &amp; Decode Demo</h2>
+    <span class="badge badge-code">Code</span>
+    <pre><code class="language-python"># Create Hamming [7,4,3] code
+G = [[1,0,0,0, 1,1,0],
+     [0,1,0,0, 0,1,1],
+     [0,0,1,0, 1,1,1],
+     [0,0,0,1, 1,0,1]]
+
+hamming = LinearCode(G)
+
+# Encode
+msg = np.array([1, 0, 1, 1])
+codeword = hamming.encode(msg)
+print(f"Message:  {msg}")
+print(f"Codeword: {codeword}")  # [1 0 1 1 1 0 0]
+
+# Simulate single-bit error on position 2
+received = codeword.copy()
+received[2] ^= 1  # flip bit 2
+print(f"Received: {received}")  # [1 0 0 1 1 0 0]
+
+# Decode
+s = hamming.syndrome(received)
+print(f"Syndrome: {s}")  # [1 1 1] -> column 2 of H
+
+decoded = hamming.decode(received)
+print(f"Decoded:  {decoded}")   # [1 0 1 1] ✓
+
+# Verify: test all single-error patterns
+errors_corrected = 0
+for msg_int in range(16):
+    m = np.array([(msg_int>>i)&1 for i in range(3,-1,-1)])
+    c = hamming.encode(m)
+    for pos in range(7):
+        r = c.copy()
+        r[pos] ^= 1
+        d = hamming.decode(r)
+        if np.array_equal(d, m):
+            errors_corrected += 1
+print(f"Corrected {errors_corrected}/112 single errors")  # 112/112</code></pre>
+</section>
+
+<!-- Slide 25: Summary -->
+<section>
+    <h2>Summary</h2>
+    <div class="grid-2" style="margin-top:1em;">
+        <div class="panel fragment">
+            <h3>Core Concepts</h3>
+            <ul class="small">
+                <li>Linear codes are <span class="accent">subspaces of GF(2)<sup>n</sup></span></li>
+                <li>Generator matrix G encodes, parity-check H decodes</li>
+                <li>G · H<sup>T</sup> = 0 links them</li>
+                <li>Syndrome s = H · r<sup>T</sup> depends only on error</li>
+            </ul>
+        </div>
+        <div class="panel fragment">
+            <h3>Key Results</h3>
+            <ul class="small">
+                <li>d<sub>min</sub> = min dependent columns of H</li>
+                <li>MacWilliams identity connects C and C<sup>⊥</sup></li>
+                <li>Singleton, Hamming, Plotkin bound d</li>
+                <li>Perfect codes: Hamming, Golay, trivial — that's all!</li>
+            </ul>
+        </div>
+    </div>
+    <div class="key-point fragment" style="margin-top:1em;">
+        <strong>Next up:</strong> Convolutional codes — moving beyond block codes to memory-based encoding with the powerful Viterbi decoding algorithm.
+    </div>
+    <div class="nav-hint fragment">End of Part 05 &bull; Linear Block Codes</div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+    width: 1200,
+    height: 900,
+    margin: 0.02,
+    transition: 'slide',
+    slideNumber: 'c/t',
+    plugins: [ RevealHighlight ]
+});
+
+function fixSlides() {
+    document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+        if (!slide.getAttribute('data-background-color')) {
+            slide.setAttribute('data-background-color', '#0a0a0f');
+        }
+    });
+}
+fixSlides();
+</script>
+</body>
+</html>

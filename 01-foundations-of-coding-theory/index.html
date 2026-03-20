@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foundations of Coding Theory</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --text: #e0e0e8;
+            --dim: #6a6a7a;
+            --accent: #64ffda;
+            --accent2: #ff6b9d;
+            --accent3: #ffd93d;
+            --accent4: #6c5ce7;
+            --panel: rgba(255,255,255,0.04);
+            --border: rgba(100,255,218,0.15);
+        }
+        .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+        .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+        .reveal h1 { font-size: 2.4em; }
+        .reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+        .reveal h3 { font-size: 1.2em; color: var(--accent3); }
+        .reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+        .reveal code { font-family: 'JetBrains Mono', monospace; }
+        .reveal .slides section { text-align: left; }
+        .reveal .progress { color: var(--accent); height: 3px; }
+        .reveal .controls { color: var(--accent); }
+        .badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+        .badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+        .badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+        .badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+        .badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+        .badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+        .badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+        .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+        .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+        .cols { display: flex; gap: 1em; align-items: flex-start; }
+        .cols > * { flex: 1; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+        .formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+        .key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+        .dim { color: var(--dim); }
+        .small { font-size: 0.75em; }
+        .tiny { font-size: 0.6em; }
+        .accent { color: var(--accent); }
+        .accent2 { color: var(--accent2); }
+        .accent3 { color: var(--accent3); }
+        .accent4 { color: var(--accent4); }
+        .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+        .flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+        .flow-arrow { color: var(--accent); font-size: 1.2em; }
+        .stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+        .stat-label { font-size: 0.7em; color: var(--dim); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+        th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+        td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+        .nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+        .math-block { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+    </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+    <!-- Slide 1: Title -->
+    <section>
+        <div class="series-tag">Coding Theory Series &mdash; 01</div>
+        <h1 class="title-gradient">Foundations of Coding Theory</h1>
+        <p style="font-size: 0.7em; color: var(--dim); margin-top: 0.5em;">From Shannon's theorem to the mathematics of reliable communication</p>
+        <div style="margin-top: 1.5em;">
+            <span class="badge badge-math">Mathematics</span>
+            <span class="badge badge-history">History</span>
+            <span class="badge badge-code">Code</span>
+        </div>
+        <div class="nav-hint">Use arrow keys or swipe to navigate &bull; Press ESC for overview</div>
+    </section>
+
+    <!-- Slide 2: Roadmap -->
+    <section>
+        <h2>Roadmap</h2>
+        <div class="grid-3">
+            <div class="card fragment">
+                <h3>Origins</h3>
+                <p class="small">Telegraph errors, Bell Labs, and the birth of information theory</p>
+            </div>
+            <div class="card fragment">
+                <h3>Core Theory</h3>
+                <p class="small">Noisy channels, capacity, and Shannon's theorems</p>
+            </div>
+            <div class="card fragment">
+                <h3>Code Types</h3>
+                <p class="small">Block codes, convolutional codes, and their properties</p>
+            </div>
+            <div class="card fragment">
+                <h3>Key Metrics</h3>
+                <p class="small">Hamming distance, code rate, minimum distance</p>
+            </div>
+            <div class="card fragment">
+                <h3>Bounds</h3>
+                <p class="small">Singleton, Hamming, Plotkin, and Gilbert-Varshamov</p>
+            </div>
+            <div class="card fragment">
+                <h3>Milestones</h3>
+                <p class="small">Timeline of major achievements in coding theory</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 3: The Problem of Noise -->
+    <section>
+        <h2>The Problem of Noise</h2>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>Since the earliest days of electrical communication, engineers faced a fundamental challenge: <span class="accent">noise corrupts transmitted messages</span>.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Telegraph Era (1840s)</h3>
+                <p class="small">Morse code operators would request "please repeat" when signals were garbled by line noise, lightning, or crosstalk between wires.</p>
+            </div>
+            <div class="card">
+                <h3>Telephone Era (1900s)</h3>
+                <p class="small">Long-distance calls suffered from static, fading, and signal degradation over copper lines spanning hundreds of miles.</p>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>The core question:</strong> Can we add structure to our messages so that errors introduced during transmission can be detected &mdash; or even corrected &mdash; automatically?
+        </div>
+    </section>
+
+    <!-- Slide 4: Claude Shannon -->
+    <section>
+        <h2>Claude Shannon (1916&ndash;2001)</h2>
+        <span class="badge badge-history">History</span>
+        <div class="cols">
+            <div style="flex: 1;">
+                <div class="panel fragment">
+                    <h3>The Father of Information Theory</h3>
+                    <p class="small">In 1948, Claude Shannon, a mathematician and electrical engineer at Bell Labs, published <em>"A Mathematical Theory of Communication"</em> in the Bell System Technical Journal.</p>
+                </div>
+                <div class="fragment">
+                    <p class="small" style="margin-top: 0.5em;">Shannon showed that information could be <span class="accent">quantified</span> and that reliable communication was possible even over noisy channels &mdash; up to a fundamental limit called <span class="accent">channel capacity</span>.</p>
+                </div>
+            </div>
+            <div style="flex: 1;" class="fragment">
+                <div class="card">
+                    <h3>Key Contributions</h3>
+                    <ul class="small">
+                        <li class="fragment">Defined <span class="accent">information entropy</span> (bits)</li>
+                        <li class="fragment">Proved the <span class="accent">noisy channel coding theorem</span></li>
+                        <li class="fragment">Established <span class="accent">channel capacity</span> as a fundamental limit</li>
+                        <li class="fragment">Showed error-free communication is <em>theoretically possible</em></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 5: Richard Hamming -->
+    <section>
+        <h2>Richard Hamming (1915&ndash;1998)</h2>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment">
+            <p>Also at Bell Labs, Richard Hamming was a mathematician who grew frustrated with the unreliability of early computers. Electromechanical relay machines would fail on weekends when no operators were present.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>The Frustration</h3>
+                <p class="small">"If the machine can detect an error, why can't it locate the position of the error and correct it?" &mdash; Hamming's famous question that launched error-correcting codes.</p>
+            </div>
+            <div class="card">
+                <h3>The Breakthrough</h3>
+                <p class="small">In 1950, Hamming published his landmark paper introducing <span class="accent">Hamming codes</span> &mdash; the first practical single-error-correcting codes. He also formalized the concept of <span class="accent">Hamming distance</span>.</p>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            Shannon proved reliable communication was <em>possible</em>; Hamming showed how to <em>do it</em>.
+        </div>
+    </section>
+
+    <!-- Slide 6: What Is Coding Theory? -->
+    <section>
+        <h2>What Is Coding Theory?</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p><strong>Coding theory</strong> is the study of the properties of codes and their fitness for specific applications. It lies at the intersection of <span class="accent">mathematics</span>, <span class="accent2">computer science</span>, and <span class="accent3">electrical engineering</span>.</p>
+        </div>
+        <div class="grid-2 fragment">
+            <div class="card">
+                <h3>Source Coding</h3>
+                <p class="small">Compresses data to remove redundancy. Goal: represent information with fewer bits.</p>
+                <p class="tiny dim">Examples: Huffman coding, LZW, arithmetic coding</p>
+            </div>
+            <div class="card">
+                <h3>Channel Coding</h3>
+                <p class="small">Adds controlled redundancy to detect/correct errors. Goal: reliable communication over noisy channels.</p>
+                <p class="tiny dim">Examples: Hamming codes, Reed-Solomon, LDPC</p>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>This series focuses on channel coding</strong> &mdash; the art and science of adding <em>just enough</em> redundancy to combat errors without wasting bandwidth.
+        </div>
+    </section>
+
+    <!-- Slide 7: The Noisy Channel Model -->
+    <section>
+        <h2>The Noisy Channel Model</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="flow-row fragment">
+            <div class="flow-node"><strong>Source</strong><br><span class="tiny">Message m</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent);"><strong>Encoder</strong><br><span class="tiny">m &rarr; c</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent2);"><strong>Channel</strong><br><span class="tiny">+ Noise</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node" style="border-color: var(--accent3);"><strong>Decoder</strong><br><span class="tiny">r &rarr; m'</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node"><strong>Sink</strong><br><span class="tiny">Message m'</span></div>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <p class="small"><span class="accent">Encoder:</span> Maps message <code>m</code> of <code>k</code> bits to codeword <code>c</code> of <code>n</code> bits (where n &gt; k)</p>
+            </div>
+            <div class="card">
+                <p class="small"><span class="accent2">Channel:</span> Introduces errors &mdash; bits may be flipped, erased, or inserted</p>
+            </div>
+            <div class="card">
+                <p class="small"><span class="accent3">Decoder:</span> Receives noisy <code>r</code> and attempts to recover original <code>m</code></p>
+            </div>
+        </div>
+        <div class="formula fragment">
+            Redundancy = n &minus; k bits &nbsp;&nbsp;|&nbsp;&nbsp; Code Rate R = k / n
+        </div>
+    </section>
+
+    <!-- Slide 8: Channel Capacity -->
+    <section>
+        <h2>Channel Capacity</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Shannon defined <span class="accent">channel capacity</span> as the maximum rate at which information can be reliably transmitted over a noisy channel.</p>
+        </div>
+        <div class="formula fragment">
+            C = max<sub>p(x)</sub> I(X; Y) &nbsp;&nbsp; [bits per channel use]
+        </div>
+        <div class="fragment">
+            <h3>Binary Symmetric Channel (BSC)</h3>
+            <div class="formula">
+                C = 1 &minus; H(p) = 1 + p&middot;log<sub>2</sub>(p) + (1&minus;p)&middot;log<sub>2</sub>(1&minus;p)
+            </div>
+            <p class="small dim">where p is the crossover (bit-flip) probability and H(p) is the binary entropy function</p>
+        </div>
+        <div class="key-point fragment">
+            <strong>Example:</strong> For a BSC with p = 0.1, capacity C &asymp; 0.531 bits per use. You can reliably transmit at any rate R &lt; C, but not at rates above C.
+        </div>
+    </section>
+
+    <!-- Slide 9: Shannon's Noisy Channel Coding Theorem -->
+    <section>
+        <h2>Shannon's Noisy Channel Theorem</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-history">History</span>
+        <div class="panel fragment" style="border-color: rgba(108,92,231,0.5);">
+            <h3>The Theorem (1948)</h3>
+            <p class="small">For any rate <span class="accent">R &lt; C</span> (channel capacity), there exist codes of rate R that achieve arbitrarily low error probability as the block length n &rarr; &infin;.</p>
+            <p class="small" style="margin-top: 0.5em;">Conversely, for any rate <span class="accent2">R &gt; C</span>, the error probability is bounded away from zero regardless of the code used.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>The Good News</h3>
+                <p class="small">Error-free communication IS possible at rates below capacity. We don't need infinite bandwidth to overcome noise.</p>
+            </div>
+            <div class="card">
+                <h3>The Catch</h3>
+                <p class="small">Shannon's proof was <em>non-constructive</em>. He proved good codes <em>exist</em> using random coding arguments, but didn't show how to build them.</p>
+            </div>
+        </div>
+        <div class="warning fragment">
+            The search for <em>practical</em> codes that approach channel capacity drove 70+ years of research. LDPC and turbo codes finally achieved this in the 1990s&ndash;2000s.
+        </div>
+    </section>
+
+    <!-- Slide 10: Binary Symmetric Channel -->
+    <section>
+        <h2>Binary Symmetric Channel (BSC)</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The BSC is the simplest and most studied channel model. Each bit is independently flipped with probability <span class="accent">p</span>.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card" style="text-align: center;">
+                <p class="small" style="margin-bottom: 0.5em;"><strong>Channel Diagram</strong></p>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7em;">
+                    0 &mdash;<span class="accent">(1-p)</span>&mdash;&rarr; 0<br>
+                    &nbsp; &searr;<span class="accent2" style="font-size:0.8em;">(p)</span>&swarr;<br>
+                    1 &mdash;<span class="accent">(1-p)</span>&mdash;&rarr; 1
+                </p>
+            </div>
+            <div class="card">
+                <h3>Properties</h3>
+                <ul class="small">
+                    <li class="fragment"><span class="accent">Memoryless:</span> errors are independent</li>
+                    <li class="fragment"><span class="accent">Symmetric:</span> P(0&rarr;1) = P(1&rarr;0) = p</li>
+                    <li class="fragment"><span class="accent">Binary:</span> input and output are {0, 1}</li>
+                    <li class="fragment">When p = 0.5, channel is useless (C = 0)</li>
+                    <li class="fragment">When p = 0, channel is perfect (C = 1)</li>
+                </ul>
+            </div>
+        </div>
+        <div class="formula fragment">
+            P(received = r | sent = c) = p<sup>d(c,r)</sup> &middot; (1&minus;p)<sup>n&minus;d(c,r)</sup>
+        </div>
+    </section>
+
+    <!-- Slide 11: Block Codes vs Convolutional Codes -->
+    <section>
+        <h2>Types of Codes</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="grid-2">
+            <div class="card fragment">
+                <h3>Block Codes</h3>
+                <p class="small">Message is divided into fixed-length blocks of <span class="accent">k</span> bits. Each block is independently encoded into <span class="accent">n</span> bits.</p>
+                <ul class="tiny">
+                    <li>Denoted (n, k) or [n, k, d]</li>
+                    <li>Encoding is memoryless between blocks</li>
+                    <li>Examples: Hamming, Reed-Solomon, BCH, LDPC</li>
+                </ul>
+                <div class="formula" style="font-size: 0.8em;">
+                    [n, k, d] code over F<sub>q</sub>
+                </div>
+            </div>
+            <div class="card fragment">
+                <h3>Convolutional Codes</h3>
+                <p class="small">Message bits are encoded using a <span class="accent2">sliding window</span> with memory. Output depends on current and past input bits.</p>
+                <ul class="tiny">
+                    <li>Described by (n, k, K) where K = constraint length</li>
+                    <li>Encoding has memory (state machine)</li>
+                    <li>Decoded by Viterbi algorithm (1967)</li>
+                </ul>
+                <div class="formula" style="font-size: 0.8em;">
+                    Rate = k/n, Memory = K&minus;1
+                </div>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>This series focuses primarily on block codes</strong>, which are more naturally analyzed using algebraic structures (finite fields, polynomials, matrices).
+        </div>
+    </section>
+
+    <!-- Slide 12: Error Detection vs Error Correction -->
+    <section>
+        <h2>Detection vs. Correction</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="cols">
+            <div class="card fragment">
+                <h3>Error Detection</h3>
+                <p class="small">Recognizes that an error has occurred, but cannot fix it. Requires retransmission (ARQ).</p>
+                <ul class="tiny">
+                    <li>Needs minimum distance d &ge; 2</li>
+                    <li>Can detect up to d &minus; 1 errors</li>
+                    <li>Simpler, less redundancy needed</li>
+                    <li class="accent">Examples: parity bits, CRC, checksums</li>
+                </ul>
+            </div>
+            <div class="card fragment">
+                <h3>Error Correction (FEC)</h3>
+                <p class="small">Locates and corrects errors without retransmission. Essential for one-way channels.</p>
+                <ul class="tiny">
+                    <li>Needs minimum distance d &ge; 3</li>
+                    <li>Can correct up to &lfloor;(d&minus;1)/2&rfloor; errors</li>
+                    <li>More redundancy, higher complexity</li>
+                    <li class="accent2">Examples: Hamming, Reed-Solomon, turbo codes</li>
+                </ul>
+            </div>
+        </div>
+        <div class="formula fragment">
+            Detection: up to d<sub>min</sub> &minus; 1 errors &nbsp;&nbsp;|&nbsp;&nbsp; Correction: up to &lfloor;(d<sub>min</sub> &minus; 1) / 2&rfloor; errors
+        </div>
+        <div class="warning fragment">
+            <strong>Tradeoff:</strong> A code with d<sub>min</sub> = 5 can either detect 4 errors OR correct 2 errors, but not both simultaneously at those limits.
+        </div>
+    </section>
+
+    <!-- Slide 13: Codewords -->
+    <section>
+        <h2>Codewords &amp; Code Structure</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>A <span class="accent">code</span> C is a set of valid codewords. For a binary code of length n, C &sube; {0,1}<sup>n</sup>.</p>
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Example: Simple (4,2) Code</h3>
+                <table>
+                    <tr><th>Message</th><th>Codeword</th></tr>
+                    <tr><td>00</td><td class="accent">0000</td></tr>
+                    <tr><td>01</td><td class="accent">0111</td></tr>
+                    <tr><td>10</td><td class="accent">1011</td></tr>
+                    <tr><td>11</td><td class="accent">1100</td></tr>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Key Properties</h3>
+                <ul class="small">
+                    <li class="fragment"><strong>|C| = 2<sup>k</sup></strong> codewords for a binary (n,k) code</li>
+                    <li class="fragment"><strong>Rate R = k/n</strong> (efficiency)</li>
+                    <li class="fragment"><strong>Redundancy</strong> = n &minus; k bits per codeword</li>
+                    <li class="fragment"><strong>Linear code:</strong> sum of any two codewords is also a codeword</li>
+                </ul>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            A <strong>linear code</strong> forms a vector subspace of F<sub>2</sub><sup>n</sup>. This algebraic structure enables efficient encoding and decoding.
+        </div>
+    </section>
+
+    <!-- Slide 14: Code Rate -->
+    <section>
+        <h2>Code Rate</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="formula fragment">
+            R = k / n
+        </div>
+        <p class="fragment small">The code rate measures the proportion of information bits in each codeword.</p>
+        <div class="grid-3 fragment">
+            <div class="card" style="text-align: center;">
+                <div class="stat">1/3</div>
+                <div class="stat-label">Triple repetition code<br>(3,1) &mdash; High redundancy</div>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div class="stat">4/7</div>
+                <div class="stat-label">Hamming(7,4)<br>Good balance</div>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div class="stat">11/15</div>
+                <div class="stat-label">Hamming(15,11)<br>Higher efficiency</div>
+            </div>
+        </div>
+        <div class="warning fragment">
+            <strong>Shannon's theorem:</strong> We need R &lt; C for reliable communication. If we set R too high, no code can save us. If R is too low, we waste bandwidth.
+        </div>
+    </section>
+
+    <!-- Slide 15: Hamming Distance -->
+    <section>
+        <h2>Hamming Distance</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">Hamming distance</span> d(x, y) between two binary strings x and y of equal length is the number of positions at which they differ.</p>
+        </div>
+        <div class="formula fragment">
+            d(x, y) = |{i : x<sub>i</sub> &ne; y<sub>i</sub>}| = wt(x &oplus; y)
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Examples</h3>
+                <p class="small" style="font-family: 'JetBrains Mono', monospace;">
+                    d(10<span class="accent2">1</span>0<span class="accent2">1</span>, 10<span class="accent2">0</span>0<span class="accent2">0</span>) = <span class="accent">2</span><br>
+                    d(11111, 00000) = <span class="accent">5</span><br>
+                    d(01010, 01010) = <span class="accent">0</span>
+                </p>
+            </div>
+            <div class="card">
+                <h3>Properties (Metric)</h3>
+                <ul class="small">
+                    <li>d(x, y) &ge; 0 (non-negative)</li>
+                    <li>d(x, y) = 0 iff x = y</li>
+                    <li>d(x, y) = d(y, x) (symmetric)</li>
+                    <li>d(x, z) &le; d(x, y) + d(y, z) (triangle inequality)</li>
+                </ul>
+            </div>
+        </div>
+        <pre class="fragment"><code class="python">def hamming_distance(x, y):
+    """Compute Hamming distance between two bit strings."""
+    if len(x) != len(y):
+        raise ValueError("Strings must be equal length")
+    return sum(a != b for a, b in zip(x, y))
+
+# Examples
+print(hamming_distance("10101", "10000"))  # 2
+print(hamming_distance("11111", "00000"))  # 5</code></pre>
+    </section>
+
+    <!-- Slide 16: Minimum Distance -->
+    <section>
+        <h2>Minimum Distance</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">minimum distance</span> d<sub>min</sub> of a code C is the smallest Hamming distance between any two distinct codewords:</p>
+        </div>
+        <div class="formula fragment">
+            d<sub>min</sub>(C) = min { d(c<sub>i</sub>, c<sub>j</sub>) : c<sub>i</sub>, c<sub>j</sub> &in; C, c<sub>i</sub> &ne; c<sub>j</sub> }
+        </div>
+        <div class="key-point fragment">
+            For <strong>linear codes</strong>, d<sub>min</sub> equals the minimum Hamming weight of any non-zero codeword:<br>
+            <span class="small" style="font-family: 'JetBrains Mono', monospace;">d<sub>min</sub> = min { wt(c) : c &in; C, c &ne; 0 }</span>
+        </div>
+        <div class="panel fragment">
+            <h3>Why Minimum Distance Matters</h3>
+            <table>
+                <tr><th>d<sub>min</sub></th><th>Errors Detected</th><th>Errors Corrected</th><th>Example</th></tr>
+                <tr><td>1</td><td>0</td><td>0</td><td>Uncoded</td></tr>
+                <tr><td>2</td><td>1</td><td>0</td><td>Parity check</td></tr>
+                <tr><td>3</td><td>2</td><td>1</td><td>Hamming(7,4)</td></tr>
+                <tr><td>5</td><td>4</td><td>2</td><td>Golay codes</td></tr>
+                <tr><td>7</td><td>6</td><td>3</td><td>BCH codes</td></tr>
+            </table>
+        </div>
+    </section>
+
+    <!-- Slide 17: Hamming Weight -->
+    <section>
+        <h2>Hamming Weight</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <span class="badge badge-code">Code</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">Hamming weight</span> wt(x) of a binary string x is the number of non-zero positions &mdash; equivalently, the distance from x to the all-zeros string.</p>
+        </div>
+        <div class="formula fragment">
+            wt(x) = d(x, 0) = |{i : x<sub>i</sub> &ne; 0}|
+        </div>
+        <pre class="fragment"><code class="python">def hamming_weight(x):
+    """Count the number of 1s in a binary string."""
+    return sum(int(bit) for bit in x)
+
+# For linear codes: d_min = minimum weight of non-zero codewords
+def min_distance_linear(codewords):
+    """Find minimum distance of a linear code."""
+    non_zero = [c for c in codewords if any(b == '1' for b in c)]
+    return min(hamming_weight(c) for c in non_zero)
+
+# Example: simple (4,2) code
+code = ['0000', '0111', '1011', '1100']
+print(f"Minimum distance: {min_distance_linear(code)}")  # 2</code></pre>
+        <div class="key-point fragment">
+            For linear codes, computing d<sub>min</sub> requires checking only 2<sup>k</sup> &minus; 1 codewords (minimum weight) instead of all <span style="font-family:'JetBrains Mono',monospace;">C(2<sup>k</sup>, 2)</span> pairs.
+        </div>
+    </section>
+
+    <!-- Slide 18: Computing Hamming Distance in Python -->
+    <section>
+        <h2>Python: Distance Matrix</h2>
+        <span class="badge badge-code">Code</span>
+        <pre class="fragment"><code class="python">import itertools
+
+def code_distance_matrix(codewords):
+    """Compute all pairwise Hamming distances in a code."""
+    n = len(codewords)
+    matrix = [[0] * n for _ in range(n)]
+    for i in range(n):
+        for j in range(i + 1, n):
+            d = hamming_distance(codewords[i], codewords[j])
+            matrix[i][j] = d
+            matrix[j][i] = d
+    return matrix
+
+def minimum_distance(codewords):
+    """Find the minimum distance of a code."""
+    min_d = float('inf')
+    for c1, c2 in itertools.combinations(codewords, 2):
+        d = hamming_distance(c1, c2)
+        min_d = min(min_d, d)
+    return min_d
+
+# Example: Hamming(7,4) - some codewords
+hamming_74 = ['0000000', '1000110', '0100101', '1100011',
+              '0010011', '1010101', '0110110', '1110000']
+print(f"Minimum distance: {minimum_distance(hamming_74)}")  # 3</code></pre>
+        <div class="key-point fragment">
+            The full Hamming(7,4) code has 2<sup>4</sup> = 16 codewords, all at minimum distance 3 from each other. This enables single-error correction.
+        </div>
+    </section>
+
+    <!-- Slide 19: The Singleton Bound -->
+    <section>
+        <h2>The Singleton Bound</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">Singleton bound</span> (1964) gives the simplest upper bound on minimum distance for any code.</p>
+        </div>
+        <div class="formula fragment">
+            d<sub>min</sub> &le; n &minus; k + 1
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Intuition</h3>
+                <p class="small">If we delete d &minus; 1 positions from each codeword, the resulting shortened words must still be distinct (otherwise two codewords would agree in all remaining positions and differ in at most d &minus; 1, contradicting d<sub>min</sub>).</p>
+                <p class="small" style="margin-top: 0.5em;">So 2<sup>k</sup> &le; 2<sup>n&minus;d+1</sup>, giving d &le; n &minus; k + 1.</p>
+            </div>
+            <div class="card">
+                <h3>MDS Codes</h3>
+                <p class="small">Codes that <em>achieve</em> the Singleton bound with equality are called <span class="accent">Maximum Distance Separable</span> (MDS) codes.</p>
+                <ul class="tiny">
+                    <li>Reed-Solomon codes are MDS</li>
+                    <li>Optimal error correction for given rate</li>
+                    <li>Only exist over large enough alphabets</li>
+                </ul>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>Example:</strong> For a [15, 11, d] code, Singleton says d &le; 15 &minus; 11 + 1 = 5.
+        </div>
+    </section>
+
+    <!-- Slide 20: The Hamming Bound -->
+    <section>
+        <h2>The Hamming Bound</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">Hamming bound</span> (sphere-packing bound) considers how many error patterns of weight &le; t can be packed into the space {0,1}<sup>n</sup>.</p>
+        </div>
+        <div class="formula fragment">
+            2<sup>k</sup> &middot; &sum;<sub>i=0</sub><sup>t</sup> C(n, i) &le; 2<sup>n</sup> &nbsp;&nbsp; where t = &lfloor;(d&minus;1)/2&rfloor;
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Interpretation</h3>
+                <p class="small">Each codeword is the center of a "sphere" of radius t in Hamming space. These spheres must not overlap (otherwise decoding is ambiguous). The total volume of all spheres cannot exceed 2<sup>n</sup>.</p>
+            </div>
+            <div class="card">
+                <h3>Perfect Codes</h3>
+                <p class="small">Codes achieving the Hamming bound with <em>equality</em> are called <span class="accent">perfect codes</span>. The Hamming spheres tile the entire space with no gaps.</p>
+                <ul class="tiny">
+                    <li class="accent">Hamming codes (single-error correcting)</li>
+                    <li class="accent">Binary Golay code [23, 12, 7]</li>
+                    <li>Trivial: repetition codes, whole-space codes</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 21: The Plotkin Bound -->
+    <section>
+        <h2>The Plotkin Bound</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>The <span class="accent">Plotkin bound</span> (1960) is most useful when the minimum distance d is close to the block length n (high-redundancy regime).</p>
+        </div>
+        <div class="formula fragment">
+            If d is even and d &gt; n/2: &nbsp; |C| &le; 2 &middot; &lfloor;d / (2d &minus; n)&rfloor;
+        </div>
+        <div class="panel fragment">
+            <h3>Simplified Form (for linear codes)</h3>
+            <div class="formula">
+                If 2d &gt; n: &nbsp; k &le; n &minus; 2d + 1 + log<sub>2</sub>(2d)
+            </div>
+            <p class="small dim">The Plotkin bound becomes tighter than the Hamming bound when the code rate is low.</p>
+        </div>
+        <div class="key-point fragment">
+            <strong>Key insight:</strong> No binary code can have d<sub>min</sub> &gt; n/2 with more than 2n codewords. The Plotkin bound quantifies how quickly the code size shrinks as d approaches n.
+        </div>
+    </section>
+
+    <!-- Slide 22: Gilbert-Varshamov Bound -->
+    <section>
+        <h2>Gilbert-Varshamov Bound</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p>Unlike the previous bounds (which are <span class="accent2">upper bounds</span>), the <span class="accent">Gilbert-Varshamov (GV) bound</span> is a <span class="accent">lower bound</span> &mdash; it guarantees that good codes <em>exist</em>.</p>
+        </div>
+        <div class="formula fragment">
+            A binary linear [n, k, d] code exists if: &nbsp; 2<sup>n&minus;k</sup> &gt; &sum;<sub>i=0</sub><sup>d&minus;2</sup> C(n&minus;1, i)
+        </div>
+        <div class="cols fragment">
+            <div class="card">
+                <h3>Greedy Argument</h3>
+                <p class="small">Build the code greedily: add a new codeword if it's at distance &ge; d from all existing codewords. The process can continue as long as the Hamming balls of radius d &minus; 1 don't cover all of {0,1}<sup>n</sup>.</p>
+            </div>
+            <div class="card">
+                <h3>Significance</h3>
+                <p class="small">The GV bound matches the channel capacity in certain asymptotic regimes, suggesting that <span class="accent">random linear codes are nearly optimal</span>. Most practical codes fall between the GV and Hamming bounds.</p>
+            </div>
+        </div>
+        <div class="warning fragment">
+            The GV bound is <em>existential</em>: it proves good codes exist but doesn't help construct them explicitly.
+        </div>
+    </section>
+
+    <!-- Slide 23: Bounds Comparison -->
+    <section>
+        <h2>Comparing the Bounds</h2>
+        <span class="badge badge-math">Mathematics</span>
+        <div class="panel fragment">
+            <p class="small">For binary codes of length n, the bounds constrain the relationship between rate R = k/n and relative distance &delta; = d/n:</p>
+        </div>
+        <table class="fragment">
+            <tr><th>Bound</th><th>Type</th><th>Key Condition</th><th>Tightest When</th></tr>
+            <tr><td class="accent">Singleton</td><td>Upper</td><td>d &le; n &minus; k + 1</td><td>Over large alphabets</td></tr>
+            <tr><td class="accent">Hamming</td><td>Upper</td><td>Sphere-packing</td><td>Low error correction</td></tr>
+            <tr><td class="accent">Plotkin</td><td>Upper</td><td>Counting argument</td><td>&delta; &gt; 1/2</td></tr>
+            <tr><td class="accent3">Gilbert-Varshamov</td><td>Lower</td><td>Greedy construction</td><td>All ranges</td></tr>
+        </table>
+        <pre class="fragment"><code class="python">from math import comb, log2
+
+def hamming_bound_max_k(n, t):
+    """Max k satisfying the Hamming bound for t-error correction."""
+    sphere_size = sum(comb(n, i) for i in range(t + 1))
+    return int(n - log2(sphere_size))
+
+def singleton_bound_max_d(n, k):
+    """Max d satisfying the Singleton bound."""
+    return n - k + 1
+
+# Example: n = 15
+print(f"Hamming(15, t=1): max k = {hamming_bound_max_k(15, 1)}")  # 11
+print(f"Singleton(15, k=11): max d = {singleton_bound_max_d(15, 11)}")  # 5</code></pre>
+    </section>
+
+    <!-- Slide 24: Timeline of Coding Theory -->
+    <section>
+        <h2>Timeline of Coding Theory</h2>
+        <span class="badge badge-history">History</span>
+        <div style="font-size: 0.65em;">
+            <div class="panel fragment">
+                <span class="accent">1948</span> &mdash; Shannon publishes "A Mathematical Theory of Communication"
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1950</span> &mdash; Hamming publishes error-correcting codes; Golay discovers the [23,12,7] code
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1954</span> &mdash; Muller and Reed develop Reed-Muller codes
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1959</span> &mdash; Hocquenghem, Bose, and Chaudhuri develop BCH codes
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1960</span> &mdash; Reed and Solomon invent Reed-Solomon codes; Peterson's CRC paper
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1962</span> &mdash; Gallager invents LDPC codes (forgotten for 30 years!)
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1967</span> &mdash; Viterbi algorithm for decoding convolutional codes
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1993</span> &mdash; Berrou et al. invent turbo codes (near Shannon limit!)
+            </div>
+            <div class="panel fragment">
+                <span class="accent">1996</span> &mdash; MacKay &amp; Neal rediscover LDPC codes
+            </div>
+            <div class="panel fragment">
+                <span class="accent">2009</span> &mdash; Ar&#305;kan invents polar codes (provably achieve capacity)
+            </div>
+        </div>
+    </section>
+
+    <!-- Slide 25: Summary & What's Next -->
+    <section>
+        <h2>Summary &amp; What's Next</h2>
+        <div class="grid-2">
+            <div class="panel fragment">
+                <h3>Key Takeaways</h3>
+                <ul class="small">
+                    <li><span class="accent">Shannon's theorem</span> proves reliable communication is possible at rates below channel capacity</li>
+                    <li><span class="accent">Hamming distance</span> is the fundamental metric for code analysis</li>
+                    <li>Minimum distance determines detection and correction capability</li>
+                    <li>The major bounds constrain what codes can and cannot achieve</li>
+                    <li>Linear codes have rich algebraic structure enabling efficient algorithms</li>
+                </ul>
+            </div>
+            <div class="panel fragment">
+                <h3>Coming Up</h3>
+                <div class="card" style="margin-bottom: 0.5em;">
+                    <p class="small"><span class="accent">Lecture 02:</span> Parity Checks &amp; Simple Codes</p>
+                </div>
+                <div class="card" style="margin-bottom: 0.5em;">
+                    <p class="small"><span class="accent">Lecture 03:</span> Hamming Codes</p>
+                </div>
+                <div class="card">
+                    <p class="small"><span class="accent">Lecture 04:</span> CRC &amp; Error Detection</p>
+                </div>
+            </div>
+        </div>
+        <div class="key-point fragment">
+            <strong>The central question of coding theory:</strong> How do we design codes that approach the Shannon limit with practical encoding and decoding complexity?
+        </div>
+    </section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+    Reveal.initialize({
+        width: 1200,
+        height: 900,
+        margin: 0.02,
+        transition: 'slide',
+        slideNumber: 'c/t',
+        plugins: [RevealHighlight]
+    });
+
+    function fixSlides() {
+        document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
+            if (slide.scrollHeight > 900) {
+                slide.style.fontSize = (900 / slide.scrollHeight * 100) + '%';
+            }
+        });
+    }
+    Reveal.on('ready', fixSlides);
+    Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

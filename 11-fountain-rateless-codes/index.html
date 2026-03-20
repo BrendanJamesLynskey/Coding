@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fountain & Rateless Codes — Coding Theory Series</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+.reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+.reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+.reveal h1 { font-size: 2.4em; }
+.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal code { font-family: 'JetBrains Mono', monospace; }
+.reveal .slides section { text-align: left; }
+.reveal .progress { color: var(--accent); height: 3px; }
+.reveal .controls { color: var(--accent); }
+.badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
+.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
+.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
+.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
+.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
+.cols { display: flex; gap: 1em; align-items: flex-start; }
+.cols > * { flex: 1; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.dim { color: var(--dim); }
+.small { font-size: 0.75em; }
+.tiny { font-size: 0.6em; }
+.accent { color: var(--accent); }
+.accent2 { color: var(--accent2); }
+.accent3 { color: var(--accent3); }
+.accent4 { color: var(--accent4); }
+.flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
+.flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
+.flow-arrow { color: var(--accent); font-size: 1.2em; }
+.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.stat-label { font-size: 0.7em; color: var(--dim); }
+table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
+th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
+.nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- Slide 1: Title -->
+<section>
+  <div class="series-tag">Coding Theory Series — 11</div>
+  <h1 class="title-gradient">Fountain &amp;<br>Rateless Codes</h1>
+  <p style="font-size:0.7em; color: var(--dim); max-width: 700px;">Codes that generate an endless stream of encoded symbols — collect enough drops from the fountain, and you can reconstruct the original message.</p>
+  <div style="margin-top: 1em;">
+    <span class="badge badge-math">Mathematics</span>
+    <span class="badge badge-code">Code</span>
+    <span class="badge badge-history">History</span>
+    <span class="badge badge-app">Applications</span>
+  </div>
+  <div class="nav-hint">Use arrow keys or swipe to navigate &bull; ESC for overview</div>
+</section>
+
+<!-- Slide 2: Roadmap -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="grid-3">
+    <div class="panel fragment">
+      <h3>Motivation</h3>
+      <p class="small">The digital fountain metaphor and why fixed-rate codes fall short.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>LT Codes</h3>
+      <p class="small">Luby Transform codes — the first practical fountain code.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Raptor Codes</h3>
+      <p class="small">Linear-time encoding and decoding with pre-coding.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Theory</h3>
+      <p class="small">Degree distributions, soliton distributions, and analysis.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Applications</h3>
+      <p class="small">Streaming, broadcast, multicast, and distributed storage.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Standards</h3>
+      <p class="small">RaptorQ (RFC 6330) and real-world deployment.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 3: The Fountain Metaphor -->
+<section>
+  <h2>The Digital Fountain Metaphor</h2>
+  <span class="badge badge-history">History</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>The Idea</h3>
+        <p class="small">Imagine a <span class="accent">fountain</span> that continuously sprays water drops. Each drop carries a tiny bit of information. You hold a cup under the fountain and collect drops.</p>
+        <p class="small fragment">It doesn't matter <em>which</em> drops you catch — once you've collected <span class="accent">enough</span>, you can reconstruct the message.</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">A fountain code generates a potentially <span class="accent">unlimited</span> number of encoded symbols from k source symbols. Any (1+&epsilon;)k received symbols suffice for decoding.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Why This Is Revolutionary</h3>
+        <p class="small"><span class="accent">No feedback needed:</span> Sender doesn't need to know what was received.</p>
+        <p class="small fragment"><span class="accent3">No rate decision:</span> No need to predict the channel quality in advance.</p>
+        <p class="small fragment"><span class="accent2">Universal:</span> Works for any erasure rate without code redesign.</p>
+        <p class="small fragment"><span class="accent4">Scalable:</span> One sender, millions of receivers with different loss rates.</p>
+      </div>
+      <div class="fragment">
+        <p class="small dim">First articulated by John Byers, Michael Luby, and Michael Mitzenmacher (1998).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 4: Fixed-Rate Codes Problem -->
+<section>
+  <h2>Why Fixed-Rate Codes Struggle</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>The Broadcast Problem</h3>
+      <p class="small">A satellite broadcasts data to millions of receivers. Each has a different packet loss rate (1% to 30%).</p>
+      <p class="small fragment">With a <span class="accent2">fixed-rate</span> code (e.g., rate 1/2 RS code):</p>
+      <ul class="small">
+        <li class="fragment">Wasteful for good channels (1% loss)</li>
+        <li class="fragment">Insufficient for bad channels (30% loss)</li>
+        <li class="fragment">Can't adapt without feedback</li>
+      </ul>
+    </div>
+    <div class="panel fragment">
+      <h3>The Multicast Problem</h3>
+      <p class="small">10 receivers, each missing different 10% of packets. With fixed codes, you retransmit specific missing packets — but what's missing varies per receiver.</p>
+      <div class="formula small">
+        N retransmissions needed &asymp; N &middot; log(N)
+      </div>
+      <p class="small fragment">This is the <span class="accent2">"coupon collector" problem</span> — terribly inefficient!</p>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Fountain codes solve both problems: every encoded symbol is useful to every receiver, regardless of which symbols they've already received.</p>
+  </div>
+</section>
+
+<!-- Slide 5: Binary Erasure Channel -->
+<section>
+  <h2>The Binary Erasure Channel (BEC)</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Channel Model</h3>
+        <p class="small">The BEC is the natural channel for fountain codes:</p>
+        <p class="small fragment">Each transmitted symbol is either received <span class="accent">perfectly</span> or <span class="accent2">erased</span> (lost entirely).</p>
+        <p class="small fragment">Erasure probability = &epsilon;</p>
+      </div>
+      <div class="flow-row fragment" style="margin: 0.5em 0;">
+        <div class="flow-node">0</div>
+        <div class="flow-arrow" style="font-size: 0.8em;">1-&epsilon;</div>
+        <div class="flow-node" style="border-color: var(--accent);">0</div>
+      </div>
+      <div class="flow-row fragment">
+        <div class="flow-node">0/1</div>
+        <div class="flow-arrow" style="font-size: 0.8em; color: var(--accent2);">&epsilon;</div>
+        <div class="flow-node" style="border-color: var(--accent2);">?</div>
+      </div>
+      <div class="flow-row fragment" style="margin: 0.5em 0;">
+        <div class="flow-node">1</div>
+        <div class="flow-arrow" style="font-size: 0.8em;">1-&epsilon;</div>
+        <div class="flow-node" style="border-color: var(--accent);">1</div>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Capacity of BEC</h3>
+        <div class="formula">
+          C = 1 - &epsilon;
+        </div>
+        <p class="small">Beautifully simple! To transmit k bits, you need at least k/(1-&epsilon;) channel uses.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Real-World BECs</h3>
+        <p class="small accent">Internet packets (TCP/UDP): lost or received</p>
+        <p class="small accent3">Broadcast/multicast: missed or received</p>
+        <p class="small accent2">Wireless: fading below threshold = erasure</p>
+        <p class="small accent4">Storage: sector failures = erasures</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 6: Random Linear Fountain Codes -->
+<section>
+  <h2>Random Linear Fountain Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>The Simplest Fountain Code</h3>
+    <p class="small">Each encoded symbol is a random linear combination of source symbols over GF(2):</p>
+    <div class="formula">
+      y<sub>i</sub> = &oplus;<sub>j &in; S<sub>i</sub></sub> x<sub>j</sub>
+    </div>
+    <p class="small">where S<sub>i</sub> is a random subset of {1, 2, ..., k}.</p>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Encoding</h3>
+      <p class="small">1. Choose a random binary vector g<sub>i</sub> of length k</p>
+      <p class="small">2. Compute y<sub>i</sub> = g<sub>i</sub> &middot; x (inner product mod 2)</p>
+      <p class="small">3. Transmit (y<sub>i</sub>, g<sub>i</sub>) or seed for g<sub>i</sub></p>
+    </div>
+    <div class="card">
+      <h3>Decoding</h3>
+      <p class="small">Collect n &ge; k symbols. Form matrix G (n &times; k). Solve Gx = y by <span class="accent">Gaussian elimination</span>.</p>
+      <p class="small fragment">Succeeds w.h.p. when n &asymp; k + O(1).</p>
+    </div>
+  </div>
+  <div class="fragment warning">
+    <p class="small"><span class="accent2">Problem:</span> Encoding is O(k) per symbol, decoding is O(k<sup>3</sup>) — impractical for large k! This motivated the search for structured fountain codes.</p>
+  </div>
+</section>
+
+<!-- Slide 7: LT Codes Introduction -->
+<section>
+  <h2>LT Codes: The First Practical Fountain Code</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">Michael Luby introduced LT (Luby Transform) codes in 2002 — the first rateless erasure code with efficient encoding and decoding. The key insight: use a <span class="accent">sparse</span> random generator instead of a dense one.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>LT Encoding</h3>
+        <p class="small">For each encoded symbol:</p>
+        <p class="small">1. Sample degree d from distribution &Omega;(d)</p>
+        <p class="small">2. Choose d source symbols uniformly at random</p>
+        <p class="small">3. XOR them together: y = x<sub>i1</sub> &oplus; x<sub>i2</sub> &oplus; ... &oplus; x<sub>id</sub></p>
+      </div>
+      <div class="panel fragment">
+        <h3>The Magic: Degree Distribution</h3>
+        <p class="small">Not all degrees are equally useful. The degree distribution &Omega; must be carefully designed for efficient decoding.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>LT Decoding: Peeling</h3>
+        <p class="small">1. Find an encoded symbol with degree 1 (covers one source symbol)</p>
+        <p class="small fragment">2. That source symbol is now known — "peel" it off</p>
+        <p class="small fragment">3. XOR it from all other encoded symbols that include it</p>
+        <p class="small fragment">4. This may create new degree-1 symbols — repeat!</p>
+        <p class="small fragment accent">Like a chain reaction: one decoded symbol triggers others.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 8: Soliton Distribution -->
+<section>
+  <h2>The Soliton Distribution</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div>
+      <div class="panel fragment">
+        <h3>Ideal Soliton Distribution</h3>
+        <div class="formula small">
+          &rho;(1) = 1/k<br>
+          &rho;(d) = 1/(d(d-1)) &nbsp; for d = 2, ..., k
+        </div>
+        <p class="small fragment">In expectation, exactly one encoded symbol has degree 1, and peeling releases exactly one new degree-1 symbol at each step.</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small">The ideal soliton fails in practice: variance is too high. The peeling process often stalls because no degree-1 symbols are available.</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Robust Soliton Distribution</h3>
+        <p class="small">Luby's fix: add extra degree-1 symbols and boost certain degrees:</p>
+        <div class="formula small">
+          &mu;(d) = (&rho;(d) + &tau;(d)) / Z
+        </div>
+        <p class="small">where &tau;(d) adds "spikes" and Z normalizes. Parameters &delta; (failure probability) and c (tuning constant) control the trade-off.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Trade-offs</h3>
+        <table>
+          <tr><th>Parameter</th><th>Effect</th></tr>
+          <tr><td>More degree-1</td><td>Reliable start, higher overhead</td></tr>
+          <tr><td>Higher avg degree</td><td>Better coverage, slower encoding</td></tr>
+          <tr><td>Optimal</td><td class="accent">O(k ln(k/&delta;)) symbols needed</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 9: LT Encoding/Decoding Visual -->
+<section>
+  <h2>LT Coding: Visual Example</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="panel fragment">
+    <h3>Source: 4 symbols [A, B, C, D]</h3>
+    <div class="flow-row" style="margin: 0.5em 0;">
+      <div class="flow-node" style="border-color: var(--accent);">A</div>
+      <div class="flow-node" style="border-color: var(--accent3);">B</div>
+      <div class="flow-node" style="border-color: var(--accent2);">C</div>
+      <div class="flow-node" style="border-color: var(--accent4);">D</div>
+    </div>
+  </div>
+  <div class="grid-2 fragment">
+    <div class="card">
+      <h3>Encoded Symbols</h3>
+      <table>
+        <tr><th>Symbol</th><th>Degree</th><th>Composition</th></tr>
+        <tr><td>y1</td><td>1</td><td class="accent">B</td></tr>
+        <tr><td>y2</td><td>2</td><td>A &oplus; C</td></tr>
+        <tr><td>y3</td><td>3</td><td>A &oplus; B &oplus; D</td></tr>
+        <tr><td>y4</td><td>2</td><td>C &oplus; D</td></tr>
+        <tr><td>y5</td><td>1</td><td class="accent">A</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Peeling Decode</h3>
+      <p class="small"><span class="accent">Step 1:</span> y1 has degree 1 &rarr; <span class="accent">B = y1</span></p>
+      <p class="small fragment"><span class="accent">Step 2:</span> y5 has degree 1 &rarr; <span class="accent">A = y5</span></p>
+      <p class="small fragment"><span class="accent">Step 3:</span> Remove A from y2 &rarr; y2' = C (degree 1!) &rarr; <span class="accent">C = y2'</span></p>
+      <p class="small fragment"><span class="accent">Step 4:</span> Remove C from y4 &rarr; y4' = D (degree 1!) &rarr; <span class="accent">D = y4'</span></p>
+      <p class="small fragment accent3">All 4 source symbols recovered from 5 encoded symbols!</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 10: LT Code Python Implementation -->
+<section>
+  <h2>LT Encoding in Python</h2>
+  <span class="badge badge-code">Code</span>
+  <pre><code class="language-python">import numpy as np
+from math import log, sqrt, ceil
+
+def robust_soliton(k, c=0.1, delta=0.5):
+    """Generate robust soliton distribution for k source symbols."""
+    # Ideal soliton
+    rho = [0] * (k + 1)
+    rho[1] = 1.0 / k
+    for d in range(2, k + 1):
+        rho[d] = 1.0 / (d * (d - 1))
+
+    # Tau component
+    S = c * sqrt(k) * log(k / delta)
+    tau = [0] * (k + 1)
+    pivot = int(k / S)
+    for d in range(1, min(pivot, k) + 1):
+        tau[d] = S / (k * d)
+    if pivot <= k:
+        tau[pivot] = S * log(S / delta) / k
+
+    # Normalize
+    total = sum(rho[d] + tau[d] for d in range(1, k + 1))
+    mu = [(rho[d] + tau[d]) / total for d in range(k + 1)]
+    return mu[1:]  # degrees 1 to k
+
+def lt_encode(source_symbols, n_encoded, degree_dist):
+    """
+    LT encode: generate n_encoded symbols from source.
+    Returns list of (encoded_value, neighbors).
+    """
+    k = len(source_symbols)
+    degrees = list(range(1, k + 1))
+    encoded = []
+
+    for _ in range(n_encoded):
+        # Sample degree from distribution
+        d = np.random.choice(degrees, p=degree_dist)
+        # Choose d random source symbols
+        neighbors = sorted(np.random.choice(k, size=d, replace=False))
+        # XOR them together
+        value = 0
+        for idx in neighbors:
+            value ^= source_symbols[idx]
+        encoded.append((value, neighbors))
+
+    return encoded
+
+def lt_decode(encoded_symbols, k):
+    """Peeling decoder for LT codes."""
+    decoded = [None] * k
+    remaining = [(val, list(nbrs)) for val, nbrs in encoded_symbols]
+
+    progress = True
+    while progress:
+        progress = False
+        for i, (val, nbrs) in enumerate(remaining):
+            if len(nbrs) == 1:
+                idx = nbrs[0]
+                if decoded[idx] is None:
+                    decoded[idx] = val
+                    progress = True
+                    # Remove this source from all other symbols
+                    for j, (v2, n2) in enumerate(remaining):
+                        if idx in n2:
+                            remaining[j] = (v2 ^ val, [x for x in n2 if x != idx])
+                remaining[i] = (0, [])  # consumed
+
+    return decoded
+
+# Demo
+k = 100
+source = np.random.randint(0, 256, k).tolist()
+dist = robust_soliton(k)
+encoded = lt_encode(source, int(k * 1.2), dist)  # 20% overhead
+result = lt_decode(encoded, k)
+recovered = sum(1 for x in result if x is not None)
+print(f"Recovered {recovered}/{k} source symbols")</code></pre>
+</section>
+
+<!-- Slide 11: LT Code Analysis -->
+<section>
+  <h2>LT Code Performance Analysis</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div>
+      <div class="panel fragment">
+        <h3>Overhead</h3>
+        <p class="small">With robust soliton distribution, LT codes need:</p>
+        <div class="formula small">
+          n = k + O(&radic;k &middot; ln<sup>2</sup>(k/&delta;))
+        </div>
+        <p class="small">symbols to decode k source symbols with probability 1-&delta;.</p>
+        <p class="small fragment">Overhead &epsilon; = n/k - 1 &asymp; <span class="accent">5-10%</span> for practical k.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Encoding Cost</h3>
+        <p class="small">Average degree under robust soliton: O(ln(k/&delta;))</p>
+        <p class="small">Each encoded symbol: O(ln k) XOR operations</p>
+        <p class="small accent">Total encoding: O(k ln k) — near-linear!</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Decoding Cost</h3>
+        <p class="small">Peeling decoder: each source symbol "ripples" through O(ln k) encoded symbols.</p>
+        <p class="small accent">Total decoding: O(k ln k)</p>
+      </div>
+      <div class="fragment warning">
+        <p class="small"><span class="accent2">LT code limitation:</span> The O(&radic;k) overhead term means LT codes have non-vanishing overhead. For k = 10,000, you need ~5-10% extra symbols. Raptor codes fix this.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Comparison</h3>
+        <table>
+          <tr><th>Code</th><th>Overhead</th><th>Decode</th></tr>
+          <tr><td>Random linear</td><td class="accent">O(1)</td><td class="accent2">O(k<sup>3</sup>)</td></tr>
+          <tr><td class="accent3">LT</td><td>O(&radic;k ln<sup>2</sup>k)</td><td class="accent">O(k ln k)</td></tr>
+          <tr><td class="accent">Raptor</td><td>O(1)</td><td class="accent">O(k)</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 12: Raptor Codes -->
+<section>
+  <h2>Raptor Codes: Linear-Time Fountain Codes</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small"><span class="accent">Amin Shokrollahi (2006)</span> invented Raptor codes — achieving O(k) encoding/decoding with constant overhead. The name: <span class="accent">Ra</span>pid T<span class="accent">or</span>nado + LT.</p>
+  </div>
+  <div class="cols" style="margin-top: 0.8em;">
+    <div>
+      <div class="panel fragment">
+        <h3>The Key Idea: Pre-Coding</h3>
+        <p class="small">First apply a high-rate <span class="accent">pre-code</span> (inner code) to the k source symbols, producing n' = k(1+&epsilon;) intermediate symbols.</p>
+        <p class="small fragment">Then apply an <span class="accent3">LT code with weak degree distribution</span> (low average degree) to the intermediate symbols.</p>
+        <p class="small fragment">The pre-code handles the symbols that LT misses!</p>
+      </div>
+    </div>
+    <div>
+      <div class="flow-row fragment">
+        <div class="flow-node" style="border-color: var(--accent3);">k source<br>symbols</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color: var(--accent);">Pre-code<br><span class="tiny">(LDPC/Hamming)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color: var(--accent4);">n' intermediate<br>symbols</div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color: var(--accent2);">LT code<br><span class="tiny">(weak)</span></div>
+        <div class="flow-arrow">&rarr;</div>
+        <div class="flow-node" style="border-color: var(--accent);">Encoded<br>stream</div>
+      </div>
+      <div class="panel fragment" style="margin-top: 0.8em;">
+        <h3>Why This Works</h3>
+        <p class="small">The weak LT code recovers ~95-99% of intermediate symbols. The pre-code (e.g., LDPC) fills in the remaining 1-5%.</p>
+        <p class="small fragment">Because the LT code is weak, its average degree is <span class="accent">O(1)</span> — constant! This gives linear-time encoding and decoding.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 13: Raptor Code Structure -->
+<section>
+  <h2>Raptor Code Architecture</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Pre-Code Options</h3>
+      <table>
+        <tr><th>Pre-code</th><th>Rate</th><th>Decoding</th></tr>
+        <tr><td>LDPC</td><td class="accent">0.95-0.99</td><td>Belief propagation</td></tr>
+        <tr><td>Hamming-like</td><td>~0.95</td><td>Bounded distance</td></tr>
+        <tr><td>HDPC</td><td>~0.97</td><td>Gaussian elimination</td></tr>
+        <tr><td class="accent">Combination</td><td>~0.96</td><td>RaptorQ approach</td></tr>
+      </table>
+    </div>
+    <div class="panel fragment">
+      <h3>LT Component</h3>
+      <p class="small">Much simpler than standalone LT:</p>
+      <p class="small accent">Average degree: O(1) (e.g., ~4-5)</p>
+      <p class="small accent3">Distribution: optimized for pre-code residual</p>
+      <p class="small accent2">No need for heavy tail of soliton</p>
+    </div>
+  </div>
+  <div class="panel fragment">
+    <h3>Raptor Decoding</h3>
+    <div class="flow-row">
+      <div class="flow-node">Receive n<br>symbols</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent3);">LT peel<br><span class="tiny">recover ~95%</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent);">Pre-code<br>decode</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent2);">Fill gaps<br><span class="tiny">recover 100%</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" style="border-color: var(--accent);">k source<br>symbols</div>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Total overhead: k(1+&epsilon;) symbols suffice with &epsilon; &lt; 0.05 for practical implementations. Encoding and decoding are both O(k).</p>
+  </div>
+</section>
+
+<!-- Slide 14: RaptorQ -->
+<section>
+  <h2>RaptorQ: The State of the Art</h2>
+  <span class="badge badge-standards">Standards</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>RFC 6330 (2012)</h3>
+        <p class="small">RaptorQ is the IETF standard implementation of Raptor codes. It's the most powerful erasure code deployed at scale.</p>
+        <table>
+          <tr><td>Source symbols</td><td class="accent">1 to 56,403</td></tr>
+          <tr><td>Symbol size</td><td>Arbitrary (bytes)</td></tr>
+          <tr><td>Overhead</td><td class="accent">&lt;2 extra symbols</td></tr>
+          <tr><td>Failure prob</td><td>&lt;10<sup>-6</sup> at k+2</td></tr>
+          <tr><td>Encoding speed</td><td>~1 Gbps</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>RaptorQ Pre-Code</h3>
+        <p class="small">Uses a sophisticated combination:</p>
+        <p class="small"><span class="accent">1. LDPC:</span> Sparse parity checks for bulk error correction</p>
+        <p class="small fragment"><span class="accent3">2. HDPC:</span> Half-density parity checks (dense GF(256) rows) for guaranteed recovery</p>
+        <p class="small fragment"><span class="accent2">3. LT:</span> Degree distribution optimized for the specific pre-code</p>
+      </div>
+      <div class="fragment key-point">
+        <p class="small">RaptorQ achieves information-theoretically optimal overhead: it can decode from <span class="accent">k+0 to k+2</span> symbols in most cases. Essentially zero waste.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 15: ARQ vs Fountain Comparison -->
+<section>
+  <h2>Fountain Codes vs ARQ</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="panel" style="margin-top: 0.5em;">
+    <table>
+      <tr>
+        <th>Property</th>
+        <th class="accent2">ARQ (TCP-style)</th>
+        <th class="accent">Fountain Code</th>
+      </tr>
+      <tr class="fragment">
+        <td>Feedback required?</td>
+        <td class="accent2">Yes (ACK/NACK)</td>
+        <td class="accent">No</td>
+      </tr>
+      <tr class="fragment">
+        <td>Multicast efficiency</td>
+        <td class="accent2">Poor (N separate streams)</td>
+        <td class="accent">Excellent (one stream)</td>
+      </tr>
+      <tr class="fragment">
+        <td>Latency (1-way)</td>
+        <td class="accent2">2+ RTT per loss event</td>
+        <td class="accent">1 one-way delay</td>
+      </tr>
+      <tr class="fragment">
+        <td>Bandwidth overhead</td>
+        <td>Feedback + retransmissions</td>
+        <td class="accent">~2-5% coding overhead</td>
+      </tr>
+      <tr class="fragment">
+        <td>Adapts to loss rate?</td>
+        <td>Reactively (slow)</td>
+        <td class="accent">Automatically</td>
+      </tr>
+      <tr class="fragment">
+        <td>Deep space viable?</td>
+        <td class="accent2">No (30 min RTT!)</td>
+        <td class="accent">Yes</td>
+      </tr>
+    </table>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Fountain codes are ideal when feedback is expensive (satellite), impossible (broadcast), or when serving heterogeneous receivers with different loss rates.</p>
+  </div>
+</section>
+
+<!-- Slide 16: Streaming Applications -->
+<section>
+  <h2>Streaming &amp; Broadcast Applications</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>MBMS / eMBMS</h3>
+      <p class="small">3GPP Multimedia Broadcast/Multicast Service uses <span class="accent">Raptor codes (RFC 5053)</span> for file delivery and streaming to mobile devices.</p>
+      <p class="small fragment">One base station broadcasts; thousands of phones decode. Each phone misses different packets but all recover.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>DVB-H / ATSC 3.0</h3>
+      <p class="small">Mobile TV standards use Raptor codes as the <span class="accent">application-layer FEC</span>, complementing physical-layer coding (LDPC/turbo).</p>
+      <p class="small fragment">ATSC 3.0 (next-gen US digital TV) supports Raptor for robust mobile reception.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>FLUTE / ROUTE</h3>
+      <p class="small">IETF file delivery over unidirectional transport. RaptorQ provides <span class="accent">reliable file delivery without feedback</span>.</p>
+      <p class="small fragment">Used in satellite content distribution and emergency broadcasting.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Video Streaming</h3>
+      <p class="small">Low-latency video: Raptor codes protect against packet loss without retransmission delay.</p>
+      <p class="small fragment">Particularly valuable for <span class="accent3">live streaming</span> where retransmission would violate latency budgets.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 17: Content Distribution -->
+<section>
+  <h2>Content Distribution &amp; CDNs</h2>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Software Updates</h3>
+        <p class="small">Distributing a 1 GB update to millions of devices:</p>
+        <p class="small fragment"><span class="accent2">Without fountain:</span> Each device needs the exact missing pieces. Server tracks state per device.</p>
+        <p class="small fragment"><span class="accent">With fountain:</span> Server sprays encoded symbols. Every symbol helps every device. No per-device state.</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Peer-to-Peer</h3>
+        <p class="small">In P2P, each peer has a random subset of encoded symbols. Any peer's symbols are useful to any other — no "rare piece" problem (unlike BitTorrent).</p>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Multi-Source Download</h3>
+        <div class="flow-row">
+          <div class="flow-node" style="border-color: var(--accent);">Server A</div>
+          <div class="flow-node" style="border-color: var(--accent3);">Server B</div>
+          <div class="flow-node" style="border-color: var(--accent2);">Server C</div>
+        </div>
+        <p class="tiny" style="text-align: center;">&darr; different encoded symbols &darr;</p>
+        <div class="flow-row">
+          <div class="flow-node" style="border-color: var(--accent4);">Client</div>
+        </div>
+        <p class="small fragment">Each server generates independent encoded symbols. Client collects from all servers — no coordination needed!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 18: Distributed Storage -->
+<section>
+  <h2>Fountain Codes for Distributed Storage</h2>
+  <span class="badge badge-app">Applications</span>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="key-point fragment">
+    <p class="small">Store encoded symbols across n nodes. Any k+&epsilon; nodes suffice to recover the data. Nodes can fail and be replaced without coordination.</p>
+  </div>
+  <div class="grid-2" style="margin-top: 0.8em;">
+    <div class="panel fragment">
+      <h3>Replication vs Erasure Coding</h3>
+      <table>
+        <tr><th>Method</th><th>Storage</th><th>Tolerance</th></tr>
+        <tr><td>3x Replication</td><td class="accent2">3x</td><td>2 failures</td></tr>
+        <tr><td>RS (10,4)</td><td>1.4x</td><td class="accent">4 of 14 failures</td></tr>
+        <tr><td class="accent">Fountain (k=10)</td><td>~1.4x</td><td class="accent">Any 30% failures</td></tr>
+      </table>
+      <p class="small fragment">Fountain codes achieve the same reliability as RS with the added benefit of <span class="accent">no fixed code rate</span>.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Repair Problem</h3>
+      <p class="small">When a node fails, generating a new encoded symbol requires reading k source symbols — <span class="accent2">expensive bandwidth</span>!</p>
+      <p class="small fragment">This spawned research into <span class="accent">regenerating codes</span> and <span class="accent3">locally repairable codes</span> — important extensions for storage systems.</p>
+      <p class="small fragment dim">Cloud storage systems (Azure, Google) use specialized erasure codes optimized for repair bandwidth.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Slide 19: Advanced Topics -->
+<section>
+  <h2>Beyond Basic Fountain Codes</h2>
+  <span class="badge badge-math">Mathematics</span>
+  <div class="grid-2">
+    <div class="panel fragment">
+      <h3>Systematic Raptor Codes</h3>
+      <p class="small">Include the original k source symbols as the first k encoded symbols. Repair symbols are generated on demand.</p>
+      <p class="small accent">Advantage: No decoding needed if no erasures!</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Fountain over Noisy Channels</h3>
+      <p class="small">Standard fountain codes assume erasure channels. Extensions handle <span class="accent2">noisy channels</span> by combining with soft-decision inner codes.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Unequal Error Protection</h3>
+      <p class="small">Weight the degree distribution to protect <span class="accent3">important data</span> (e.g., video base layer) more heavily than less critical data.</p>
+    </div>
+    <div class="panel fragment">
+      <h3>Network Coding Connection</h3>
+      <p class="small">Random linear network coding is essentially a fountain code applied at <span class="accent4">every relay node</span> in a network. Deep connection between the two fields.</p>
+    </div>
+  </div>
+  <div class="fragment key-point">
+    <p class="small">Fountain codes represent a fundamental shift in coding philosophy: from "design a fixed code for a known channel" to "generate symbols on demand and let the receiver decide when it has enough."</p>
+  </div>
+</section>
+
+<!-- Slide 20: Summary & Future -->
+<section>
+  <h2>Fountain Codes: Summary &amp; Future</h2>
+  <span class="badge badge-history">History</span>
+  <span class="badge badge-app">Applications</span>
+  <div class="cols">
+    <div>
+      <div class="panel fragment">
+        <h3>Timeline</h3>
+        <table>
+          <tr><td class="accent">1998</td><td>Digital fountain concept (Byers, Luby, Mitzenmacher)</td></tr>
+          <tr><td class="accent">2002</td><td>LT codes (Luby)</td></tr>
+          <tr><td>2005</td><td>RFC 5053: Raptor codes</td></tr>
+          <tr><td class="accent">2006</td><td>Raptor codes theory (Shokrollahi)</td></tr>
+          <tr><td>2012</td><td>RFC 6330: RaptorQ</td></tr>
+          <tr><td>2017</td><td>ATSC 3.0 adopts Raptor</td></tr>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="panel fragment">
+        <h3>Key Takeaways</h3>
+        <p class="small accent">Rateless: no rate decision needed</p>
+        <p class="small accent3">Universal: works for any erasure rate</p>
+        <p class="small accent2">Efficient: O(k) encoding and decoding</p>
+        <p class="small accent4">Near-optimal: overhead &lt; 2 symbols</p>
+      </div>
+      <div class="panel fragment">
+        <h3>Future Directions</h3>
+        <p class="small">Fountain codes for <span class="accent">IoT/sensor networks</span>, coded computation, blockchain scalability, and <span class="accent3">DNA data storage</span> (where read order is inherently random — a perfect fit for fountain codes).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  transition: 'slide',
+  slideNumber: 'c/t',
+  plugins: [RevealHighlight]
+});
+
+function fixSlides() {
+  document.querySelectorAll('.reveal .slides section').forEach(s => {
+    s.style.textAlign = 'left';
+  });
+}
+fixSlides();
+Reveal.on('ready', fixSlides);
+Reveal.on('slidechanged', fixSlides);
+</script>
+</body>
+</html>

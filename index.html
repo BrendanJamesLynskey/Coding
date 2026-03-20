@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coding Theory — Error Detection &amp; Correction</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#0a0a0f;--surface:#131318;--border:#23232a;--text:#d4d4d8;--text2:#a1a1aa;--dim:#71717a;
+    --accent:#64ffda;--green:#10b981;--purple:#8b5cf6;--blue:#60a5fa;--red:#ef4444;--gold:#ffd93d;--pink:#ff6b9d;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;line-height:1.6;min-height:100vh}
+  a{color:inherit;text-decoration:none}
+
+  .container{max-width:900px;margin:0 auto;padding:3rem 1.5rem 4rem}
+
+  header{text-align:center;margin-bottom:3rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+  .series-label{font-family:'JetBrains Mono',monospace;font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:0.5rem}
+  h1{font-family:'Playfair Display',serif;font-size:3rem;font-weight:900;margin-bottom:0.5rem;
+     background:linear-gradient(135deg,#64ffda 0%,#8b5cf6 50%,#ff6b9d 100%);
+     -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .subtitle{color:var(--text2);font-size:1.05rem;max-width:620px;margin:0 auto}
+
+  .badge-row{display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;flex-wrap:wrap}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:0.65rem;padding:0.25em 0.75em;border-radius:20px;letter-spacing:0.04em;font-weight:600}
+  .badge-green{background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.25)}
+  .badge-purple{background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.25)}
+  .badge-blue{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.25)}
+
+  .card-list{display:flex;flex-direction:column;gap:0.75rem}
+  .card{display:grid;grid-template-columns:3.5rem 1fr auto;align-items:center;gap:1rem;
+        background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;
+        transition:border-color 0.2s,transform 0.2s}
+  .card:hover{border-color:rgba(100,255,218,0.3);transform:translateX(4px)}
+  .card-num{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--dim);text-align:center}
+  .card:hover .card-num{color:var(--accent)}
+  .card-info h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:0.15rem}
+  .card-info p{font-size:0.8rem;color:var(--dim);line-height:1.4}
+  .card-meta{display:flex;align-items:center;gap:0.75rem}
+  .slide-count{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--dim);
+               border:1px solid var(--border);border-radius:6px;padding:0.2em 0.5em;white-space:nowrap}
+  .card:hover .slide-count{border-color:rgba(100,255,218,0.25);color:var(--accent)}
+  .launch{font-family:'JetBrains Mono',monospace;font-size:0.75rem;font-weight:700;
+          background:rgba(100,255,218,0.12);color:var(--accent);border:1px solid rgba(100,255,218,0.3);
+          border-radius:8px;padding:0.45em 1.1em;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+  .launch:hover{background:rgba(100,255,218,0.2);border-color:var(--accent)}
+
+  .section-divider{text-align:center;margin:2rem 0 1.5rem;color:var(--dim);font-family:'JetBrains Mono',monospace;
+                    font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase}
+  .section-divider::before,.section-divider::after{content:'';display:inline-block;width:3rem;height:1px;
+    background:var(--border);vertical-align:middle;margin:0 0.75rem}
+
+  footer{text-align:center;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border);color:var(--dim);font-size:0.8rem}
+  footer a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+  .controls-hint{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--dim);margin-top:0.5rem}
+
+  @media(max-width:640px){
+    h1{font-size:2rem}
+    .card{grid-template-columns:2.5rem 1fr;gap:0.75rem}
+    .card-meta{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <div class="series-label">Interactive Presentation Series</div>
+  <h1>Coding Theory</h1>
+  <p class="subtitle">Error detection and error correction — from parity bits to Reed-Solomon, turbo codes, and beyond. A comprehensive journey through the mathematics that keeps our digital world reliable.</p>
+  <div class="badge-row">
+    <span class="badge badge-green">13 Presentations</span>
+    <span class="badge badge-purple">Interactive</span>
+    <span class="badge badge-blue">Reveal.js</span>
+  </div>
+</header>
+
+<div class="section-divider">Foundations</div>
+
+<div class="card-list">
+
+  <a href="01-foundations-of-coding-theory/" class="card">
+    <div class="card-num">01</div>
+    <div class="card-info">
+      <h3>Foundations of Coding Theory</h3>
+      <p>Shannon's theorem, noisy channels, Hamming distance, and the fundamental limits of reliable communication</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~25 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="02-parity-and-simple-codes/" class="card">
+    <div class="card-num">02</div>
+    <div class="card-info">
+      <h3>Parity Checks &amp; Simple Codes</h3>
+      <p>Parity bits, repetition codes, ISBN check digits, and the building blocks of error detection</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~22 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="03-hamming-codes/" class="card">
+    <div class="card-num">03</div>
+    <div class="card-info">
+      <h3>Hamming Codes</h3>
+      <p>Richard Hamming's elegant single-error-correcting codes, SECDED, and perfect codes</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~25 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="04-crc-error-detection/" class="card">
+    <div class="card-num">04</div>
+    <div class="card-info">
+      <h3>CRC &amp; Error Detection</h3>
+      <p>Cyclic redundancy checks, polynomial arithmetic over GF(2), and the workhorses of error detection</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~22 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+</div>
+
+<div class="section-divider">Algebraic &amp; Structural Codes</div>
+
+<div class="card-list">
+
+  <a href="05-linear-block-codes/" class="card">
+    <div class="card-num">05</div>
+    <div class="card-info">
+      <h3>Linear Block Codes</h3>
+      <p>Generator matrices, syndrome decoding, dual codes, and the mathematical framework for block codes</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~24 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="06-convolutional-codes/" class="card">
+    <div class="card-num">06</div>
+    <div class="card-info">
+      <h3>Convolutional Codes &amp; Viterbi Decoding</h3>
+      <p>Shift-register encoders, trellis diagrams, and the Viterbi algorithm that powered deep space exploration</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~25 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="07-bch-codes/" class="card">
+    <div class="card-num">07</div>
+    <div class="card-info">
+      <h3>BCH Codes</h3>
+      <p>Multi-error-correcting codes, minimal polynomials, and the bridge to Reed-Solomon</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~22 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="08-reed-solomon-codes/" class="card">
+    <div class="card-num">08</div>
+    <div class="card-info">
+      <h3>Reed-Solomon Codes</h3>
+      <p>The world's most deployed error-correction code — from CDs to deep space to QR codes</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~28 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+</div>
+
+<div class="section-divider">Modern &amp; Capacity-Approaching Codes</div>
+
+<div class="card-list">
+
+  <a href="09-turbo-codes/" class="card">
+    <div class="card-num">09</div>
+    <div class="card-info">
+      <h3>Turbo Codes &amp; Iterative Decoding</h3>
+      <p>The 1993 breakthrough that came within a whisker of Shannon's limit and revolutionised communications</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~24 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="10-ldpc-codes/" class="card">
+    <div class="card-num">10</div>
+    <div class="card-info">
+      <h3>LDPC Codes</h3>
+      <p>Gallager's rediscovered codes, Tanner graphs, belief propagation, and the codes inside Wi-Fi and 5G</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~24 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="11-fountain-rateless-codes/" class="card">
+    <div class="card-num">11</div>
+    <div class="card-info">
+      <h3>Fountain &amp; Rateless Codes</h3>
+      <p>LT codes, Raptor codes, and the elegant idea of generating unlimited encoded symbols</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~20 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="12-polar-codes/" class="card">
+    <div class="card-num">12</div>
+    <div class="card-info">
+      <h3>Polar Codes</h3>
+      <p>Arikan's provably capacity-achieving codes, channel polarisation, and the 5G control channel standard</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~22 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+  <a href="13-coding-in-practice/" class="card">
+    <div class="card-num">13</div>
+    <div class="card-info">
+      <h3>Coding in Practice — Real-World Systems</h3>
+      <p>Deep space, QR codes, Blu-ray, 5G, RAID, submarine cables — where coding theory meets the real world</p>
+    </div>
+    <div class="card-meta">
+      <span class="slide-count">~26 slides</span>
+      <span class="launch">Launch &rarr;</span>
+    </div>
+  </a>
+
+</div>
+
+<footer>
+  <p>Built with <a href="https://revealjs.com" target="_blank">Reveal.js</a> &middot; Part of the <a href="https://brendanjameslynskey.github.io/Mathematics_and_Cryptography/">Mathematics &amp; Cryptography</a> collection</p>
+  <p class="controls-hint">&larr; &rarr; navigate slides &middot; Esc overview &middot; F fullscreen &middot; S speaker notes</p>
+</footer>
+
+</div>
+</body>
+</html>
