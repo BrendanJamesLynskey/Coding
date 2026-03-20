@@ -4,7 +4,7 @@ Interactive presentation series covering the theory and practice of error-detect
 
 **[View the presentations](https://brendanjameslynskey.github.io/Coding/)**
 
-Part of the [Mathematics & Cryptography](https://brendanjameslynskey.github.io/Mathematics_and_Cryptography/) collection.
+Part of the [Mathematics & Engineering](https://brendanjameslynskey.github.io/) collection.
 
 ---
 
