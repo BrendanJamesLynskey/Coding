@@ -13,9 +13,9 @@
 :root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
 .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
 .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
-.reveal h1 { font-size: 2.4em; }
-.reveal h2 { font-size: 1.6em; color: var(--accent); margin-bottom: 0.5em; }
-.reveal h3 { font-size: 1.2em; color: var(--accent3); }
+.reveal h1 { font-size: 2.0em; }
+.reveal h2 { font-size: 1.3em; color: var(--accent); margin-bottom: 0.5em; }
+.reveal h3 { font-size: 1.0em; color: var(--accent3); }
 .reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
 .reveal code { font-family: 'JetBrains Mono', monospace; }
 .reveal .slides section { text-align: left; }
@@ -28,15 +28,15 @@
 .badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
 .badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
 .badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
-.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 1.2em; margin: 0.5em 0; }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 0.9em; margin: 0.4em 0; }
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
 .cols { display: flex; gap: 1em; align-items: flex-start; }
 .cols > * { flex: 1; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
-.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.1em; margin: 0.5em 0; }
-.key-point { border-left: 3px solid var(--accent); padding: 0.8em 1em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
-.warning { border-left: 3px solid var(--accent2); padding: 0.8em 1em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.95em; margin: 0.4em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.5em 0.8em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.5em 0.8em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
 .dim { color: var(--dim); }
 .small { font-size: 0.75em; }
 .tiny { font-size: 0.6em; }
@@ -46,8 +46,8 @@
 .accent4 { color: var(--accent4); }
 .flow-row { display: flex; align-items: center; justify-content: center; gap: 0.5em; flex-wrap: wrap; }
 .flow-node { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 0.6em 1em; text-align: center; font-size: 0.75em; }
-.flow-arrow { color: var(--accent); font-size: 1.2em; }
-.stat { font-size: 2em; font-weight: 700; color: var(--accent); }
+.flow-arrow { color: var(--accent); font-size: 1.0em; }
+.stat { font-size: 1.6em; font-weight: 700; color: var(--accent); }
 .stat-label { font-size: 0.7em; color: var(--dim); }
 table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
 th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
@@ -56,7 +56,24 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
 .series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
 .nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
 .math-block { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
-</style>
+
+        /* -- overflow & sizing fixes -- */
+        .reveal .slides { overflow: visible; }
+        .reveal .slides > section,
+        .reveal .slides > section > section {
+            overflow-y: auto !important;
+            max-height: 880px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(100,255,218,0.25) transparent;
+        }
+        .reveal .slides > section::-webkit-scrollbar { width: 5px; }
+        .reveal .slides > section::-webkit-scrollbar-track { background: transparent; }
+        .reveal .slides > section::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
+        .reveal .slides > section > section::-webkit-scrollbar { width: 5px; }
+        .reveal .slides > section > section::-webkit-scrollbar-track { background: transparent; }
+        .reveal .slides > section > section::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
+        .reveal { font-size: 28px; }
+    </style>
 </head>
 <body>
 <div class="reveal">
@@ -776,22 +793,27 @@ print(f"Minimum weight (= d_min): {min_weight}")  # 5</code></pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
 <script>
 Reveal.initialize({
-    width: 1200,
-    height: 900,
-    margin: 0.02,
-    transition: 'slide',
-    slideNumber: 'c/t',
-    plugins: [ RevealHighlight ]
+  width: 1200,
+  height: 900,
+  margin: 0.02,
+  transition: 'slide',
+  slideNumber: 'c/t',
+  plugins: [RevealHighlight]
 });
 
-function fixSlides() {
-    document.querySelectorAll('.reveal .slides section').forEach(function(slide) {
-        if (!slide.getAttribute('data-background-color')) {
-            slide.setAttribute('data-background-color', '#0a0a0f');
-        }
+(function(){
+  var maxH = 880;
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH + 'px';
+      s.style.overflowY = 'auto';
+      s.style.textAlign = 'left';
     });
-}
-fixSlides();
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
 </script>
 </body>
 </html>
