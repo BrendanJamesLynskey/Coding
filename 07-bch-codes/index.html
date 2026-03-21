@@ -73,6 +73,13 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .reveal .slides > section > section::-webkit-scrollbar-track { background: transparent; }
         .reveal .slides > section > section::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
         .reveal { font-size: 28px; }
+        /* --- matrix bracket rendering --- */
+        .mat { display:inline-flex; align-items:stretch; vertical-align:middle; }
+        .mat-bl, .mat-br { width:7px; flex-shrink:0; }
+        .mat-bl { border:2px solid currentColor; border-right:none; border-radius:3px 0 0 3px; margin-right:2px; }
+        .mat-br { border:2px solid currentColor; border-left:none; border-radius:0 3px 3px 0; margin-left:2px; }
+        .mat table { border-collapse:collapse; }
+        .mat td { padding:0.08em 0.35em; text-align:center; white-space:nowrap; line-height:1.5; }
     </style>
 </head>
 <body>
@@ -453,11 +460,38 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
     <div class="panel" style="margin-top:0.8em;">
         <h3>Direct Matrix Approach</h3>
         <p class="small fragment">The error-locator polynomial &sigma;(x) = 1 + &sigma;<sub>1</sub>x + &sigma;<sub>2</sub>x<sup>2</sup> + ... + &sigma;<sub>v</sub>x<sup>v</sup> satisfies Newton's identities:</p>
-        <div class="formula fragment" style="font-size:0.85em;">
-            ⎡ S₁&nbsp;&nbsp;S₂&nbsp;&nbsp;...&nbsp;S<sub>v</sub> ⎤ ⎡ &sigma;<sub>v</sub> ⎤   ⎡ S<sub>v+1</sub> ⎤<br>
-            ⎢ S₂&nbsp;&nbsp;S₃&nbsp;&nbsp;...&nbsp;S<sub>v+1</sub>⎥ ⎢ &sigma;<sub>v-1</sub>⎥ = ⎢ S<sub>v+2</sub> ⎥<br>
-            ⎢ &nbsp;⋮ &nbsp;&nbsp; ⋮ &nbsp;&nbsp; ⋱ &nbsp; ⋮ &nbsp;⎥ ⎢ &nbsp; ⋮ &nbsp; ⎥   ⎢ &nbsp; ⋮ &nbsp; ⎥<br>
-            ⎣ S<sub>v</sub> S<sub>v+1</sub>... S<sub>2v-1</sub>⎦ ⎣ &sigma;<sub>1</sub> ⎦   ⎣ S<sub>2v</sub> ⎦
+        <div class="formula fragment" style="font-size:0.85em; display:flex; align-items:center; justify-content:center; gap:0.4em; flex-wrap:wrap;">
+            <div class="mat">
+                <span class="mat-bl"></span>
+                <table>
+                    <tr><td>S<sub>1</sub></td><td>S<sub>2</sub></td><td>⋯</td><td>S<sub>v</sub></td></tr>
+                    <tr><td>S<sub>2</sub></td><td>S<sub>3</sub></td><td>⋯</td><td>S<sub>v+1</sub></td></tr>
+                    <tr><td>⋮</td><td>⋮</td><td>⋱</td><td>⋮</td></tr>
+                    <tr><td>S<sub>v</sub></td><td>S<sub>v+1</sub></td><td>⋯</td><td>S<sub>2v−1</sub></td></tr>
+                </table>
+                <span class="mat-br"></span>
+            </div>
+            <div class="mat">
+                <span class="mat-bl"></span>
+                <table>
+                    <tr><td>&sigma;<sub>v</sub></td></tr>
+                    <tr><td>&sigma;<sub>v−1</sub></td></tr>
+                    <tr><td>⋮</td></tr>
+                    <tr><td>&sigma;<sub>1</sub></td></tr>
+                </table>
+                <span class="mat-br"></span>
+            </div>
+            <span>=</span>
+            <div class="mat">
+                <span class="mat-bl"></span>
+                <table>
+                    <tr><td>S<sub>v+1</sub></td></tr>
+                    <tr><td>S<sub>v+2</sub></td></tr>
+                    <tr><td>⋮</td></tr>
+                    <tr><td>S<sub>2v</sub></td></tr>
+                </table>
+                <span class="mat-br"></span>
+            </div>
         </div>
     </div>
     <div class="cols fragment">

@@ -73,6 +73,14 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .reveal .slides > section > section::-webkit-scrollbar-track { background: transparent; }
         .reveal .slides > section > section::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
         .reveal { font-size: 28px; }
+        /* --- matrix bracket rendering --- */
+        .mat { display:inline-flex; align-items:stretch; vertical-align:middle; }
+        .mat-bl, .mat-br { width:7px; flex-shrink:0; }
+        .mat-bl { border:2px solid currentColor; border-right:none; border-radius:3px 0 0 3px; margin-right:2px; }
+        .mat-br { border:2px solid currentColor; border-left:none; border-radius:0 3px 3px 0; margin-left:2px; }
+        .mat table { border-collapse:collapse; }
+        .mat td { padding:0.08em 0.35em; text-align:center; white-space:nowrap; line-height:1.5; }
+        .mat-vsep { border-left:1px solid rgba(255,255,255,0.35); }
     </style>
 </head>
 <body>
@@ -241,12 +249,18 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
     <span class="badge badge-code">Code</span>
     <div class="panel" style="margin-top:0.8em;">
         <h3>Hamming [7, 4, 3] Code</h3>
-        <div class="formula fragment">
-            G = <br>
-            ⎡ 1 0 0 0 | 1 1 0 ⎤<br>
-            ⎢ 0 1 0 0 | 0 1 1 ⎥<br>
-            ⎢ 0 0 1 0 | 1 1 1 ⎥<br>
-            ⎣ 0 0 0 1 | 1 0 1 ⎦
+        <div class="formula fragment" style="display:flex; align-items:center; justify-content:center; gap:0.4em;">
+            G =
+            <div class="mat">
+                <span class="mat-bl"></span>
+                <table>
+                    <tr><td>1</td><td>0</td><td>0</td><td>0</td><td class="mat-vsep">1</td><td>1</td><td>0</td></tr>
+                    <tr><td>0</td><td>1</td><td>0</td><td>0</td><td class="mat-vsep">0</td><td>1</td><td>1</td></tr>
+                    <tr><td>0</td><td>0</td><td>1</td><td>0</td><td class="mat-vsep">1</td><td>1</td><td>1</td></tr>
+                    <tr><td>0</td><td>0</td><td>0</td><td>1</td><td class="mat-vsep">1</td><td>0</td><td>1</td></tr>
+                </table>
+                <span class="mat-br"></span>
+            </div>
         </div>
     </div>
     <div class="card fragment" style="margin-top:0.5em;">
@@ -299,11 +313,17 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
     </div>
     <div class="panel fragment">
         <h3>Hamming Code H Matrix</h3>
-        <div class="formula">
-            H = <br>
-            ⎡ 1 0 1 1 | 1 0 0 ⎤<br>
-            ⎢ 1 1 1 0 | 0 1 0 ⎥<br>
-            ⎣ 0 1 1 1 | 0 0 1 ⎦
+        <div class="formula" style="display:flex; align-items:center; justify-content:center; gap:0.4em;">
+            H =
+            <div class="mat">
+                <span class="mat-bl"></span>
+                <table>
+                    <tr><td>1</td><td>0</td><td>1</td><td>1</td><td class="mat-vsep">1</td><td>0</td><td>0</td></tr>
+                    <tr><td>1</td><td>1</td><td>1</td><td>0</td><td class="mat-vsep">0</td><td>1</td><td>0</td></tr>
+                    <tr><td>0</td><td>1</td><td>1</td><td>1</td><td class="mat-vsep">0</td><td>0</td><td>1</td></tr>
+                </table>
+                <span class="mat-br"></span>
+            </div>
         </div>
         <p class="small fragment">Every column is distinct and nonzero. Any 2 columns are linearly independent, but there exist 3 dependent columns. Therefore d = 3.</p>
     </div>
