@@ -10,33 +10,33 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/monokai.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root { --bg: #0a0a0f; --text: #e0e0e8; --dim: #6a6a7a; --accent: #64ffda; --accent2: #ff6b9d; --accent3: #ffd93d; --accent4: #6c5ce7; --panel: rgba(255,255,255,0.04); --border: rgba(100,255,218,0.15); }
+:root { --bg: #121a1b; --text: #e1ddd2; --dim: #566362; --accent: #9fe7db; --accent2: #db8b9c; --accent3: #fdbd7e; --accent4: #72609c; --panel: rgba(248,243,234,0.04); --border: rgba(159,231,219,0.15); }
 .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
 .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
 .reveal h1 { font-size: 2.0em; }
 .reveal h2 { font-size: 1.3em; color: var(--accent); margin-bottom: 0.5em; }
 .reveal h3 { font-size: 1.0em; color: var(--accent3); }
-.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
+.reveal pre { font-family: 'JetBrains Mono', monospace; background: rgba(11,16,17,0.5); border: 1px solid var(--border); border-radius: 8px; padding: 0.8em; font-size: 0.48em; }
 .reveal code { font-family: 'JetBrains Mono', monospace; }
 .reveal .slides section { text-align: left; }
 .reveal .progress { color: var(--accent); height: 3px; }
 .reveal .controls { color: var(--accent); }
 .badge { display: inline-block; padding: 0.2em 0.8em; border-radius: 20px; font-size: 0.55em; font-weight: 600; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.05em; }
-.badge-math { background: rgba(108,92,231,0.2); color: #a78bfa; border: 1px solid rgba(108,92,231,0.3); }
-.badge-code { background: rgba(100,255,218,0.1); color: var(--accent); border: 1px solid var(--border); }
-.badge-history { background: rgba(255,217,61,0.1); color: var(--accent3); border: 1px solid rgba(255,217,61,0.2); }
-.badge-app { background: rgba(255,107,157,0.1); color: var(--accent2); border: 1px solid rgba(255,107,157,0.2); }
-.badge-interactive { background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); }
-.badge-standards { background: rgba(96,165,250,0.1); color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.badge-math { background: rgba(114,96,156,0.2); color: #a896c7; border: 1px solid rgba(114,96,156,0.3); }
+.badge-code { background: rgba(159,231,219,0.1); color: var(--accent); border: 1px solid var(--border); }
+.badge-history { background: rgba(253,189,126,0.1); color: var(--accent3); border: 1px solid rgba(253,189,126,0.2); }
+.badge-app { background: rgba(219,139,156,0.1); color: var(--accent2); border: 1px solid rgba(219,139,156,0.2); }
+.badge-interactive { background: rgba(90,163,147,0.1); color: #5aa393; border: 1px solid rgba(90,163,147,0.2); }
+.badge-standards { background: rgba(131,169,201,0.1); color: #83a9c9; border: 1px solid rgba(131,169,201,0.2); }
 .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 0.9em; margin: 0.4em 0; }
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 1em; }
 .cols { display: flex; gap: 1em; align-items: flex-start; }
 .cols > * { flex: 1; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; }
 .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8em; }
-.formula { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.95em; margin: 0.4em 0; }
-.key-point { border-left: 3px solid var(--accent); padding: 0.5em 0.8em; background: rgba(100,255,218,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
-.warning { border-left: 3px solid var(--accent2); padding: 0.5em 0.8em; background: rgba(255,107,157,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.formula { background: rgba(114,96,156,0.1); border: 1px solid rgba(114,96,156,0.3); border-radius: 8px; padding: 1em; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 0.95em; margin: 0.4em 0; }
+.key-point { border-left: 3px solid var(--accent); padding: 0.5em 0.8em; background: rgba(159,231,219,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
+.warning { border-left: 3px solid var(--accent2); padding: 0.5em 0.8em; background: rgba(219,139,156,0.05); border-radius: 0 8px 8px 0; margin: 0.5em 0; }
 .dim { color: var(--dim); }
 .small { font-size: 0.75em; }
 .tiny { font-size: 0.6em; }
@@ -50,12 +50,12 @@
 .stat { font-size: 1.6em; font-weight: 700; color: var(--accent); }
 .stat-label { font-size: 0.7em; color: var(--dim); }
 table { width: 100%; border-collapse: collapse; font-size: 0.7em; }
-th { background: rgba(100,255,218,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
-td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.title-gradient { background: linear-gradient(135deg, #64ffda 0%, #6c5ce7 50%, #ff6b9d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+th { background: rgba(159,231,219,0.1); color: var(--accent); padding: 0.6em; text-align: left; border-bottom: 2px solid var(--border); }
+td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(248,243,234,0.05); }
+.title-gradient { background: linear-gradient(135deg, #9fe7db 0%, #72609c 50%, #db8b9c 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
 .series-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.5em; color: var(--dim); letter-spacing: 0.15em; text-transform: uppercase; }
 .nav-hint { font-size: 0.45em; color: var(--dim); margin-top: 2em; }
-.math-block { background: rgba(108,92,231,0.08); border: 1px solid rgba(108,92,231,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
+.math-block { background: rgba(114,96,156,0.08); border: 1px solid rgba(114,96,156,0.25); border-radius: 8px; padding: 0.8em; text-align: center; font-family: 'JetBrains Mono', monospace; margin: 0.5em 0; }
 
         /* -- overflow & sizing fixes -- */
         .reveal .slides { overflow: visible; }
@@ -64,14 +64,14 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
             overflow-y: auto !important;
             max-height: 880px;
             scrollbar-width: thin;
-            scrollbar-color: rgba(100,255,218,0.25) transparent;
+            scrollbar-color: rgba(159,231,219,0.25) transparent;
         }
         .reveal .slides > section::-webkit-scrollbar { width: 5px; }
         .reveal .slides > section::-webkit-scrollbar-track { background: transparent; }
-        .reveal .slides > section::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
+        .reveal .slides > section::-webkit-scrollbar-thumb { background: rgba(159,231,219,0.25); border-radius: 3px; }
         .reveal .slides > section > section::-webkit-scrollbar { width: 5px; }
         .reveal .slides > section > section::-webkit-scrollbar-track { background: transparent; }
-        .reveal .slides > section > section::-webkit-scrollbar-thumb { background: rgba(100,255,218,0.25); border-radius: 3px; }
+        .reveal .slides > section > section::-webkit-scrollbar-thumb { background: rgba(159,231,219,0.25); border-radius: 3px; }
         .reveal { font-size: 28px; }
         /* --- matrix bracket rendering --- */
         .mat { display:inline-flex; align-items:stretch; vertical-align:middle; }
@@ -81,6 +81,7 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .mat table { border-collapse:collapse; }
         .mat td { padding:0.08em 0.35em; text-align:center; white-space:nowrap; line-height:1.5; }
     </style>
+<style>:root{--r-background-color:#121a1b}.reveal-viewport{background:#121a1b}</style>
 </head>
 <body>
 <div class="reveal">
@@ -397,15 +398,15 @@ td { padding: 0.5em 0.6em; border-bottom: 1px solid rgba(255,255,255,0.05); }
     <h2>BCH Decoding Pipeline</h2>
     <span class="badge badge-math">Mathematics</span>
     <div class="flow-row" style="margin-top:1.5em;">
-        <div class="flow-node" style="background:rgba(108,92,231,0.15);">Received<br><span class="accent4">r(x)</span></div>
+        <div class="flow-node" style="background:rgba(114,96,156,0.15);">Received<br><span class="accent4">r(x)</span></div>
         <div class="flow-arrow">&rarr;</div>
-        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Syndromes<br><span class="accent">S₁...S₂ₜ</span></div>
+        <div class="flow-node" style="background:rgba(159,231,219,0.1);">Syndromes<br><span class="accent">S₁...S₂ₜ</span></div>
         <div class="flow-arrow">&rarr;</div>
-        <div class="flow-node" style="background:rgba(255,217,61,0.1);">Error Locator<br><span class="accent3">&sigma;(x)</span></div>
+        <div class="flow-node" style="background:rgba(253,189,126,0.1);">Error Locator<br><span class="accent3">&sigma;(x)</span></div>
         <div class="flow-arrow">&rarr;</div>
-        <div class="flow-node" style="background:rgba(255,107,157,0.1);">Error Locations<br><span class="accent2">Chien Search</span></div>
+        <div class="flow-node" style="background:rgba(219,139,156,0.1);">Error Locations<br><span class="accent2">Chien Search</span></div>
         <div class="flow-arrow">&rarr;</div>
-        <div class="flow-node" style="background:rgba(100,255,218,0.1);">Correct<br><span class="accent">ĉ(x)</span></div>
+        <div class="flow-node" style="background:rgba(159,231,219,0.1);">Correct<br><span class="accent">ĉ(x)</span></div>
     </div>
     <div class="grid-2" style="margin-top:1em;">
         <div class="card fragment">
